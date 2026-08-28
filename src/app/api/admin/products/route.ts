@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { readDb, updateDb } from "@/lib/admin/db";
+import { assertMediaFilesExist } from "@/lib/admin/media-url.server";
+import { normalizeMediaSrc } from "@/lib/admin/media-url";
 import type { AdminProduct } from "@/lib/admin/types";
 import { uniqueSlug } from "@/lib/admin/slug";
 
@@ -47,9 +49,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Укажите название" }, { status: 400 });
     }
 
-    const image = body.image?.trim() || body.gallery?.[0];
+    const image = normalizeMediaSrc(body.image?.trim() || body.gallery?.[0] || "");
     if (!image) {
       return NextResponse.json({ error: "Добавьте фото товара" }, { status: 400 });
+    }
+
+    const gallery = (body.gallery?.length ? body.gallery : [image]).map(normalizeMediaSrc);
+    try {
+      assertMediaFilesExist([image, ...gallery]);
+    } catch (err) {
+      if (err instanceof Error && err.message.startsWith("IMAGE_NOT_FOUND:")) {
+        const file = err.message.split(":")[1];
+        return NextResponse.json(
+          { error: `Файл не найден на сервере: ${file}. Загрузите фото заново.` },
+          { status: 400 },
+        );
+      }
+      throw err;
     }
 
     let createdSlug = "";
@@ -73,7 +89,7 @@ export async function POST(request: Request) {
         shortName: body.shortName?.trim() || name,
         image,
         video: body.video?.trim() || undefined,
-        gallery: body.gallery?.length ? body.gallery : [image],
+        gallery,
         benefits: body.benefits ?? base.benefits,
         ingredients: body.ingredients ?? base.ingredients,
         howToUse: body.howToUse ?? base.howToUse,
@@ -108,6 +124,12 @@ export async function PATCH(request: Request) {
   }
 
   try {
+    const image = body.image ? normalizeMediaSrc(body.image) : undefined;
+    const gallery = body.gallery?.map(normalizeMediaSrc);
+    if (image || gallery?.length) {
+      assertMediaFilesExist([image ?? "", ...(gallery ?? [])].filter(Boolean));
+    }
+
     const db = await updateDb((data) => {
       const index = data.products.findIndex((p) => p.slug === body.slug);
       if (index === -1) throw new Error("NOT_FOUND");
@@ -116,6 +138,8 @@ export async function PATCH(request: Request) {
         ...current,
         ...body,
         slug: body.slug,
+        ...(image ? { image } : {}),
+        ...(gallery ? { gallery } : {}),
         video:
           "video" in body ? body.video?.trim() || undefined : current.video,
       } as AdminProduct;
@@ -124,6 +148,13 @@ export async function PATCH(request: Request) {
     const product = db.products.find((p) => p.slug === body.slug);
     return NextResponse.json({ product });
   } catch (err) {
+    if (err instanceof Error && err.message.startsWith("IMAGE_NOT_FOUND:")) {
+      const file = err.message.split(":")[1];
+      return NextResponse.json(
+        { error: `Файл не найден на сервере: ${file}. Загрузите фото заново.` },
+        { status: 400 },
+      );
+    }
     if (err instanceof Error && err.message === "NOT_FOUND") {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }

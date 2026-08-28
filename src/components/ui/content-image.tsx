@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { normalizeMediaSrc } from "@/lib/admin/media-url";
 
 type ContentImageProps = {
   src: string;
@@ -30,8 +31,9 @@ export function ContentImage({
 }: ContentImageProps) {
   const [failed, setFailed] = useState(false);
   const fitClass = objectFit === "cover" ? "object-cover" : "object-contain";
+  const resolvedSrc = normalizeMediaSrc(src);
 
-  if (!src || failed) {
+  if (!resolvedSrc || failed) {
     return (
       <div
         className={cn(
@@ -45,11 +47,11 @@ export function ContentImage({
     );
   }
 
-  if (isDirectMediaPath(src)) {
+  if (isDirectMediaPath(resolvedSrc)) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
-        src={src}
+        src={resolvedSrc}
         alt={alt}
         className={cn(fill && "absolute inset-0 h-full w-full", fitClass, className)}
         onError={() => setFailed(true)}
@@ -59,7 +61,7 @@ export function ContentImage({
 
   return (
     <Image
-      src={src}
+      src={resolvedSrc}
       alt={alt}
       fill={fill}
       priority={priority}
