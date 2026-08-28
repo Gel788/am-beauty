@@ -30,7 +30,7 @@ export function OrderSummary({
   showThumbnails = true,
 }: OrderSummaryProps) {
   return (
-    <aside className={cn("border border-border bg-cream/40 p-6 md:p-8", className)}>
+    <aside className={cn("min-w-0 border border-border bg-white p-5 sm:p-6 md:p-8", className)}>
       <h2 className="border-l-2 border-gold py-0.5 pl-3 text-[10px] tracking-[0.24em] uppercase">
         Итого
       </h2>

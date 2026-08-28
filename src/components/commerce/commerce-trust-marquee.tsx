@@ -17,7 +17,7 @@ export function CommerceTrustMarquee() {
   ));
 
   return (
-    <div className="overflow-hidden border-y border-border bg-black py-3" aria-hidden>
+    <div className="overflow-x-clip border-y border-border bg-black py-3" aria-hidden>
       <div className="marquee-track flex w-max items-center gap-12 px-6 text-[10px] tracking-[0.28em] text-white/70 uppercase md:gap-20">
         <span className="inline-flex items-center gap-12 md:gap-20">{row}</span>
         <span className="inline-flex items-center gap-12 md:gap-20">{row}</span>
