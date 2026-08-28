@@ -5,7 +5,7 @@ import { useState } from "react";
 import { ProductCard } from "@/components/catalog/product-card";
 import { Reveal } from "@/components/reveal";
 import { getProductsBySlugs, type Product } from "@/data/products";
-import { getReviewsForProduct } from "@/data/reviews";
+import { useProductReviews } from "@/context/catalog-context";
 import { ProductDetailBuyBox, ProductDetailHeroMeta } from "@/components/product/product-detail-buy-box";
 import { ProductDetailGallery } from "@/components/product/product-detail-gallery";
 import {
@@ -29,7 +29,7 @@ export function ProductDetail({ product }: { product: Product }) {
 
   const related = getProductsBySlugs(product.relatedSlugs);
   const bundle = getProductsBySlugs(product.bundleSlugs);
-  const productReviews = getReviewsForProduct(product.slug);
+  const productReviews = useProductReviews(product.slug);
 
   return (
     <>

@@ -6,6 +6,20 @@ import { seedDatabase } from "@/lib/admin/seed";
 const DB_DIR = path.join(process.cwd(), ".data");
 const DB_PATH = path.join(DB_DIR, "admin-db.json");
 
+function normalizeDb(partial: Partial<AdminDatabase>): AdminDatabase {
+  const seed = seedDatabase();
+  return {
+    version: 2,
+    updatedAt: partial.updatedAt ?? seed.updatedAt,
+    products: partial.products?.length ? partial.products : seed.products,
+    categories: partial.categories?.length ? partial.categories : seed.categories,
+    site: { ...seed.site, ...partial.site },
+    orders: partial.orders ?? seed.orders,
+    reviews: partial.reviews ?? seed.reviews,
+    promos: partial.promos ?? seed.promos,
+  };
+}
+
 async function ensureDir() {
   await mkdir(DB_DIR, { recursive: true });
 }
@@ -13,7 +27,7 @@ async function ensureDir() {
 export async function readDb(): Promise<AdminDatabase> {
   try {
     const raw = await readFile(DB_PATH, "utf-8");
-    return JSON.parse(raw) as AdminDatabase;
+    return normalizeDb(JSON.parse(raw) as Partial<AdminDatabase>);
   } catch {
     const db = seedDatabase();
     await writeDb(db);
@@ -112,6 +126,7 @@ export function computeDashboardStats(db: AdminDatabase): DashboardStats {
     ordersTotal: db.orders.length,
     ordersPending,
     productsTotal: db.products.length,
+    categoriesTotal: db.categories.length,
     lowStock,
     customersTotal: deriveCustomers(db.orders).length,
     reviewsPending,

@@ -1,19 +1,18 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductDetail } from "@/components/product/product-detail";
-import { getProduct, products } from "@/data/products";
+import { hydrateCatalog } from "@/data/products";
+import { getPublicCatalog, getRuntimeProduct } from "@/lib/catalog/runtime";
+
+export const dynamic = "force-dynamic";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export function generateStaticParams() {
-  return products.map((p) => ({ slug: p.slug }));
-}
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProduct(slug);
+  const product = await getRuntimeProduct(slug);
   if (!product) return {};
   return {
     title: product.name,
@@ -25,8 +24,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function ProductPage({ params }: PageProps) {
+  const catalog = await getPublicCatalog();
+  hydrateCatalog(catalog.products);
+
   const { slug } = await params;
-  const product = getProduct(slug);
+  const product = await getRuntimeProduct(slug);
   if (!product) notFound();
 
   return <ProductDetail product={product} />;

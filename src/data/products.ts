@@ -240,6 +240,17 @@ export const products: Product[] = [
   },
 ];
 
+let runtimeCatalog: Product[] | null = null;
+
+/** Hydrate storefront catalog from admin DB (client + server). */
+export function hydrateCatalog(source: Product[]) {
+  runtimeCatalog = source;
+}
+
+function allProducts() {
+  return runtimeCatalog ?? products;
+}
+
 export function formatPrice(rub: number) {
   return new Intl.NumberFormat("ru-RU", {
     style: "currency",
@@ -249,15 +260,19 @@ export function formatPrice(rub: number) {
 }
 
 export function getProduct(slug: string) {
-  return products.find((p) => p.slug === slug);
+  return allProducts().find((p) => p.slug === slug);
 }
 
 export function getBestsellers(limit = 4) {
-  return products.filter((p) => p.isBestseller).slice(0, limit);
+  return allProducts().filter((p) => p.isBestseller).slice(0, limit);
 }
 
 export function getProductsBySlugs(slugs: string[]) {
   return slugs.map((s) => getProduct(s)).filter(Boolean) as Product[];
+}
+
+export function getAllProducts() {
+  return allProducts();
 }
 
 // Backward compat alias

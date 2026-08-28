@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SlidersHorizontal, X } from "lucide-react";
-import { categories, lineLabels, skinTypeLabels } from "@/data/categories";
-import { products } from "@/data/products";
+import { lineLabels, skinTypeLabels } from "@/data/categories";
+import { useCatalogCategories, useCatalogProducts } from "@/context/catalog-context";
 import {
   defaultFilters,
   filterProducts,
@@ -26,6 +26,8 @@ import type { SkinType } from "@/data/types";
 export function CatalogView() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const categories = useCatalogCategories();
+  const products = useCatalogProducts();
   const [isPending, startTransition] = useTransition();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [draft, setDraft] = useState<CatalogFilters>(defaultFilters);
@@ -35,7 +37,7 @@ export function CatalogView() {
     [searchParams],
   );
 
-  const filtered = useMemo(() => filterProducts(products, filters), [filters]);
+  const filtered = useMemo(() => filterProducts(products, filters), [filters, products]);
   const activeCount = countActiveFilters(filters);
 
   const pushFilters = useCallback(

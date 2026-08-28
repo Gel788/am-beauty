@@ -3,6 +3,9 @@ import { Geist } from "next/font/google";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { Providers } from "@/components/providers";
+import { CatalogProvider } from "@/context/catalog-context";
+import { getPublicCatalog } from "@/lib/catalog/runtime";
+import { hydrateCatalog } from "@/data/products";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 
@@ -30,20 +33,25 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const catalog = await getPublicCatalog();
+  hydrateCatalog(catalog.products);
+
   return (
     <html lang="ru" className={cn("h-full", sans.variable)}>
       <body className="flex min-h-full flex-col font-sans">
         <a href="#main" className="skip-link">
           Перейти к содержимому
         </a>
-        <Providers>
-          <Header />
-          <main id="main" className="flex-1 pt-[3.75rem]">
-            {children}
-          </main>
-          <Footer />
-        </Providers>
+        <CatalogProvider data={catalog}>
+          <Providers>
+            <Header />
+            <main id="main" className="flex-1 pt-[3.75rem]">
+              {children}
+            </main>
+            <Footer />
+          </Providers>
+        </CatalogProvider>
       </body>
     </html>
   );

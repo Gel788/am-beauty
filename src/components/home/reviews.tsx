@@ -1,7 +1,10 @@
-import { reviews } from "@/data/reviews";
+"use client";
+
 import { getProduct } from "@/data/products";
+import { useCatalog } from "@/context/catalog-context";
 
 export function HomeReviews() {
+  const { reviews } = useCatalog();
   const featured = reviews[0];
 
   return (

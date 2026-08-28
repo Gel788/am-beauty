@@ -4,6 +4,8 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  FolderTree,
+  Globe,
   LayoutDashboard,
   LogOut,
   Package,
@@ -23,6 +25,8 @@ const NAV: {
   { href: "/admin", label: "Дашборд", icon: LayoutDashboard, exact: true },
   { href: "/admin/orders", label: "Заказы", icon: Package },
   { href: "/admin/products", label: "Товары", icon: ShoppingBag },
+  { href: "/admin/categories", label: "Категории", icon: FolderTree },
+  { href: "/admin/site", label: "Сайт", icon: Globe },
   { href: "/admin/reviews", label: "Отзывы", icon: Star },
   { href: "/admin/customers", label: "Клиенты", icon: Users },
   { href: "/admin/promos", label: "Промокоды", icon: Percent },

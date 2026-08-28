@@ -57,7 +57,7 @@ export function AdminTable({ children }: { children: ReactNode }) {
   );
 }
 
-export function AdminTh({ children }: { children: ReactNode }) {
+export function AdminTh({ children }: { children?: ReactNode }) {
   return (
     <th className="border-b border-black/10 px-3 py-3 text-[10px] tracking-[0.14em] text-grey uppercase first:pl-0 last:pr-0">
       {children}

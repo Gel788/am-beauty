@@ -1,10 +1,6 @@
 export type SkinType = "all" | "dry" | "oily" | "combination" | "sensitive";
 
-export type ProductCategory =
-  | "serums"
-  | "face-care"
-  | "cleansing"
-  | "makeup";
+export type ProductCategory = string;
 
 export type ProductLine = "atelier" | "glow" | "pure";
 

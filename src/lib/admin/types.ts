@@ -1,10 +1,31 @@
-import type { Product, Review } from "@/data/types";
+import type { CategoryMeta } from "@/data/types";
 import type { DeliverySelection } from "@/lib/delivery/types";
 import type { OrderStatus } from "@/store/account-store";
+import type { Product, Review } from "@/data/types";
 
 export type AdminProduct = Product & {
   stock: number;
   published: boolean;
+};
+
+export type AdminCategory = CategoryMeta & {
+  published: boolean;
+  sortOrder: number;
+};
+
+export type AdminSiteSettings = {
+  brand: string;
+  tagline: string;
+  heroLabel: string;
+  heroTitle: string;
+  heroSubtitle: string;
+  heroImage: string;
+  email: string;
+  phone: string;
+  phoneHref: string;
+  workingHours: string;
+  freeShippingThreshold: number;
+  shippingCost: number;
 };
 
 export type AdminOrderItem = {
@@ -58,6 +79,8 @@ export type AdminDatabase = {
   version: number;
   updatedAt: string;
   products: AdminProduct[];
+  categories: AdminCategory[];
+  site: AdminSiteSettings;
   orders: AdminOrder[];
   reviews: AdminReview[];
   promos: AdminPromo[];
@@ -68,9 +91,17 @@ export type DashboardStats = {
   ordersTotal: number;
   ordersPending: number;
   productsTotal: number;
+  categoriesTotal: number;
   lowStock: number;
   customersTotal: number;
   reviewsPending: number;
   revenueByDay: { date: string; revenue: number; orders: number }[];
   topProducts: { slug: string; name: string; qty: number; revenue: number }[];
+};
+
+export type PublicCatalog = {
+  products: Product[];
+  categories: AdminCategory[];
+  reviews: Review[];
+  site: AdminSiteSettings;
 };

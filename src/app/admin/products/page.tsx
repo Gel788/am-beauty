@@ -1,7 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { AdminShell } from "@/components/admin/admin-shell";
 import {
@@ -12,7 +14,6 @@ import {
   AdminTh,
 } from "@/components/admin/admin-ui";
 import type { AdminProduct } from "@/lib/admin/types";
-import { formatAdminPrice } from "@/lib/admin/format";
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<AdminProduct[]>([]);
@@ -40,8 +41,21 @@ export default function AdminProductsPage() {
   };
 
   return (
-    <AdminShell title="Товары" description="Цены, остатки и публикация">
-      <AdminPanel>
+    <AdminShell
+      title="Товары"
+      description="Быстрое редактирование и полные карточки"
+    >
+      <AdminPanel
+        action={
+          <Link
+            href="/admin/products/new"
+            className="flex items-center gap-2 border border-black/15 px-4 py-2 text-[10px] tracking-[0.14em] uppercase hover:border-gold hover:text-gold"
+          >
+            <Plus className="size-3.5" />
+            Новый товар
+          </Link>
+        }
+      >
         <AdminTable>
           <thead>
             <tr>
@@ -50,6 +64,7 @@ export default function AdminProductsPage() {
               <AdminTh>Остаток</AdminTh>
               <AdminTh>Статус</AdminTh>
               <AdminTh>Бейдж</AdminTh>
+              <AdminTh />
             </tr>
           </thead>
           <tbody>
@@ -63,7 +78,12 @@ export default function AdminProductsPage() {
                       </div>
                     </div>
                     <div>
-                      <p className="text-[11px] tracking-[0.12em] uppercase">{product.shortName}</p>
+                      <Link
+                        href={`/admin/products/${product.slug}`}
+                        className="text-[11px] tracking-[0.12em] uppercase hover:text-gold"
+                      >
+                        {product.shortName}
+                      </Link>
                       <p className="text-xs text-grey">{product.volume}</p>
                     </div>
                   </div>
@@ -118,6 +138,14 @@ export default function AdminProductsPage() {
                       <AdminBadge variant="default">Hit</AdminBadge>
                     </span>
                   ) : null}
+                </AdminTd>
+                <AdminTd>
+                  <Link
+                    href={`/admin/products/${product.slug}`}
+                    className="text-[10px] tracking-[0.14em] text-grey uppercase hover:text-gold"
+                  >
+                    Редактировать
+                  </Link>
                 </AdminTd>
               </tr>
             ))}

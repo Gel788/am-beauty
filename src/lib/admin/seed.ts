@@ -1,4 +1,5 @@
 import { products } from "@/data/products";
+import { categories } from "@/data/categories";
 import { reviews } from "@/data/reviews";
 import type { AdminDatabase, AdminOrder } from "@/lib/admin/types";
 
@@ -150,13 +151,33 @@ const MOCK_ORDERS: AdminOrder[] = [
 
 export function seedDatabase(): AdminDatabase {
   return {
-    version: 1,
+    version: 2,
     updatedAt: new Date().toISOString(),
     products: products.map((p, i) => ({
       ...p,
       stock: [24, 18, 31, 12, 45, 8, 22, 15, 27][i] ?? 20,
       published: true,
     })),
+    categories: categories.map((c, i) => ({
+      ...c,
+      published: true,
+      sortOrder: i,
+    })),
+    site: {
+      brand: "AM Beauty",
+      tagline: "Премиальная косметика",
+      heroLabel: "Ателье · Москва",
+      heroTitle: "Три формулы. Один ритуал",
+      heroSubtitle:
+        "Ночь, утро, восстановление — сыворотки в стекле. Малые партии, точные дозировки.",
+      heroImage: "/images/hero-v2.jpg",
+      email: "info@mebelit-prof.ru",
+      phone: "+7 (926) 235-51-41",
+      phoneHref: "+79262355141",
+      workingHours: "Пн–Вс 10:00–21:00 (МСК)",
+      freeShippingThreshold: 7500,
+      shippingCost: 390,
+    },
     orders: MOCK_ORDERS,
     reviews: reviews.map((r) => ({ ...r, published: true })),
     promos: [

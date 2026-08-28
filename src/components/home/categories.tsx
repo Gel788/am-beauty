@@ -2,10 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { categories } from "@/data/categories";
+import { useCatalogCategories } from "@/context/catalog-context";
 import { Reveal } from "@/components/reveal";
 
 export function HomeCategories() {
+  const categories = useCatalogCategories();
   const [lead, ...rest] = categories;
 
   return (

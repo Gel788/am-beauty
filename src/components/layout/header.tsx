@@ -6,9 +6,9 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Heart, Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { categories } from "@/data/categories";
 import { lineLabels } from "@/data/categories";
-import { formatPrice, products } from "@/data/products";
+import { formatPrice } from "@/data/products";
+import { useCatalogCategories, useCatalogProducts } from "@/context/catalog-context";
 import { searchSuggestions } from "@/lib/catalog";
 import { useCartTotals } from "@/store/cart-store";
 import { useWishlistStore } from "@/store/wishlist-store";
@@ -42,6 +42,8 @@ export function Header() {
   const onHero = isHome && !scrolled && !searchOpen && !menuOpen;
   const { count } = useCartTotals();
   const wishlistCount = useWishlistStore((s) => s.slugs.length);
+  const categories = useCatalogCategories();
+  const products = useCatalogProducts();
   const suggestions = searchSuggestions(products, query);
 
   useEffect(() => {
