@@ -41,6 +41,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# admin database (runtime)
+.data/
+
 # user-uploaded media (deploy via scp)
 /public/videos/*
 !/public/videos/.gitkeep
