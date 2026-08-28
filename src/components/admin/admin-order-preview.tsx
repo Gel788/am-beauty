@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type MouseEvent } from "react";
-import { Copy, Eye } from "lucide-react";
+import { Copy, Eye, X } from "lucide-react";
 import { toast } from "sonner";
 import { AdminBadge } from "@/components/admin/admin-ui";
 import { AdminButton } from "@/components/admin/admin-form";
@@ -12,16 +12,10 @@ import {
 import {
   ORDER_STATUS_OPTIONS,
   formatAdminDate,
+  formatAdminPrice,
   orderStatusLabel,
 } from "@/lib/admin/format";
 import type { AdminOrder } from "@/lib/admin/types";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 import type { OrderStatus } from "@/store/account-store";
 
 function toDetail(order: AdminOrder): OrderDetailData {
@@ -69,6 +63,20 @@ export function AdminOrderPreview({
     setTracking(order.trackingNumber ?? "");
   }, [order]);
 
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onOpenChange(false);
+    };
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open, onOpenChange]);
+
   const copyId = async () => {
     if (!order) return;
     try {
@@ -104,34 +112,58 @@ export function AdminOrderPreview({
     }
   };
 
-  const dirty = order
-    ? status !== order.status || tracking !== (order.trackingNumber ?? "")
-    : false;
+  if (!open || !order) return null;
+
+  const dirty = status !== order.status || tracking !== (order.trackingNumber ?? "");
+  const itemCount = order.items.reduce((sum, item) => sum + item.qty, 0);
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side="right"
-        overlayClassName="z-[300]"
-        className="z-[300] w-full overflow-y-auto border-black/10 bg-[#faf9f7] p-0 sm:max-w-xl md:max-w-2xl"
+    <div
+      className="fixed inset-0 z-[300] flex items-center justify-center bg-black/55 p-4 md:p-8"
+      onClick={() => onOpenChange(false)}
+      role="presentation"
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="admin-order-preview-title"
+        className="flex max-h-[92vh] w-full max-w-4xl flex-col border border-black/10 bg-[#faf9f7] shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
       >
-        {order ? (
-          <>
-        <SheetHeader className="border-b border-black/10 bg-white px-5 py-5 pr-14 text-left">
-          <div className="flex flex-wrap items-center gap-2">
-            <AdminBadge variant="gold">Предпросмотр</AdminBadge>
-            <AdminBadge>{orderStatusLabel(order.status)}</AdminBadge>
+        <header className="shrink-0 border-b border-black/10 bg-white px-5 py-5 md:px-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <AdminBadge variant="gold">Заказ</AdminBadge>
+                <AdminBadge>{orderStatusLabel(order.status)}</AdminBadge>
+              </div>
+              <h2
+                id="admin-order-preview-title"
+                className="mt-3 font-display text-2xl tracking-wide text-black md:text-3xl"
+              >
+                {order.id}
+              </h2>
+              <p className="mt-1 text-sm text-grey">
+                {formatAdminDate(order.date)} · {order.customerName}
+              </p>
+            </div>
+            <div className="flex shrink-0 flex-col items-end gap-2">
+              <button
+                type="button"
+                onClick={() => onOpenChange(false)}
+                className="inline-flex size-9 cursor-pointer items-center justify-center border border-black/15 bg-white text-grey transition-colors hover:border-black hover:text-black"
+                aria-label="Закрыть"
+              >
+                <X className="size-4" />
+              </button>
+              <p className="font-display text-xl tracking-wide tabular-nums md:text-2xl">
+                {formatAdminPrice(order.total)}
+              </p>
+              <p className="text-xs text-grey">{itemCount} поз.</p>
+            </div>
           </div>
-          <SheetTitle className="mt-3 font-display text-2xl tracking-wide text-black">
-            {order.id}
-          </SheetTitle>
-          <SheetDescription className="text-grey">
-            {formatAdminDate(order.date)} · {order.customerName}
-          </SheetDescription>
-        </SheetHeader>
 
-        <div className="space-y-6 px-5 py-6">
-          <div className="grid gap-4 border border-black/10 bg-white p-4 sm:grid-cols-2">
+          <div className="mt-5 grid gap-3 border border-black/10 bg-cream/40 p-4 sm:grid-cols-2">
             <label className="grid gap-2">
               <span className="text-[10px] tracking-[0.16em] uppercase text-grey">Статус</span>
               <select
@@ -153,7 +185,7 @@ export function AdminOrderPreview({
                   value={tracking}
                   onChange={(e) => setTracking(e.target.value)}
                   placeholder="Введите трек"
-                  className="h-10 min-w-0 flex-1 border border-black/15 px-3 text-sm"
+                  className="h-10 min-w-0 flex-1 border border-black/15 bg-white px-3 text-sm"
                 />
                 <button
                   type="button"
@@ -167,23 +199,31 @@ export function AdminOrderPreview({
               </div>
             </label>
           </div>
+        </header>
 
-          <OrderDetailContent order={toDetail(order)} variant="admin" productLinks />
-
-          <div className="flex flex-wrap gap-2 border-t border-black/10 pt-4">
-            <AdminButton onClick={saveChanges} disabled={!dirty || saving}>
-              {saving ? "Сохранение…" : "Сохранить изменения"}
-            </AdminButton>
-            <AdminButton variant="ghost" onClick={copyId}>
-              <Copy className="size-3.5" />
-              Скопировать № заказа
-            </AdminButton>
-          </div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-6 md:px-6">
+          <OrderDetailContent
+            order={toDetail(order)}
+            variant="admin"
+            productLinks
+            hideHeader
+          />
         </div>
-          </>
-        ) : null}
-      </SheetContent>
-    </Sheet>
+
+        <footer className="flex shrink-0 flex-wrap gap-2 border-t border-black/10 bg-white px-5 py-4 md:px-6">
+          <AdminButton onClick={saveChanges} disabled={!dirty || saving}>
+            {saving ? "Сохранение…" : "Сохранить изменения"}
+          </AdminButton>
+          <AdminButton variant="ghost" onClick={copyId}>
+            <Copy className="size-3.5" />
+            Скопировать № заказа
+          </AdminButton>
+          <AdminButton variant="ghost" onClick={() => onOpenChange(false)}>
+            Закрыть
+          </AdminButton>
+        </footer>
+      </div>
+    </div>
   );
 }
 
@@ -199,7 +239,7 @@ export function AdminOrderPreviewButton({
       className="inline-flex cursor-pointer items-center gap-1.5 border border-black/15 px-2.5 py-1.5 text-[10px] tracking-[0.12em] uppercase transition-colors hover:border-gold hover:text-gold"
     >
       <Eye className="size-3.5" aria-hidden />
-      Открыть
+      Просмотр
     </button>
   );
 }

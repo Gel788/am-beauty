@@ -125,12 +125,14 @@ type OrderDetailContentProps = {
   order: OrderDetailData;
   variant?: "storefront" | "admin";
   productLinks?: boolean;
+  hideHeader?: boolean;
 };
 
 export function OrderDetailContent({
   order,
   variant = "storefront",
   productLinks = true,
+  hideHeader = false,
 }: OrderDetailContentProps) {
   const delivery = order.delivery;
   const deliveryTitle = `${CARRIER_LABELS[delivery.carrier]} · ${MODE_LABELS[delivery.mode]}`;
@@ -139,6 +141,7 @@ export function OrderDetailContent({
 
   return (
     <div className={cn("space-y-6", isAdmin && "text-charcoal")}>
+      {!hideHeader ? (
       <header className="border border-border bg-cream/40 p-5 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
@@ -167,6 +170,7 @@ export function OrderDetailContent({
           <OrderStatusTimeline status={order.status} />
         </div>
       </header>
+      ) : null}
 
       <div
         className={cn(
