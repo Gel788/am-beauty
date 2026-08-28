@@ -1,182 +1,27 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  ChevronDown,
-  Heart,
-  LayoutDashboard,
-  MapPin,
-  Package,
-  Plus,
-  Trash2,
-  User,
-} from "lucide-react";
+import { ArrowRight, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { products } from "@/data/products";
-import { formatPrice } from "@/data/products";
-import { CARRIER_LABELS, MODE_LABELS } from "@/lib/delivery/types";
+import { ProductCard } from "@/components/catalog/product-card";
+import { CommercePageHeader } from "@/components/commerce/commerce-page-header";
+import { CommerceTrustMarquee, CommerceTrustPills } from "@/components/commerce/commerce-trust-marquee";
+import { AccountNav, AccountSidebar, type AccountTabId } from "@/components/account/account-sidebar";
+import { AccountOrderRow } from "@/components/account/account-order-row";
+import { formatPrice, getBestsellers, products } from "@/data/products";
 import {
-  ORDER_STATUS_LABELS,
   useAccountStore,
   type AccountAddress,
-  type AccountOrder,
 } from "@/store/account-store";
 import { useWishlistStore } from "@/store/wishlist-store";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
-import { CommercePageHeader } from "@/components/commerce/commerce-page-header";
-import { CommerceTrustMarquee } from "@/components/commerce/commerce-trust-marquee";
-import { ProductCard } from "@/components/catalog/product-card";
 import { cn } from "@/lib/utils";
-
-type TabId = "overview" | "orders" | "profile" | "addresses" | "wishlist";
-
-const TABS: { id: TabId; label: string; icon: typeof LayoutDashboard }[] = [
-  { id: "overview", label: "Обзор", icon: LayoutDashboard },
-  { id: "orders", label: "Заказы", icon: Package },
-  { id: "profile", label: "Профиль", icon: User },
-  { id: "addresses", label: "Адреса", icon: MapPin },
-  { id: "wishlist", label: "Избранное", icon: Heart },
-];
-
-function statusVariant(status: AccountOrder["status"]) {
-  switch (status) {
-    case "delivered":
-      return "secondary" as const;
-    case "cancelled":
-      return "destructive" as const;
-    case "processing":
-    case "shipped":
-      return "outline" as const;
-    default:
-      return "outline" as const;
-  }
-}
-
-function statusAccent(status: AccountOrder["status"]) {
-  if (status === "processing" || status === "shipped") return "text-gold";
-  if (status === "delivered") return "text-black";
-  return "text-grey";
-}
-
-function AccountNav({
-  active,
-  onChange,
-  vertical,
-}: {
-  active: TabId;
-  onChange: (tab: TabId) => void;
-  vertical?: boolean;
-}) {
-  return (
-    <nav
-      className={cn(
-        vertical ? "flex flex-col gap-1" : "flex gap-1 overflow-x-auto border-b border-border pb-px",
-      )}
-      aria-label="Разделы личного кабинета"
-    >
-      {TABS.map(({ id, label, icon: Icon }) => (
-        <button
-          key={id}
-          type="button"
-          onClick={() => onChange(id)}
-          className={cn(
-            "flex shrink-0 items-center gap-2 px-4 py-3 text-[10px] tracking-[0.16em] uppercase transition-colors cursor-pointer motion-safe:transition-colors motion-reduce:transition-none",
-            vertical
-              ? active === id
-                ? "border-l-2 border-gold bg-cream/60 pl-[14px] text-black"
-                : "border-l-2 border-transparent text-grey hover:text-black"
-              : active === id
-                ? "border-b-2 border-gold text-black"
-                : "text-grey hover:text-black",
-          )}
-        >
-          <Icon className="size-3.5" aria-hidden />
-          {label}
-        </button>
-      ))}
-    </nav>
-  );
-}
-
-function OrderRow({ order }: { order: AccountOrder }) {
-  const [open, setOpen] = useState(false);
-  const deliveryLabel = `${CARRIER_LABELS[order.delivery.carrier]} · ${MODE_LABELS[order.delivery.mode]}`;
-
-  return (
-    <li className="border border-border bg-white transition-colors hover:border-black/20">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full flex-wrap items-center justify-between gap-4 p-5 text-left cursor-pointer"
-      >
-        <div>
-          <p className="text-[11px] tracking-[0.14em] uppercase">{order.id}</p>
-          <p className="mt-1 text-xs text-grey">{order.date}</p>
-        </div>
-        <Badge variant={statusVariant(order.status)} className={statusAccent(order.status)}>
-          {ORDER_STATUS_LABELS[order.status]}
-        </Badge>
-        <span className="font-display text-lg tracking-wide tabular-nums">{formatPrice(order.total)}</span>
-        <ChevronDown
-          className={cn("size-4 text-grey transition-transform motion-safe:transition-transform motion-reduce:transition-none", open && "rotate-180")}
-          aria-hidden
-        />
-      </button>
-
-      {open ? (
-        <div className="border-t border-border bg-cream/30 px-5 py-5">
-          <dl className="grid gap-4 text-sm sm:grid-cols-2">
-            <div>
-              <dt className="text-[10px] tracking-[0.16em] uppercase text-grey">Доставка</dt>
-              <dd className="mt-1">{deliveryLabel}</dd>
-              <dd className="text-grey">
-                {order.delivery.pickupPoint
-                  ? `${order.delivery.pickupPoint.name}, ${order.delivery.pickupPoint.address}`
-                  : `${order.delivery.city}${order.delivery.address ? `, ${order.delivery.address}` : ""}`}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-[10px] tracking-[0.16em] uppercase text-grey">Оплата</dt>
-              <dd className="mt-1">{order.payment === "card" ? "Карта" : "СБП"}</dd>
-              <dd className="text-grey">Доставка: {order.shipping === 0 ? "Бесплатно" : formatPrice(order.shipping)}</dd>
-            </div>
-          </dl>
-
-          <ul className="mt-5 divide-y divide-border border-t border-border">
-            {order.items.map((item) => (
-              <li key={item.slug} className="flex items-center gap-4 py-3">
-                <div className="relative size-12 shrink-0 bg-cream">
-                  <div className="absolute inset-1">
-                    <Image src={item.image} alt="" fill className="object-contain object-bottom" sizes="48px" />
-                  </div>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[11px] tracking-[0.12em] uppercase">{item.name}</p>
-                  <p className="text-xs text-grey">× {item.qty}</p>
-                </div>
-                <p className="text-sm">{formatPrice(item.price * item.qty)}</p>
-              </li>
-            ))}
-          </ul>
-
-          {order.trackingNumber ? (
-            <p className="mt-4 text-xs text-grey">
-              Трек-номер: <span className="text-black">{order.trackingNumber}</span>
-            </p>
-          ) : (
-            <p className="mt-4 text-xs text-grey">Трек-номер появится после отправки</p>
-          )}
-        </div>
-      ) : null}
-    </li>
-  );
-}
 
 function AddressForm({
   initial,
@@ -204,12 +49,14 @@ function AddressForm({
         onSave({ label, city, address, postalCode: postalCode || undefined });
       }}
     >
-      <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Название (Дом, Офис)" aria-label="Название адреса" className="h-11" />
-      <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Город" aria-label="Город" className="h-11" />
-      <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Адрес" aria-label="Адрес" className="h-11" />
-      <Input value={postalCode} onChange={(e) => setPostalCode(e.target.value)} placeholder="Индекс" aria-label="Индекс" className="h-11" />
+      <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Название (Дом, Офис)" aria-label="Название адреса" className="h-11 bg-white" />
+      <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Город" aria-label="Город" className="h-11 bg-white" />
+      <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Адрес" aria-label="Адрес" className="h-11 bg-white" />
+      <Input value={postalCode} onChange={(e) => setPostalCode(e.target.value)} placeholder="Индекс" aria-label="Индекс" className="h-11 bg-white" />
       <div className="flex gap-2">
-        <Button type="submit" size="sm" className="cursor-pointer">Сохранить</Button>
+        <Button type="submit" size="sm" className="cursor-pointer text-[10px] tracking-[0.14em] uppercase">
+          Сохранить
+        </Button>
         <Button type="button" variant="outline" size="sm" className="cursor-pointer" onClick={onCancel}>
           Отмена
         </Button>
@@ -218,12 +65,22 @@ function AddressForm({
   );
 }
 
+function SectionHeading({ children }: { children: ReactNode }) {
+  return (
+    <h2 className="border-l-2 border-gold py-0.5 pl-3 text-[10px] tracking-[0.22em] uppercase">
+      {children}
+    </h2>
+  );
+}
+
 function AccountContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const tabParam = searchParams.get("tab") as TabId | null;
-  const [activeTab, setActiveTab] = useState<TabId>(
-    tabParam && TABS.some((t) => t.id === tabParam) ? tabParam : "overview",
+  const tabParam = searchParams.get("tab") as AccountTabId | null;
+  const [activeTab, setActiveTab] = useState<AccountTabId>(
+    tabParam && ["overview", "orders", "profile", "addresses", "wishlist"].includes(tabParam)
+      ? tabParam
+      : "overview",
   );
   const [editingAddress, setEditingAddress] = useState<string | null>(null);
   const [addingAddress, setAddingAddress] = useState(false);
@@ -242,16 +99,21 @@ function AccountContent() {
 
   const [form, setForm] = useState(profile);
 
+  const totalSpent = useMemo(
+    () => orders.reduce((sum, o) => sum + o.total, 0),
+    [orders],
+  );
+  const activeOrders = useMemo(
+    () => orders.filter((o) => o.status === "processing" || o.status === "shipped").length,
+    [orders],
+  );
+
   useEffect(() => {
-    setForm({
-      name: profile.name,
-      email: profile.email,
-      phone: profile.phone,
-    });
+    setForm({ name: profile.name, email: profile.email, phone: profile.phone });
   }, [profile.name, profile.email, profile.phone]);
 
   const changeTab = useCallback(
-    (tab: TabId) => {
+    (tab: AccountTabId) => {
       setActiveTab(tab);
       router.replace(`/account?tab=${tab}`, { scroll: false });
     },
@@ -259,7 +121,7 @@ function AccountContent() {
   );
 
   useEffect(() => {
-    if (tabParam && TABS.some((t) => t.id === tabParam)) {
+    if (tabParam && ["overview", "orders", "profile", "addresses", "wishlist"].includes(tabParam)) {
       setActiveTab(tabParam);
     }
   }, [tabParam]);
@@ -272,304 +134,419 @@ function AccountContent() {
 
   const greeting = profile.name.trim() || "Гость";
   const recentOrder = orders[0];
+  const defaultAddress = addresses.find((a) => a.isDefault) ?? addresses[0];
+  const suggestions = getBestsellers(3);
 
   return (
-    <>
-    <div className="container-page section-pad pb-16">
-      <CommercePageHeader
-        label="Аккаунт"
-        title="Личный кабинет"
-        description="Заказы, адреса доставки и избранные продукты."
-      />
+    <div className="bg-cream/30">
+      <div className="container-page section-pad pb-16">
+        <CommercePageHeader
+          label="Аккаунт"
+          title="Личный кабинет"
+          description="Заказы, адреса, профиль и избранное — всё для вашего ритуала ухода."
+        />
 
-      <div className="mt-12 grid gap-10 lg:grid-cols-[240px_1fr] lg:gap-16">
-        <aside className="hidden lg:block">
-          <AccountNav active={activeTab} onChange={changeTab} vertical />
-        </aside>
+        <div className="mt-10 grid gap-8 lg:grid-cols-[280px_1fr] lg:gap-10">
+          <aside className="hidden lg:block">
+            <AccountSidebar
+              active={activeTab}
+              onChange={changeTab}
+              profile={profile}
+              stats={{
+                orders: orders.length,
+                addresses: addresses.length,
+                wishlist: wishlistSlugs.length,
+              }}
+            />
+          </aside>
 
-        <div>
-          <div className="lg:hidden">
-            <AccountNav active={activeTab} onChange={changeTab} />
-          </div>
+          <div className="min-w-0">
+            <div className="border border-border bg-white p-4 lg:hidden">
+              <AccountNav active={activeTab} onChange={changeTab} />
+            </div>
 
-          <div className="mt-8 lg:mt-0">
-            {activeTab === "overview" ? (
-              <div className="space-y-10">
-                <div className="border border-border bg-cream/40 p-6 md:p-8">
-                  <p className="border-l-2 border-gold py-0.5 pl-3 text-[10px] tracking-[0.22em] uppercase text-grey">
-                    Добро пожаловать
-                  </p>
-                  <h2 className="mt-4 font-display text-2xl md:text-3xl">{greeting}</h2>
-                  <p className="mt-2 max-w-md text-sm leading-relaxed text-grey">
-                    Управляйте заказами, адресами и избранным в одном месте.
-                  </p>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-3">
-                  {[
-                    { label: "Заказов", value: orders.length },
-                    { label: "Адресов", value: addresses.length },
-                    { label: "В избранном", value: wishlistSlugs.length },
-                  ].map((stat) => (
-                    <div key={stat.label} className="border border-border bg-white p-6 text-center">
-                      <p className="font-display text-4xl text-gold/90">{stat.value}</p>
-                      <p className="mt-2 text-[10px] tracking-[0.16em] uppercase text-grey">{stat.label}</p>
-                    </div>
-                  ))}
-                </div>
-
-                {recentOrder ? (
-                  <section>
-                    <div className="flex items-center justify-between gap-4">
-                      <h3 className="border-l-2 border-gold py-0.5 pl-3 text-[10px] tracking-[0.22em] uppercase">
-                        Последний заказ
-                      </h3>
-                      <Button variant="link" size="sm" className="cursor-pointer" onClick={() => changeTab("orders")}>
-                        Все заказы
+            <div className="mt-4 border border-border bg-white p-6 md:p-8 lg:mt-0">
+              {activeTab === "overview" ? (
+                <div className="space-y-10">
+                  <div className="border border-border bg-cream/50 p-6 md:p-8">
+                    <p className="border-l-2 border-gold py-0.5 pl-3 text-[10px] tracking-[0.22em] uppercase text-grey">
+                      Добро пожаловать
+                    </p>
+                    <h2 className="mt-4 font-display text-2xl md:text-3xl">{greeting}</h2>
+                    <p className="mt-3 max-w-lg text-sm leading-relaxed text-grey">
+                      Здесь собраны ваши заказы, сохранённые адреса и любимые продукты AM Beauty.
+                    </p>
+                    <div className="mt-6 flex flex-wrap gap-3">
+                      <Button
+                        nativeButton={false}
+                        className="h-11 cursor-pointer text-[10px] tracking-[0.18em] uppercase"
+                        render={<Link href="/catalog" />}
+                      >
+                        В каталог
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="h-11 cursor-pointer text-[10px] tracking-[0.18em] uppercase"
+                        onClick={() => changeTab("orders")}
+                      >
+                        Мои заказы
                       </Button>
                     </div>
-                    <ul className="mt-4">
-                      <OrderRow order={recentOrder} />
-                    </ul>
-                  </section>
-                ) : (
-                  <EmptyState
-                    className="!py-10"
-                    title="Заказов пока нет"
-                    description="Оформите первый заказ в каталоге."
-                    actionLabel="В каталог"
-                    actionHref="/catalog"
-                  />
-                )}
-              </div>
-            ) : null}
-
-            {activeTab === "orders" ? (
-              <section>
-                <h2 className="border-l-2 border-gold py-0.5 pl-3 text-[10px] tracking-[0.22em] uppercase">
-                  История заказов
-                </h2>
-                {orders.length === 0 ? (
-                  <EmptyState
-                    className="!py-12"
-                    title="Заказов пока нет"
-                    description="Здесь появятся ваши заказы после оформления."
-                    actionLabel="В каталог"
-                    actionHref="/catalog"
-                  />
-                ) : (
-                  <ul className="mt-6 space-y-3">
-                    {orders.map((order) => (
-                      <OrderRow key={order.id} order={order} />
-                    ))}
-                  </ul>
-                )}
-                <p className="mt-6 text-xs text-grey">
-                  Нужна помощь?{" "}
-                  <Link href="/contacts" className="underline underline-offset-4">
-                    Свяжитесь с нами
-                  </Link>
-                </p>
-              </section>
-            ) : null}
-
-            {activeTab === "profile" ? (
-              <section className="max-w-lg">
-                <h2 className="border-l-2 border-gold py-0.5 pl-3 text-[10px] tracking-[0.22em] uppercase">
-                  Профиль
-                </h2>
-                <form
-                  className="mt-5 grid gap-3"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    updateProfile(form);
-                    toast.success("Изменения сохранены");
-                  }}
-                >
-                  <Input
-                    value={form.name}
-                    onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                    placeholder="Имя"
-                    aria-label="Имя"
-                    className="h-11"
-                  />
-                  <Input
-                    value={form.email}
-                    onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                    placeholder="Email"
-                    type="email"
-                    aria-label="Email"
-                    className="h-11"
-                  />
-                  <Input
-                    value={form.phone}
-                    onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                    placeholder="Телефон"
-                    type="tel"
-                    aria-label="Телефон"
-                    className="h-11"
-                  />
-                  <Button type="submit" className="mt-2 w-fit cursor-pointer">
-                    Сохранить
-                  </Button>
-                </form>
-              </section>
-            ) : null}
-
-            {activeTab === "addresses" ? (
-              <section className="max-w-xl">
-                <div className="flex items-center justify-between gap-4">
-                  <h2 className="border-l-2 border-gold py-0.5 pl-3 text-[10px] tracking-[0.22em] uppercase">
-                    Адреса доставки
-                  </h2>
-                  {!addingAddress ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="cursor-pointer"
-                      onClick={() => setAddingAddress(true)}
-                    >
-                      <Plus className="size-3.5" aria-hidden />
-                      Добавить
-                    </Button>
-                  ) : null}
-                </div>
-
-                {addingAddress ? (
-                  <div className="mt-5">
-                    <AddressForm
-                      onSave={(data) => {
-                        addAddress(data);
-                        setAddingAddress(false);
-                        toast.success("Адрес добавлен");
-                      }}
-                      onCancel={() => setAddingAddress(false)}
-                    />
                   </div>
-                ) : null}
 
-                {addresses.length === 0 && !addingAddress ? (
-                  <EmptyState
-                    className="!py-10"
-                    title="Адресов нет"
-                    description="Добавьте адрес для быстрого оформления заказов."
-                    actionLabel="Добавить адрес"
-                    onAction={() => setAddingAddress(true)}
-                  />
-                ) : (
-                  <ul className="mt-6 space-y-3">
-                    {addresses.map((addr) => (
-                      <li
-                        key={addr.id}
-                        className={cn(
-                          "border p-5 transition-colors",
-                          addr.isDefault ? "border-gold/60 bg-cream/30" : "border-border bg-white",
-                        )}
-                      >
-                        {editingAddress === addr.id ? (
-                          <AddressForm
-                            initial={addr}
-                            onSave={(data) => {
-                              updateAddress(addr.id, data);
-                              setEditingAddress(null);
-                              toast.success("Адрес обновлён");
-                            }}
-                            onCancel={() => setEditingAddress(null)}
-                          />
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    {[
+                      { label: "Заказов", value: orders.length, hint: activeOrders ? `${activeOrders} в пути` : "История" },
+                      { label: "Потрачено", value: formatPrice(totalSpent), hint: "Всего" },
+                      { label: "Избранное", value: wishlistSlugs.length, hint: "Продуктов" },
+                    ].map((stat) => (
+                      <div key={stat.label} className="border border-border bg-white p-5 text-center">
+                        <p className="font-display text-2xl text-gold/90 sm:text-3xl">{stat.value}</p>
+                        <p className="mt-2 text-[10px] tracking-[0.16em] uppercase text-grey">{stat.label}</p>
+                        <p className="mt-1 text-xs text-grey">{stat.hint}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="grid gap-6 lg:grid-cols-2">
+                    <section>
+                      <div className="flex items-center justify-between gap-4">
+                        <SectionHeading>Последний заказ</SectionHeading>
+                        {orders.length > 0 ? (
+                          <Button variant="link" size="sm" className="cursor-pointer" onClick={() => changeTab("orders")}>
+                            Все
+                            <ArrowRight className="ml-1 size-3" aria-hidden />
+                          </Button>
+                        ) : null}
+                      </div>
+                      {recentOrder ? (
+                        <ul className="mt-4">
+                          <AccountOrderRow order={recentOrder} defaultOpen />
+                        </ul>
+                      ) : (
+                        <div className="mt-4 border border-dashed border-border bg-cream/30 p-8 text-center">
+                          <p className="text-sm text-grey">Заказов пока нет</p>
+                          <Button
+                            nativeButton={false}
+                            variant="outline"
+                            size="sm"
+                            className="mt-4 cursor-pointer"
+                            render={<Link href="/catalog" />}
+                          >
+                            Собрать ритуал
+                          </Button>
+                        </div>
+                      )}
+                    </section>
+
+                    <section className="space-y-6">
+                      <div>
+                        <SectionHeading>Профиль</SectionHeading>
+                        <dl className="mt-4 space-y-3 border border-border bg-cream/30 p-5 text-sm">
+                          <div className="flex justify-between gap-4">
+                            <dt className="text-grey">Имя</dt>
+                            <dd className="text-right text-charcoal">{profile.name || "—"}</dd>
+                          </div>
+                          <div className="flex justify-between gap-4">
+                            <dt className="text-grey">Email</dt>
+                            <dd className="text-right text-charcoal">{profile.email || "—"}</dd>
+                          </div>
+                          <div className="flex justify-between gap-4">
+                            <dt className="text-grey">Телефон</dt>
+                            <dd className="text-right text-charcoal">{profile.phone || "—"}</dd>
+                          </div>
+                        </dl>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-3 cursor-pointer text-[10px] tracking-[0.14em] uppercase"
+                          onClick={() => changeTab("profile")}
+                        >
+                          Редактировать
+                        </Button>
+                      </div>
+
+                      <div>
+                        <SectionHeading>Адрес доставки</SectionHeading>
+                        {defaultAddress ? (
+                          <div className="mt-4 border border-gold/40 bg-cream/40 p-5">
+                            <p className="text-[11px] tracking-[0.14em] uppercase">{defaultAddress.label}</p>
+                            <p className="mt-1 text-sm">{defaultAddress.city}, {defaultAddress.address}</p>
+                            <Button
+                              variant="link"
+                              size="sm"
+                              className="mt-2 cursor-pointer px-0"
+                              onClick={() => changeTab("addresses")}
+                            >
+                              Все адреса
+                            </Button>
+                          </div>
                         ) : (
-                          <div className="flex flex-wrap items-start justify-between gap-4">
-                            <div>
-                              <p className="text-[11px] tracking-[0.14em] uppercase">
-                                {addr.label}
-                                {addr.isDefault ? (
-                                  <Badge variant="secondary" className="ml-2">
-                                    По умолчанию
-                                  </Badge>
-                                ) : null}
-                              </p>
-                              <p className="mt-1 text-sm">{addr.city}, {addr.address}</p>
-                              {addr.postalCode ? (
-                                <p className="text-xs text-grey">{addr.postalCode}</p>
-                              ) : null}
-                            </div>
-                            <div className="flex gap-2">
-                              {!addr.isDefault ? (
-                                <Button
-                                  variant="ghost"
-                                  size="xs"
-                                  className="cursor-pointer"
-                                  onClick={() => {
-                                    setDefaultAddress(addr.id);
-                                    toast.success("Адрес по умолчанию обновлён");
-                                  }}
-                                >
-                                  По умолчанию
-                                </Button>
-                              ) : null}
-                              <Button
-                                variant="ghost"
-                                size="xs"
-                                className="cursor-pointer"
-                                onClick={() => setEditingAddress(addr.id)}
-                              >
-                                Изменить
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon-xs"
-                                className="cursor-pointer text-destructive"
-                                aria-label="Удалить адрес"
-                                onClick={() => {
-                                  removeAddress(addr.id);
-                                  toast.success("Адрес удалён");
-                                }}
-                              >
-                                <Trash2 className="size-3.5" />
-                              </Button>
-                            </div>
+                          <div className="mt-4 border border-dashed border-border p-5 text-sm text-grey">
+                            Добавьте адрес для быстрого оформления
+                            <Button
+                              variant="link"
+                              size="sm"
+                              className="mt-1 cursor-pointer px-0"
+                              onClick={() => changeTab("addresses")}
+                            >
+                              Добавить
+                            </Button>
                           </div>
                         )}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </section>
-            ) : null}
-
-            {activeTab === "wishlist" ? (
-              <section id="wishlist">
-                <h2 className="border-l-2 border-gold py-0.5 pl-3 text-[10px] tracking-[0.22em] uppercase">
-                  Избранное
-                </h2>
-                {wishlistProducts.length === 0 ? (
-                  <EmptyState
-                    className="!py-12"
-                    title="Список пуст"
-                    description="Сохраняйте любимые продукты, чтобы вернуться к ним позже."
-                    actionLabel="В каталог"
-                    actionHref="/catalog"
-                  />
-                ) : (
-                  <div className="mt-8 grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
-                    {wishlistProducts.map((p) => (
-                      <ProductCard key={p.slug} product={p} />
-                    ))}
+                      </div>
+                    </section>
                   </div>
-                )}
-              </section>
-            ) : null}
+
+                  {wishlistProducts.length > 0 ? (
+                    <section>
+                      <div className="flex items-center justify-between gap-4">
+                        <SectionHeading>Избранное</SectionHeading>
+                        <Button variant="link" size="sm" className="cursor-pointer" onClick={() => changeTab("wishlist")}>
+                          Смотреть все
+                        </Button>
+                      </div>
+                      <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3">
+                        {wishlistProducts.slice(0, 3).map((p) => (
+                          <ProductCard key={p.slug} product={p} />
+                        ))}
+                      </div>
+                    </section>
+                  ) : (
+                    <section className="border border-border bg-cream/30 p-6">
+                      <SectionHeading>Рекомендуем</SectionHeading>
+                      <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3">
+                        {suggestions.map((p) => (
+                          <ProductCard key={p.slug} product={p} />
+                        ))}
+                      </div>
+                    </section>
+                  )}
+
+                  <CommerceTrustPills className="flex flex-wrap gap-2" />
+                </div>
+              ) : null}
+
+              {activeTab === "orders" ? (
+                <section className="space-y-6">
+                  <SectionHeading>История заказов</SectionHeading>
+
+                  {orders.length > 0 ? (
+                    <div className="grid gap-4 border border-border bg-cream/40 p-5 sm:grid-cols-3">
+                      <div>
+                        <p className="text-[9px] tracking-[0.16em] text-grey uppercase">Всего заказов</p>
+                        <p className="mt-1 font-display text-2xl">{orders.length}</p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] tracking-[0.16em] text-grey uppercase">В обработке</p>
+                        <p className="mt-1 font-display text-2xl text-gold">{activeOrders}</p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] tracking-[0.16em] text-grey uppercase">Сумма покупок</p>
+                        <p className="mt-1 font-display text-2xl">{formatPrice(totalSpent)}</p>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {orders.length === 0 ? (
+                    <EmptyState
+                      className="!py-12"
+                      title="Заказов пока нет"
+                      description="Здесь появятся ваши заказы после оформления."
+                      actionLabel="В каталог"
+                      actionHref="/catalog"
+                    />
+                  ) : (
+                    <ul className="space-y-4">
+                      {orders.map((order) => (
+                        <AccountOrderRow key={order.id} order={order} />
+                      ))}
+                    </ul>
+                  )}
+                  <p className="text-xs text-grey">
+                    Нужна помощь?{" "}
+                    <Link href="/contacts" className="underline underline-offset-4 hover:text-black">
+                      Свяжитесь с нами
+                    </Link>
+                  </p>
+                </section>
+              ) : null}
+
+              {activeTab === "profile" ? (
+                <section className="grid gap-8 lg:grid-cols-[1fr_280px]">
+                  <div>
+                    <SectionHeading>Профиль</SectionHeading>
+                    <p className="mt-3 text-sm text-grey">
+                      Данные подставляются при оформлении заказа.
+                    </p>
+                    <form
+                      className="mt-6 grid gap-3"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        updateProfile(form);
+                        toast.success("Изменения сохранены");
+                      }}
+                    >
+                      <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="Имя" aria-label="Имя" className="h-11" />
+                      <Input value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} placeholder="Email" type="email" aria-label="Email" className="h-11" />
+                      <Input value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} placeholder="Телефон" type="tel" aria-label="Телефон" className="h-11" />
+                      <Button type="submit" className="mt-2 w-fit cursor-pointer text-[10px] tracking-[0.18em] uppercase">
+                        Сохранить
+                      </Button>
+                    </form>
+                  </div>
+                  <aside className="border border-border bg-cream/40 p-5">
+                    <p className="text-[9px] tracking-[0.18em] text-grey uppercase">Подсказка</p>
+                    <p className="mt-3 text-sm leading-relaxed text-charcoal">
+                      Укажите телефон — курьер сможет связаться при доставке. Email нужен для чека и статуса заказа.
+                    </p>
+                    <Link href="/legal/privacy" className="mt-4 inline-block text-[10px] tracking-[0.14em] text-grey uppercase underline">
+                      Политика конфиденциальности
+                    </Link>
+                  </aside>
+                </section>
+              ) : null}
+
+              {activeTab === "addresses" ? (
+                <section>
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <SectionHeading>Адреса доставки</SectionHeading>
+                    {!addingAddress ? (
+                      <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => setAddingAddress(true)}>
+                        <Plus className="size-3.5" aria-hidden />
+                        Добавить
+                      </Button>
+                    ) : null}
+                  </div>
+                  <p className="mt-3 text-sm text-grey">
+                    Сохранённые адреса доступны при оформлении заказа.
+                  </p>
+
+                  {addingAddress ? (
+                    <div className="mt-5">
+                      <AddressForm
+                        onSave={(data) => {
+                          addAddress(data);
+                          setAddingAddress(false);
+                          toast.success("Адрес добавлен");
+                        }}
+                        onCancel={() => setAddingAddress(false)}
+                      />
+                    </div>
+                  ) : null}
+
+                  {addresses.length === 0 && !addingAddress ? (
+                    <div className="mt-6 border border-dashed border-border bg-cream/30 p-10">
+                      <EmptyState
+                        className="!py-4"
+                        title="Адресов нет"
+                        description="Добавьте адрес для быстрого оформления заказов."
+                        actionLabel="Добавить адрес"
+                        onAction={() => setAddingAddress(true)}
+                      />
+                    </div>
+                  ) : (
+                    <ul className="mt-6 space-y-4">
+                      {addresses.map((addr) => (
+                        <li
+                          key={addr.id}
+                          className={cn(
+                            "border p-5",
+                            addr.isDefault ? "border-gold/60 bg-cream/40" : "border-border bg-white",
+                          )}
+                        >
+                          {editingAddress === addr.id ? (
+                            <AddressForm
+                              initial={addr}
+                              onSave={(data) => {
+                                updateAddress(addr.id, data);
+                                setEditingAddress(null);
+                                toast.success("Адрес обновлён");
+                              }}
+                              onCancel={() => setEditingAddress(null)}
+                            />
+                          ) : (
+                            <div className="flex flex-wrap items-start justify-between gap-4">
+                              <div>
+                                <p className="text-[11px] tracking-[0.14em] uppercase">
+                                  {addr.label}
+                                  {addr.isDefault ? (
+                                    <Badge variant="secondary" className="ml-2 text-gold">
+                                      По умолчанию
+                                    </Badge>
+                                  ) : null}
+                                </p>
+                                <p className="mt-1 text-sm">{addr.city}, {addr.address}</p>
+                                {addr.postalCode ? <p className="text-xs text-grey">{addr.postalCode}</p> : null}
+                              </div>
+                              <div className="flex gap-2">
+                                {!addr.isDefault ? (
+                                  <Button variant="ghost" size="xs" className="cursor-pointer" onClick={() => { setDefaultAddress(addr.id); toast.success("Адрес по умолчанию обновлён"); }}>
+                                    По умолчанию
+                                  </Button>
+                                ) : null}
+                                <Button variant="ghost" size="xs" className="cursor-pointer" onClick={() => setEditingAddress(addr.id)}>
+                                  Изменить
+                                </Button>
+                                <Button variant="ghost" size="icon-xs" className="cursor-pointer text-destructive" aria-label="Удалить адрес" onClick={() => { removeAddress(addr.id); toast.success("Адрес удалён"); }}>
+                                  <Trash2 className="size-3.5" />
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              ) : null}
+
+              {activeTab === "wishlist" ? (
+                <section id="wishlist">
+                  <SectionHeading>Избранное</SectionHeading>
+                  {wishlistProducts.length > 0 ? (
+                    <>
+                      <p className="mt-3 text-sm text-grey">
+                        {wishlistProducts.length} продуктов в вашей коллекции
+                      </p>
+                      <div className="mt-8 grid grid-cols-2 gap-6 md:grid-cols-3">
+                        {wishlistProducts.map((p) => (
+                          <ProductCard key={p.slug} product={p} />
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="mt-6 border border-border bg-cream/30 p-8">
+                      <EmptyState
+                        title="Список пуст"
+                        description="Сохраняйте любимые продукты, чтобы вернуться к ним позже."
+                        actionLabel="В каталог"
+                        actionHref="/catalog"
+                      />
+                      <div className="mt-10 border-t border-border pt-10">
+                        <p className="text-center text-[10px] tracking-[0.24em] text-grey uppercase">Хиты</p>
+                        <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3">
+                          {getBestsellers(3).map((p) => (
+                            <ProductCard key={p.slug} product={p} />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </section>
+              ) : null}
+            </div>
           </div>
         </div>
       </div>
+      <CommerceTrustMarquee />
     </div>
-    <CommerceTrustMarquee />
-    </>
   );
 }
 
 export function AccountView() {
   return (
-    <Suspense fallback={<div className="container-page section-pad">Загрузка…</div>}>
+    <Suspense fallback={<div className="container-page section-pad text-grey">Загрузка…</div>}>
       <AccountContent />
     </Suspense>
   );
