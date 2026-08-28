@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import { Copy, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { AdminBadge } from "@/components/admin/admin-ui";
@@ -69,9 +69,8 @@ export function AdminOrderPreview({
     setTracking(order.trackingNumber ?? "");
   }, [order]);
 
-  if (!order) return null;
-
   const copyId = async () => {
+    if (!order) return;
     try {
       await navigator.clipboard.writeText(order.id);
       toast.success("Номер заказа скопирован");
@@ -91,6 +90,7 @@ export function AdminOrderPreview({
   };
 
   const saveChanges = async () => {
+    if (!order) return;
     setSaving(true);
     try {
       const patch: { status?: OrderStatus; trackingNumber?: string } = {};
@@ -104,14 +104,19 @@ export function AdminOrderPreview({
     }
   };
 
-  const dirty = status !== order.status || tracking !== (order.trackingNumber ?? "");
+  const dirty = order
+    ? status !== order.status || tracking !== (order.trackingNumber ?? "")
+    : false;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full overflow-y-auto border-black/10 bg-[#faf9f7] p-0 sm:max-w-xl md:max-w-2xl"
+        overlayClassName="z-[300]"
+        className="z-[300] w-full overflow-y-auto border-black/10 bg-[#faf9f7] p-0 sm:max-w-xl md:max-w-2xl"
       >
+        {order ? (
+          <>
         <SheetHeader className="border-b border-black/10 bg-white px-5 py-5 pr-14 text-left">
           <div className="flex flex-wrap items-center gap-2">
             <AdminBadge variant="gold">Предпросмотр</AdminBadge>
@@ -175,6 +180,8 @@ export function AdminOrderPreview({
             </AdminButton>
           </div>
         </div>
+          </>
+        ) : null}
       </SheetContent>
     </Sheet>
   );
@@ -183,7 +190,7 @@ export function AdminOrderPreview({
 export function AdminOrderPreviewButton({
   onClick,
 }: {
-  onClick: () => void;
+  onClick: (e: MouseEvent<HTMLButtonElement>) => void;
 }) {
   return (
     <button

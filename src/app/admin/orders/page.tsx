@@ -163,7 +163,12 @@ export default function AdminOrdersPage() {
                     />
                   </AdminTd>
                   <AdminTd>
-                    <AdminOrderPreviewButton onClick={() => openPreview(order)} />
+                    <AdminOrderPreviewButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openPreview(order);
+                      }}
+                    />
                   </AdminTd>
                 </tr>
               ))}
