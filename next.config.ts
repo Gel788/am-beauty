@@ -37,6 +37,10 @@ const nextConfig: NextConfig = {
               headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
             },
             {
+              source: "/uploads/:path*",
+              headers: [{ key: "Cache-Control", value: "public, max-age=86400" }],
+            },
+            {
               source: "/_next/static/:path*",
               headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
             },

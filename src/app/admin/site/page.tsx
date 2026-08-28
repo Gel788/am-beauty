@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { AdminButton, AdminField, AdminGrid, AdminInput, AdminTextarea } from "@/components/admin/admin-form";
 import { AdminPanel } from "@/components/admin/admin-ui";
+import { MediaField } from "@/components/admin/media-field";
 import type { AdminSiteSettings } from "@/lib/admin/types";
 
 export default function AdminSitePage() {
@@ -70,9 +71,12 @@ export default function AdminSitePage() {
                 onChange={(e) => set("heroSubtitle", e.target.value)}
               />
             </AdminField>
-            <AdminField label="Изображение hero (URL)">
-              <AdminInput value={site.heroImage} onChange={(e) => set("heroImage", e.target.value)} />
-            </AdminField>
+            <MediaField
+              label="Изображение hero"
+              accept="image"
+              value={site.heroImage}
+              onChange={(url) => set("heroImage", url)}
+            />
           </div>
         </AdminPanel>
 

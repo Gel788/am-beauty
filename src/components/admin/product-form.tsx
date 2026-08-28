@@ -14,6 +14,8 @@ import {
   parseLines,
 } from "@/components/admin/admin-form";
 import { AdminPanel } from "@/components/admin/admin-ui";
+import { MediaField } from "@/components/admin/media-field";
+import { MediaGallery } from "@/components/admin/media-gallery";
 import type { AdminCategory, AdminProduct } from "@/lib/admin/types";
 import type { ProductLine, SkinType } from "@/data/types";
 
@@ -174,23 +176,31 @@ export function ProductForm({ product, categories, mode }: ProductFormProps) {
       </AdminPanel>
 
       <AdminPanel title="Медиа">
-        <AdminGrid>
-          <AdminField label="Главное фото (URL)">
-            <AdminInput value={form.image ?? ""} onChange={(e) => set("image", e.target.value)} />
-          </AdminField>
-          <AdminField label="Видео (URL)">
-            <AdminInput
-              value={form.video ?? ""}
-              onChange={(e) => set("video", e.target.value || undefined)}
-            />
-          </AdminField>
-          <AdminField label="Галерея" className="md:col-span-2" hint="По одному URL на строку">
-            <AdminTextarea
-              value={joinLines(form.gallery ?? [])}
-              onChange={(e) => set("gallery", parseLines(e.target.value))}
-            />
-          </AdminField>
-        </AdminGrid>
+        <div className="space-y-6">
+          <MediaField
+            label="Главное фото"
+            accept="image"
+            value={form.image ?? ""}
+            onChange={(url) => {
+              set("image", url);
+              if (!form.gallery?.length) set("gallery", url ? [url] : []);
+            }}
+          />
+          <MediaField
+            label="Видео товара"
+            accept="video"
+            value={form.video ?? ""}
+            onChange={(url) => set("video", url || undefined)}
+            hint="MP4, WebM или MOV — показывается в карточке товара"
+          />
+          <MediaGallery
+            label="Галерея"
+            images={form.gallery ?? []}
+            mainImage={form.image}
+            onChange={(gallery) => set("gallery", gallery)}
+            onMainChange={(url) => set("image", url)}
+          />
+        </div>
       </AdminPanel>
 
       <AdminPanel title="Контент">

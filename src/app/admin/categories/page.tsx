@@ -1,10 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { AdminShell } from "@/components/admin/admin-shell";
 import {
   AdminButton,
@@ -14,15 +13,15 @@ import {
   AdminTextarea,
 } from "@/components/admin/admin-form";
 import { AdminBadge, AdminPanel, AdminTable, AdminTd, AdminTh } from "@/components/admin/admin-ui";
+import { MediaField } from "@/components/admin/media-field";
 import type { AdminCategory } from "@/lib/admin/types";
+
+const emptyForm = { title: "", description: "", image: "" };
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<AdminCategory[]>([]);
-  const [form, setForm] = useState({
-    title: "",
-    description: "",
-    image: "/images/hero-v2.jpg",
-  });
+  const [form, setForm] = useState(emptyForm);
+  const [editing, setEditing] = useState<AdminCategory | null>(null);
 
   const load = () => {
     fetch("/api/admin/categories")
@@ -39,6 +38,10 @@ export default function AdminCategoriesPage() {
       toast.error("Укажите название");
       return;
     }
+    if (!form.image) {
+      toast.error("Загрузите изображение");
+      return;
+    }
     const res = await fetch("/api/admin/categories", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -46,7 +49,7 @@ export default function AdminCategoriesPage() {
     });
     if (res.ok) {
       toast.success("Категория создана");
-      setForm({ title: "", description: "", image: "/images/hero-v2.jpg" });
+      setForm(emptyForm);
       load();
     } else {
       const err = await res.json();
@@ -66,6 +69,20 @@ export default function AdminCategoriesPage() {
     }
   };
 
+  const saveEdit = async () => {
+    if (!editing) return;
+    if (!editing.title.trim()) {
+      toast.error("Укажите название");
+      return;
+    }
+    await patch(editing.id, {
+      title: editing.title,
+      description: editing.description,
+      image: editing.image,
+    });
+    setEditing(null);
+  };
+
   const remove = async (id: string) => {
     if (!confirm("Удалить категорию?")) return;
     const res = await fetch("/api/admin/categories", {
@@ -83,7 +100,7 @@ export default function AdminCategoriesPage() {
   };
 
   return (
-    <AdminShell title="Категории" description="Разделы каталога на витрине">
+    <AdminShell title="Категории" description="Разделы каталога — фото, порядок, публикация">
       <div className="space-y-6">
         <AdminPanel title="Новая категория">
           <AdminGrid>
@@ -93,12 +110,14 @@ export default function AdminCategoriesPage() {
                 onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
               />
             </AdminField>
-            <AdminField label="Изображение (URL)">
-              <AdminInput
+            <div className="md:col-span-2">
+              <MediaField
+                label="Обложка"
+                accept="image"
                 value={form.image}
-                onChange={(e) => setForm((f) => ({ ...f, image: e.target.value }))}
+                onChange={(url) => setForm((f) => ({ ...f, image: url }))}
               />
-            </AdminField>
+            </div>
             <AdminField label="Описание" className="md:col-span-2">
               <AdminTextarea
                 value={form.description}
@@ -111,6 +130,46 @@ export default function AdminCategoriesPage() {
             Добавить
           </AdminButton>
         </AdminPanel>
+
+        {editing ? (
+          <AdminPanel title={`Редактирование: ${editing.id}`}>
+          <div className="mb-4 flex justify-end">
+            <button
+              type="button"
+              onClick={() => setEditing(null)}
+              className="cursor-pointer text-grey hover:text-black"
+              aria-label="Закрыть"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+            <AdminGrid>
+              <AdminField label="Название">
+                <AdminInput
+                  value={editing.title}
+                  onChange={(e) => setEditing({ ...editing, title: e.target.value })}
+                />
+              </AdminField>
+              <div className="md:col-span-2">
+                <MediaField
+                  label="Обложка"
+                  accept="image"
+                  value={editing.image}
+                  onChange={(url) => setEditing({ ...editing, image: url })}
+                />
+              </div>
+              <AdminField label="Описание" className="md:col-span-2">
+                <AdminTextarea
+                  value={editing.description}
+                  onChange={(e) => setEditing({ ...editing, description: e.target.value })}
+                />
+              </AdminField>
+            </AdminGrid>
+            <AdminButton className="mt-5" onClick={() => void saveEdit()}>
+              Сохранить изменения
+            </AdminButton>
+          </AdminPanel>
+        ) : null}
 
         <AdminPanel title="Все категории">
           <AdminTable>
@@ -128,7 +187,9 @@ export default function AdminCategoriesPage() {
                   <AdminTd>
                     <div className="flex items-center gap-3">
                       <div className="relative size-12 border border-black/10 bg-cream">
-                        <Image src={cat.image} alt="" fill className="object-cover" sizes="48px" />
+                        {cat.image ? (
+                          <Image src={cat.image} alt="" fill className="object-cover" sizes="48px" />
+                        ) : null}
                       </div>
                       <div>
                         <p className="text-sm font-medium">{cat.title}</p>
@@ -159,14 +220,24 @@ export default function AdminCategoriesPage() {
                     </button>
                   </AdminTd>
                   <AdminTd>
-                    <button
-                      type="button"
-                      onClick={() => remove(cat.id)}
-                      className="cursor-pointer text-grey hover:text-red-600"
-                      aria-label="Удалить"
-                    >
-                      <Trash2 className="size-4" />
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setEditing(cat)}
+                        className="cursor-pointer text-grey hover:text-gold"
+                        aria-label="Редактировать"
+                      >
+                        <Pencil className="size-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => remove(cat.id)}
+                        className="cursor-pointer text-grey hover:text-red-600"
+                        aria-label="Удалить"
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
+                    </div>
                   </AdminTd>
                 </tr>
               ))}

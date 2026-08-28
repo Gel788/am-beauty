@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   FolderTree,
   Globe,
+  ImageIcon,
   LayoutDashboard,
   LogOut,
   Package,
@@ -26,6 +27,7 @@ const NAV: {
   { href: "/admin/orders", label: "Заказы", icon: Package },
   { href: "/admin/products", label: "Товары", icon: ShoppingBag },
   { href: "/admin/categories", label: "Категории", icon: FolderTree },
+  { href: "/admin/media", label: "Медиа", icon: ImageIcon },
   { href: "/admin/site", label: "Сайт", icon: Globe },
   { href: "/admin/reviews", label: "Отзывы", icon: Star },
   { href: "/admin/customers", label: "Клиенты", icon: Users },
