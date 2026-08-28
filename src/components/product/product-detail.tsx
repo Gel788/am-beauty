@@ -112,7 +112,6 @@ export function ProductDetail({ product }: { product: Product }) {
               alt={product.name}
               videoSrc={product.video}
               videoMode={activeSlide === "video" ? "always" : "off"}
-              videoControls={activeSlide === "video"}
               priority
               aspect="aspect-[4/5] lg:aspect-square"
               sizes="(max-width:1024px) 100vw, 50vw"

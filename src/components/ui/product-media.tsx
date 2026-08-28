@@ -11,7 +11,6 @@ type ProductMediaProps = {
   alt: string;
   videoSrc?: string;
   videoMode?: VideoMode;
-  videoControls?: boolean;
   priority?: boolean;
   sizes?: string;
   className?: string;
@@ -32,7 +31,6 @@ export function ProductMedia({
   alt,
   videoSrc,
   videoMode,
-  videoControls = false,
   priority,
   sizes = "50vw",
   className,
@@ -96,17 +94,16 @@ export function ProductMedia({
           muted
           loop
           playsInline
-          controls={videoControls}
+          disablePictureInPicture
+          controlsList="nodownload noplaybackrate noremoteplayback"
           preload="metadata"
           poster={src}
-          aria-label={videoControls ? `Видео: ${alt}` : undefined}
-          aria-hidden={!videoControls}
+          aria-hidden
           onLoadedData={() => setVideoReady(true)}
           onError={() => setVideoReady(false)}
           className={cn(
-            "absolute inset-0 size-full object-contain object-bottom transition-opacity duration-300 motion-reduce:transition-none",
+            "product-media-video pointer-events-none absolute inset-0 size-full border-0 object-contain object-bottom outline-none transition-opacity duration-300 motion-reduce:transition-none",
             showVideo ? "opacity-100" : "opacity-0",
-            videoControls && showVideo && "z-[1]",
           )}
         />
       ) : null}
