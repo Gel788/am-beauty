@@ -40,3 +40,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# user-uploaded media (deploy via scp)
+/public/videos/*
+!/public/videos/.gitkeep

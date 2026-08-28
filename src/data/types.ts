@@ -25,6 +25,8 @@ export type Product = {
   badge?: string;
   image: string;
   gallery: string[];
+  /** Видео для карточки: положите файл в public/videos/ */
+  video?: string;
   description: string;
   benefits: string[];
   ingredients: string[];

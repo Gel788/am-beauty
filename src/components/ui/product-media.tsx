@@ -1,10 +1,13 @@
+"use client";
+
 import Image from "next/image";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 type ProductMediaProps = {
   src: string;
   alt: string;
+  videoSrc?: string;
   priority?: boolean;
   sizes?: string;
   className?: string;
@@ -23,6 +26,7 @@ const insetMap = {
 export function ProductMedia({
   src,
   alt,
+  videoSrc,
   priority,
   sizes = "50vw",
   className,
@@ -31,9 +35,44 @@ export function ProductMedia({
   inset = "md",
   children,
 }: ProductMediaProps) {
+  const [active, setActive] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !videoSrc || !active) return;
+
+    const play = async () => {
+      try {
+        await video.play();
+      } catch {
+        // autoplay blocked — остаётся постер
+      }
+    };
+
+    void play();
+    return () => {
+      video.pause();
+      video.currentTime = 0;
+    };
+  }, [active, videoSrc]);
+
   return (
-    <div className={cn("relative overflow-hidden bg-cream", aspect, className)}>
-      <div className={cn("absolute", insetMap[inset])}>
+    <div
+      className={cn("relative overflow-hidden bg-cream", aspect, className)}
+      onMouseEnter={() => videoSrc && setActive(true)}
+      onMouseLeave={() => videoSrc && setActive(false)}
+      onFocus={() => videoSrc && setActive(true)}
+      onBlur={() => videoSrc && setActive(false)}
+    >
+      <div
+        className={cn(
+          "absolute transition-opacity duration-300 motion-reduce:transition-none",
+          insetMap[inset],
+          videoSrc && active && videoReady ? "opacity-0" : "opacity-100",
+        )}
+      >
         <Image
           src={src}
           alt={alt}
@@ -43,6 +82,26 @@ export function ProductMedia({
           className={cn("object-contain object-bottom", zoom && "img-zoom")}
         />
       </div>
+
+      {videoSrc ? (
+        <video
+          ref={videoRef}
+          src={videoSrc}
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster={src}
+          aria-hidden
+          onLoadedData={() => setVideoReady(true)}
+          onError={() => setVideoReady(false)}
+          className={cn(
+            "absolute inset-0 size-full object-contain object-bottom transition-opacity duration-300 motion-reduce:transition-none",
+            active && videoReady ? "opacity-100" : "opacity-0",
+          )}
+        />
+      ) : null}
+
       {children}
     </div>
   );

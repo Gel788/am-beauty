@@ -40,6 +40,7 @@ export function ProductCard({ product, className, priority }: ProductCardProps) 
         <ProductMedia
           src={product.image}
           alt={product.name}
+          videoSrc={product.video}
           priority={priority}
           sizes="(max-width:768px) 50vw, 25vw"
         >

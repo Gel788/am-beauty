@@ -19,6 +19,7 @@ export const products: Product[] = [
     compareAt: 9900,
     badge: "Бестселлер",
     image: "/images/bakuchiol-v2.jpg",
+    video: "/videos/IMG_7732.MOV",
     gallery: ["/images/bakuchiol-v2.jpg", "/images/bakuchiol-texture.jpg"],
     description:
       "Ночная сыворотка с бакучиолом — растительной альтернативой ретинолу. Плотная текстура обволакивает кожу, работая пока вы спите.",
