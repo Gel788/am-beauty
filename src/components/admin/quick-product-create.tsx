@@ -38,7 +38,8 @@ export function QuickProductCreate({ categories, onCreated }: Props) {
       toast.error("Укажите название");
       return;
     }
-    if (!form.gallery.length) {
+    const image = form.image || form.gallery[0];
+    if (!image) {
       toast.error("Добавьте хотя бы одно фото");
       return;
     }
@@ -51,8 +52,8 @@ export function QuickProductCreate({ categories, onCreated }: Props) {
         shortName: form.name.trim(),
         category: form.category,
         price: form.price,
-        image: form.image || form.gallery[0],
-        gallery: form.gallery,
+        image,
+        gallery: form.gallery.length ? form.gallery : [image],
         video: form.video || undefined,
         published: true,
         stock: 10,

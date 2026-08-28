@@ -9,12 +9,22 @@ git pull origin main
 
 mkdir -p public/uploads/images public/uploads/videos public/videos .data
 
-# Если БД осталась в старом standalone-каталоге — подтягиваем в корень
-if [ -f .next/standalone/.data/admin-db.json ]; then
-  if [ ! -f .data/admin-db.json ] || [ .next/standalone/.data/admin-db.json -nt .data/admin-db.json ]; then
-    cp .next/standalone/.data/admin-db.json .data/admin-db.json
+merge_db() {
+  local root_db=".data/admin-db.json"
+  local legacy_db=".next/standalone/.data/admin-db.json"
+  mkdir -p .data
+  if [ -f "$legacy_db" ] && [ -f "$root_db" ]; then
+    if [ "$legacy_db" -nt "$root_db" ]; then
+      cp "$legacy_db" "$root_db"
+    fi
+  elif [ -f "$legacy_db" ]; then
+    cp "$legacy_db" "$root_db"
   fi
-fi
+  chmod 664 .data/admin-db.json 2>/dev/null || true
+  chmod 775 .data 2>/dev/null || true
+}
+
+merge_db
 
 npm ci
 npm run build

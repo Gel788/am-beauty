@@ -22,12 +22,20 @@ export default function AdminProductsPage() {
 
   const load = () => {
     Promise.all([
-      fetch("/api/admin/products").then((r) => r.json()),
-      fetch("/api/admin/categories").then((r) => r.json()),
-    ]).then(([productsRes, categoriesRes]) => {
-      setProducts(productsRes.products);
-      setCategories(categoriesRes.categories);
-    });
+      fetch("/api/admin/products").then(async (r) => {
+        if (!r.ok) throw new Error("products");
+        return r.json();
+      }),
+      fetch("/api/admin/categories").then(async (r) => {
+        if (!r.ok) throw new Error("categories");
+        return r.json();
+      }),
+    ])
+      .then(([productsRes, categoriesRes]) => {
+        setProducts(productsRes.products ?? []);
+        setCategories(categoriesRes.categories ?? []);
+      })
+      .catch(() => toast.error("Сессия истекла — войдите снова в /admin/login"));
   };
 
   useEffect(() => {

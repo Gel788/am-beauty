@@ -1,11 +1,11 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { AdminCustomer, AdminDatabase, DashboardStats } from "@/lib/admin/types";
 import { seedDatabase } from "@/lib/admin/seed";
 import { mergeSiteSettings } from "@/lib/admin/site-merge";
 
-const DB_DIR = path.join(process.cwd(), ".data");
-const DB_PATH = path.join(DB_DIR, "admin-db.json");
+export const DB_DIR = path.join(process.cwd(), ".data");
+export const DB_PATH = path.join(DB_DIR, "admin-db.json");
 
 function normalizeDb(partial: Partial<AdminDatabase>): AdminDatabase {
   const seed = seedDatabase();
@@ -40,7 +40,10 @@ export async function readDb(): Promise<AdminDatabase> {
 export async function writeDb(db: AdminDatabase) {
   await ensureDir();
   db.updatedAt = new Date().toISOString();
-  await writeFile(DB_PATH, JSON.stringify(db, null, 2), "utf-8");
+  const json = JSON.stringify(db, null, 2);
+  const tmp = `${DB_PATH}.${process.pid}.tmp`;
+  await writeFile(tmp, json, "utf-8");
+  await rename(tmp, DB_PATH);
 }
 
 export async function updateDb(mutator: (db: AdminDatabase) => void) {
