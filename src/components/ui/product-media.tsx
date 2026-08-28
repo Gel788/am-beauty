@@ -94,11 +94,13 @@ export function ProductMedia({
           muted
           loop
           playsInline
+          autoPlay={mode === "always"}
           disablePictureInPicture
           controlsList="nodownload noplaybackrate noremoteplayback"
-          preload="metadata"
+          preload="auto"
           poster={src}
           aria-hidden
+          onCanPlay={() => setVideoReady(true)}
           onLoadedData={() => setVideoReady(true)}
           onError={() => setVideoReady(false)}
           className={cn(

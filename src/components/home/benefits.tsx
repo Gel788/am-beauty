@@ -1,11 +1,10 @@
-const pillars = [
-  { title: "Состав", text: "Без парабенов и SLS. Только активы с доказанной эффективностью." },
-  { title: "Тесты", text: "Дерматологический контроль на чувствительной коже." },
-  { title: "Упаковка", text: "Стекло и перерабатываемые материалы. Малые партии." },
-  { title: "Производство", text: "Собственное ателье в Москве." },
-];
+"use client";
+
+import { useSite } from "@/context/catalog-context";
 
 export function HomeBenefits() {
+  const pillars = useSite().home.benefits;
+
   return (
     <section className="section-pad-sm">
       <div className="container-page">

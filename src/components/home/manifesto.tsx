@@ -5,8 +5,10 @@ import Link from "next/link";
 import { useRef } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { Reveal } from "@/components/reveal";
+import { useSite } from "@/context/catalog-context";
 
 export function HomeManifesto() {
+  const { home } = useSite();
   const ref = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll({
@@ -19,11 +21,9 @@ export function HomeManifesto() {
     <section ref={ref} className="relative overflow-hidden bg-cream py-24 md:py-36">
       <div className="container-page grid items-center gap-12 lg:grid-cols-12 lg:gap-0">
         <Reveal className="lg:col-span-5">
-          <p className="label-caps">Манифест</p>
-          <h2 className="headline-massive mt-6 !text-[clamp(2rem,6vw,4.5rem)] !leading-[0.95]">
-            Less
-            <br />
-            noise
+          <p className="label-caps">{home.manifestoLabel}</p>
+          <h2 className="headline-massive mt-6 !text-[clamp(2rem,6vw,4.5rem)] !leading-[0.95] whitespace-pre-line">
+            {home.manifestoTitle}
           </h2>
         </Reveal>
 
@@ -33,7 +33,7 @@ export function HomeManifesto() {
         >
           <div className="absolute inset-3 sm:inset-4 md:inset-0">
             <Image
-              src="/images/peptide-v2.jpg"
+              src={home.manifestoImage}
               alt="Сыворотка AM Beauty"
               fill
               className="object-contain object-center md:object-cover"
@@ -45,8 +45,7 @@ export function HomeManifesto() {
 
       <Reveal className="container-page mt-16 max-w-xl">
         <p className="text-lg leading-relaxed font-light md:text-xl">
-          Мы не обещаем чудес за одну ночь. Мы делаем формулы, которые работают каждый день — тихо,
-          стабильно, честно.
+          {home.manifestoText}
         </p>
         <Link href="/about" className="link-underline mt-8 inline-block">
           О бренде

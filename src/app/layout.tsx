@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
-import { Footer } from "@/components/layout/footer";
-import { Header } from "@/components/layout/header";
+import { StorefrontChrome } from "@/components/layout/storefront-chrome";
 import { Providers } from "@/components/providers";
 import { CatalogProvider } from "@/context/catalog-context";
 import { getPublicCatalog } from "@/lib/catalog/runtime";
@@ -45,11 +44,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         </a>
         <CatalogProvider data={catalog}>
           <Providers>
-            <Header />
-            <main id="main" className="flex-1 pt-[3.75rem]">
-              {children}
-            </main>
-            <Footer />
+            <StorefrontChrome>{children}</StorefrontChrome>
           </Providers>
         </CatalogProvider>
       </body>

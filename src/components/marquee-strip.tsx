@@ -1,4 +1,4 @@
-const items = [
+const DEFAULT_ITEMS = [
   "Малые партии",
   "Стекло и пипетка",
   "Доставка 1–3 дня",
@@ -7,7 +7,13 @@ const items = [
   "Сделано в Москве",
 ];
 
-export function MarqueeStrip({ invert = false }: { invert?: boolean }) {
+export function MarqueeStrip({
+  invert = false,
+  items = DEFAULT_ITEMS,
+}: {
+  invert?: boolean;
+  items?: string[];
+}) {
   const row = items.map((item) => (
     <span key={item} className="inline-flex items-center gap-12 md:gap-20">
       <span>{item}</span>

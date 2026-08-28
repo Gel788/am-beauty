@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
-import { company, legalLinks } from "@/data/company";
+import { legalLinks } from "@/data/company";
+import { useSite } from "@/context/catalog-context";
 
 const shop = [
   { href: "/catalog", label: "Каталог" },
@@ -25,26 +28,29 @@ const legal = [
 ];
 
 export function Footer() {
+  const site = useSite();
+  const company = site.company;
+
   return (
     <footer className="section-invert">
       <div className="container-page grid gap-12 py-16 md:grid-cols-12 md:gap-8 md:py-20">
         <div className="md:col-span-4">
-          <p className="text-[11px] font-medium tracking-[0.42em] uppercase">{company.brand}</p>
-          <p className="mt-6 max-w-xs text-sm leading-relaxed text-white/50">
-            Натуральный уход и декоративная косметика. Доставка по России.
-          </p>
+          <p className="text-[11px] font-medium tracking-[0.42em] uppercase">{site.brand}</p>
+          <p className="mt-6 max-w-xs text-sm leading-relaxed text-white/50">{site.footerTagline}</p>
           <address className="mt-6 not-italic text-xs leading-relaxed text-white/45">
             <p>{company.shortLegalName}</p>
-            <p className="mt-1">ИНН {company.inn} · ОГРНИП {company.ogrnip}</p>
+            <p className="mt-1">
+              ИНН {company.inn} · ОГРНИП {company.ogrnip}
+            </p>
             <p className="mt-2">{company.legalAddress}</p>
             <p className="mt-2">
-              <a href={`mailto:${company.email}`} className="hover:text-white/70">
-                {company.email}
+              <a href={`mailto:${site.email}`} className="hover:text-white/70">
+                {site.email}
               </a>
             </p>
             <p>
-              <a href={`tel:${company.phoneHref}`} className="hover:text-white/70">
-                {company.phone}
+              <a href={`tel:${site.phoneHref}`} className="hover:text-white/70">
+                {site.phone}
               </a>
             </p>
           </address>
@@ -121,7 +127,7 @@ export function Footer() {
       </div>
       <div className="border-t border-white/15">
         <div className="container-page flex flex-col items-center justify-between gap-4 py-6 text-[10px] tracking-[0.18em] text-white/40 uppercase sm:flex-row">
-          <p>© 2026 {company.brand}</p>
+          <p>© 2026 {site.brand}</p>
           <div className="flex flex-wrap justify-center gap-x-8 gap-y-2">
             <Link href={legalLinks.privacy} className="transition-opacity hover:opacity-70">
               Конфиденциальность

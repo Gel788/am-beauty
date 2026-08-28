@@ -4,16 +4,16 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { legalLinks } from "@/data/company";
 import { Input } from "@/components/ui/input";
+import { useSite } from "@/context/catalog-context";
 
 export function HomeNewsletter() {
+  const { home } = useSite();
   return (
     <section className="section-pad-sm">
       <div className="container-narrow">
         <p className="label-caps">Рассылка</p>
-        <h2 className="headline-lg mt-4">Будьте в курсе</h2>
-        <p className="mx-auto mt-4 max-w-sm text-sm text-grey">
-          Новинки, ритуалы ухода и промокод WELCOME15 на первый заказ.
-        </p>
+        <h2 className="headline-lg mt-4">{home.newsletterTitle}</h2>
+        <p className="mx-auto mt-4 max-w-sm text-sm text-grey">{home.newsletterText}</p>
         <form
           className="mx-auto mt-10 flex max-w-md flex-col gap-3 sm:flex-row"
           onSubmit={(e) => {

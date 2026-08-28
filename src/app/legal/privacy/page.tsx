@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { LegalDocument } from "@/components/legal/legal-document";
-import { company } from "@/data/company";
+import { getRuntimeCompany } from "@/lib/catalog/company";
 
 export const metadata: Metadata = {
   title: "Политика конфиденциальности",
   description: "Обработка персональных данных AM Beauty в соответствии с 152-ФЗ",
 };
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const company = await getRuntimeCompany();
   return (
     <LegalDocument
       title="Политика конфиденциальности"

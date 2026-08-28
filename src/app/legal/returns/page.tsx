@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { LegalDocument } from "@/components/legal/legal-document";
-import { company } from "@/data/company";
+import { getRuntimeCompany } from "@/lib/catalog/company";
 
 export const metadata: Metadata = {
   title: "Возврат и обмен",
   description: "Условия возврата и обмена товаров AM Beauty",
 };
 
-export default function ReturnsPage() {
+export default async function ReturnsPage() {
+  const company = await getRuntimeCompany();
   return (
     <LegalDocument title="Возврат и обмен" updatedAt="28.08.2026">
       <h2>1. Общие условия</h2>

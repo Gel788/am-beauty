@@ -2,18 +2,19 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCatalogCategories } from "@/context/catalog-context";
+import { useCatalogCategories, useSite } from "@/context/catalog-context";
 import { Reveal } from "@/components/reveal";
 
 export function HomeCategories() {
   const categories = useCatalogCategories();
+  const { home } = useSite();
   const [lead, ...rest] = categories;
 
   return (
     <section className="bg-cream py-20 md:py-28">
       <div className="container-page">
         <Reveal>
-          <h2 className="headline-lg text-center">Уход и макияж</h2>
+          <h2 className="headline-lg text-center">{home.categoriesTitle}</h2>
         </Reveal>
 
         {lead ? (

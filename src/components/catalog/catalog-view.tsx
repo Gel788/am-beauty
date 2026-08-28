@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { LayoutGrid, SlidersHorizontal, X } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { lineLabels, skinTypeLabels } from "@/data/categories";
-import { useCatalogCategories, useCatalogProducts } from "@/context/catalog-context";
+import { useCatalogCategories, useCatalogProducts, useSite } from "@/context/catalog-context";
 import {
   defaultFilters,
   filterProducts,
@@ -33,6 +33,7 @@ export function CatalogView() {
   const searchParams = useSearchParams();
   const categories = useCatalogCategories();
   const products = useCatalogProducts();
+  const { marquee } = useSite();
   const reduce = useReducedMotion();
   const [isPending, startTransition] = useTransition();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -128,7 +129,7 @@ export function CatalogView() {
         onSelect={(id) => update({ category: id })}
       />
 
-      <MarqueeStrip />
+      <MarqueeStrip items={marquee} />
 
       <div className="container-page py-12 md:py-16 lg:py-20">
         <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-6">

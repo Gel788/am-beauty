@@ -5,10 +5,12 @@ import { useRef } from "react";
 import { formatPrice, products } from "@/data/products";
 import { ProductMedia } from "@/components/ui/product-media";
 import { Reveal, Stagger, StaggerItem } from "@/components/reveal";
+import { useSite } from "@/context/catalog-context";
 
 const trio = products.slice(0, 3);
 
 export function HomeFeatured() {
+  const { home } = useSite();
   const railRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -17,12 +19,10 @@ export function HomeFeatured() {
         <Reveal>
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="label-caps">Коллекция</p>
-              <h2 className="headline-lg mt-3">Три формулы</h2>
+              <p className="label-caps">{home.featuredLabel}</p>
+              <h2 className="headline-lg mt-3">{home.featuredTitle}</h2>
             </div>
-            <p className="max-w-xs text-sm text-grey">
-              Листайте вправо — ночь, утро, восстановление.
-            </p>
+            <p className="max-w-xs text-sm text-grey">{home.featuredHint}</p>
           </div>
         </Reveal>
       </div>

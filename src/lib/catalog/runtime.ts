@@ -22,6 +22,7 @@ export const getPublicCatalog = cache(async (): Promise<PublicCatalog> => {
     reviews: db.reviews
       .filter((r) => r.published)
       .map(({ published: _p, ...r }) => r as Review),
+    blog: db.blog.filter((p) => p.published),
     site: db.site,
   };
 });

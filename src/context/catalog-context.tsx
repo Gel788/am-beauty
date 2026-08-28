@@ -3,12 +3,13 @@
 import { createContext, useContext, useEffect, type ReactNode } from "react";
 import type { Product, Review } from "@/data/types";
 import { hydrateCatalog } from "@/data/products";
-import type { AdminCategory, AdminSiteSettings } from "@/lib/admin/types";
+import type { AdminBlogPost, AdminCategory, AdminSiteSettings } from "@/lib/admin/types";
 
 type CatalogContextValue = {
   products: Product[];
   categories: AdminCategory[];
   reviews: Review[];
+  blog: AdminBlogPost[];
   site: AdminSiteSettings;
 };
 
@@ -42,6 +43,14 @@ export function useCatalogProducts() {
 
 export function useCatalogCategories() {
   return useCatalog().categories;
+}
+
+export function useSite() {
+  return useCatalog().site;
+}
+
+export function useBlogPosts() {
+  return useCatalog().blog;
 }
 
 export function useProductReviews(slug: string) {

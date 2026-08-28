@@ -5,14 +5,12 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { Reveal } from "@/components/reveal";
 import { MarqueeStrip } from "@/components/marquee-strip";
-
-const steps = [
-  { num: "01", title: "Одна капля", text: "Густая текстура — достаточно одной капли." },
-  { num: "02", title: "Ладони", text: "Согрейте сыворотку между ладонями." },
-  { num: "03", title: "Тишина", text: "Дайте формуле впитаться. Не трогайте кожу." },
-];
+import { useSite } from "@/context/catalog-context";
 
 export function HomeRitual() {
+  const site = useSite();
+  const { home } = site;
+  const steps = home.ritualSteps;
   const ref = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
   const [isDesktop, setIsDesktop] = useState(false);
@@ -40,7 +38,7 @@ export function HomeRitual() {
             style={reduce || !isDesktop ? undefined : { y: imageY }}
           >
             <Image
-              src="/images/cica-texture.jpg"
+              src={home.ritualImage}
               alt="Текстура сыворотки"
               fill
               className="object-cover object-[center_35%] lg:object-center"
@@ -74,7 +72,7 @@ export function HomeRitual() {
           </div>
         </div>
       </section>
-      <MarqueeStrip invert />
+      <MarqueeStrip invert items={site.marquee} />
     </>
   );
 }

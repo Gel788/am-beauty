@@ -15,7 +15,11 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
   }, []);
 
   const disableLenis =
-    reduce || isTouch || pathname.startsWith("/checkout") || pathname.startsWith("/account");
+    reduce ||
+    isTouch ||
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/checkout") ||
+    pathname.startsWith("/account");
 
   if (disableLenis) return children;
 

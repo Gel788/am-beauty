@@ -8,19 +8,11 @@ import { Heart, Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { lineLabels } from "@/data/categories";
 import { formatPrice } from "@/data/products";
-import { useCatalogCategories, useCatalogProducts } from "@/context/catalog-context";
+import { useCatalogCategories, useCatalogProducts, useSite } from "@/context/catalog-context";
 import { searchSuggestions } from "@/lib/catalog";
 import { useCartTotals } from "@/store/cart-store";
 import { useWishlistStore } from "@/store/wishlist-store";
 import { cn } from "@/lib/utils";
-
-const navItems = [
-  { href: "/catalog", label: "Каталог" },
-  { href: "/about", label: "О бренде" },
-  { href: "/blog", label: "Блог" },
-  { href: "/contacts", label: "Контакты" },
-  { href: "/account", label: "Аккаунт" },
-];
 
 const iconClass = "size-[18px] stroke-[1]";
 
@@ -30,6 +22,8 @@ function isActive(pathname: string, href: string) {
 }
 
 export function Header() {
+  const site = useSite();
+  const navItems = site.nav;
   const router = useRouter();
   const pathname = usePathname();
   const reduce = useReducedMotion();
@@ -131,7 +125,7 @@ export function Header() {
             className="justify-self-center text-center text-[11px] font-medium tracking-[0.42em] uppercase"
             style={{ color: onHero ? "white" : "black" }}
           >
-            AM Beauty
+            {site.brand}
           </Link>
 
           <Link
@@ -169,7 +163,7 @@ export function Header() {
             className="text-[11px] font-medium tracking-[0.42em] uppercase transition-colors"
             style={{ color: onHero ? "white" : "black" }}
           >
-            AM Beauty
+            {site.brand}
           </Link>
 
           <div className="flex items-center justify-end gap-0">

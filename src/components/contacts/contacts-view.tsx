@@ -4,63 +4,52 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
-import { company, legalLinks } from "@/data/company";
+import { legalLinks } from "@/data/company";
 import { PageHeader } from "@/components/ui/page-header";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
-const faq = [
-  {
-    q: "Как долго идёт доставка?",
-    a: "По Москве — 1–2 дня, по России — 1–5 дней в зависимости от региона.",
-  },
-  {
-    q: "Можно ли вернуть товар?",
-    a: "Да, в течение 7 дней при дистанционной покупке, если сохранены товарный вид и упаковка не вскрыта. Подробнее — в разделе «Возврат».",
-  },
-  {
-    q: "Есть ли тестеры?",
-    a: "К каждому заказу от 5 000 ₽ добавляем набор миниатюр.",
-  },
-  {
-    q: "Подходит ли косметика при беременности?",
-    a: "Уточняйте состав конкретного продукта. Bakuchiol Night без ретинола.",
-  },
-];
+import { useSite } from "@/context/catalog-context";
 
 export function ContactsView() {
+  const site = useSite();
+  const faq = site.contacts.faq;
   const [form, setForm] = useState({ name: "", email: "", message: "" });
 
   return (
     <div className="container-page section-pad">
       <div className="grid gap-16 lg:grid-cols-2 lg:gap-20">
         <div>
-          <PageHeader label="Контакты" title="Свяжитесь с нами" align="left" className="!text-left" />
+          <PageHeader
+            label="Контакты"
+            title={site.contacts.title}
+            align="left"
+            className="!text-left"
+          />
 
           <dl className="mt-10 space-y-6 text-sm">
             <div>
               <dt className="label-caps">Email</dt>
               <dd className="mt-2">
-                <a href={`mailto:${company.email}`} className="hover:opacity-60">
-                  {company.email}
+                <a href={`mailto:${site.email}`} className="hover:opacity-60">
+                  {site.email}
                 </a>
               </dd>
             </div>
             <div>
               <dt className="label-caps">Телефон</dt>
               <dd className="mt-2">
-                <a href={`tel:${company.phoneHref}`} className="hover:opacity-60">
-                  {company.phone}
+                <a href={`tel:${site.phoneHref}`} className="hover:opacity-60">
+                  {site.phone}
                 </a>
               </dd>
             </div>
             <div>
               <dt className="label-caps">Адрес</dt>
-              <dd className="mt-2 text-grey">{company.postalAddress}</dd>
+              <dd className="mt-2 text-grey">{site.company.postalAddress}</dd>
             </div>
             <div>
               <dt className="label-caps">Часы работы</dt>
-              <dd className="mt-2 text-grey">Пн–Вс 10:00–21:00</dd>
+              <dd className="mt-2 text-grey">{site.workingHours}</dd>
             </div>
           </dl>
 

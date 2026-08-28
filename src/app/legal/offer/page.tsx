@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { LegalDocument } from "@/components/legal/legal-document";
-import { company } from "@/data/company";
+import { getRuntimeCompany } from "@/lib/catalog/company";
 
 export const metadata: Metadata = {
   title: "Публичная оферта",
   description: "Договор розничной купли-продажи дистанционным способом AM Beauty",
 };
 
-export default function OfferPage() {
+export default async function OfferPage() {
+  const company = await getRuntimeCompany();
   return (
     <LegalDocument
       title="Публичная оферта"

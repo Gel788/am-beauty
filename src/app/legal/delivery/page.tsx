@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { LegalDocument } from "@/components/legal/legal-document";
-import { company } from "@/data/company";
+import { getRuntimeCompany } from "@/lib/catalog/company";
 
 export const metadata: Metadata = {
   title: "Доставка и оплата",
   description: "Способы доставки и оплаты заказов AM Beauty",
 };
 
-export default function DeliveryPage() {
+export default async function DeliveryPage() {
+  const company = await getRuntimeCompany();
   return (
     <LegalDocument title="Доставка и оплата" updatedAt="28.08.2026">
       <h2>1. Территория доставки</h2>

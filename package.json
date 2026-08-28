@@ -11,6 +11,8 @@
     "build:static": "NEXT_STATIC_EXPORT=true next build",
     "build:production": "bash scripts/build-production.sh",
     "deploy:regru": "bash scripts/deploy-regru.sh",
+    "deploy:vps": "bash scripts/deploy-vps.sh",
+    "sync:videos": "bash scripts/sync-videos-vps.sh",
     "lint": "eslint"
   },
   "engines": {

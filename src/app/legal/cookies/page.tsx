@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { LegalDocument } from "@/components/legal/legal-document";
-import { company } from "@/data/company";
+import { getRuntimeCompany } from "@/lib/catalog/company";
 
 export const metadata: Metadata = {
   title: "Политика cookie",
   description: "Использование cookie и локального хранилища на сайте AM Beauty",
 };
 
-export default function CookiesPage() {
+export default async function CookiesPage() {
+  const company = await getRuntimeCompany();
   return (
     <LegalDocument title="Политика использования cookie" updatedAt="28.08.2026">
       <h2>1. Что такое cookie</h2>

@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { AdminCustomer, AdminDatabase, DashboardStats } from "@/lib/admin/types";
 import { seedDatabase } from "@/lib/admin/seed";
+import { mergeSiteSettings } from "@/lib/admin/site-merge";
 
 const DB_DIR = path.join(process.cwd(), ".data");
 const DB_PATH = path.join(DB_DIR, "admin-db.json");
@@ -9,11 +10,12 @@ const DB_PATH = path.join(DB_DIR, "admin-db.json");
 function normalizeDb(partial: Partial<AdminDatabase>): AdminDatabase {
   const seed = seedDatabase();
   return {
-    version: 2,
+    version: 3,
     updatedAt: partial.updatedAt ?? seed.updatedAt,
     products: partial.products?.length ? partial.products : seed.products,
     categories: partial.categories?.length ? partial.categories : seed.categories,
-    site: { ...seed.site, ...partial.site },
+    site: mergeSiteSettings(partial.site),
+    blog: partial.blog?.length ? partial.blog : seed.blog,
     orders: partial.orders ?? seed.orders,
     reviews: partial.reviews ?? seed.reviews,
     promos: partial.promos ?? seed.promos,

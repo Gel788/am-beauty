@@ -6,8 +6,11 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { products } from "@/data/products";
 import { MarqueeStrip } from "@/components/marquee-strip";
+import { useSite } from "@/context/catalog-context";
 
 export function HomeHero() {
+  const site = useSite();
+  const home = site.home;
   const ref = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
   const [isDesktop, setIsDesktop] = useState(false);
@@ -41,7 +44,7 @@ export function HomeHero() {
         >
           <div className={`absolute inset-0 md:inset-[-8%] ${reduce ? "" : "hero-kenburns max-md:!transform-none"}`}>
             <Image
-              src="/images/hero-dark.jpg"
+              src={home.heroImage}
               alt=""
               fill
               priority
@@ -70,7 +73,7 @@ export function HomeHero() {
             transition={{ duration: 0.7, delay: 0.15 }}
             className="text-[10px] tracking-[0.36em] text-white/55 uppercase"
           >
-            Коллекция 2026 · Москва
+            {home.heroLabel}
           </motion.p>
 
           <motion.h1
@@ -79,7 +82,7 @@ export function HomeHero() {
             transition={{ duration: 1, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
             className="headline-massive mt-6 max-w-[12ch] text-white"
           >
-            Сыворотки
+            {home.heroTitle}
           </motion.h1>
 
           <motion.p
@@ -88,7 +91,7 @@ export function HomeHero() {
             transition={{ duration: 0.8, delay: 0.45 }}
             className="mt-6 max-w-sm text-sm leading-relaxed text-white/60"
           >
-            Три формулы. Стекло. Малые партии. Уход, который чувствуется — без лишних слов.
+            {home.heroSubtitle}
           </motion.p>
 
           <motion.div
@@ -102,7 +105,7 @@ export function HomeHero() {
               className="group relative inline-flex h-12 items-center overflow-hidden border border-white px-8 text-[10px] tracking-[0.28em] text-white uppercase"
             >
               <span className="relative z-10 transition-colors duration-500 group-hover:text-black">
-                Смотреть коллекцию
+                {home.heroCta}
               </span>
               <span className="absolute inset-0 origin-left scale-x-0 bg-white transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100" />
             </Link>
@@ -124,11 +127,11 @@ export function HomeHero() {
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             className="h-10 w-px origin-top bg-white/50"
           />
-          <p className="text-[10px] tracking-[0.28em] text-white/40 uppercase">03 формулы</p>
+          <p className="text-[10px] tracking-[0.28em] text-white/40 uppercase">{home.heroFootnote}</p>
         </div>
       </section>
 
-      <MarqueeStrip />
+      <MarqueeStrip items={site.marquee} />
     </>
   );
 }

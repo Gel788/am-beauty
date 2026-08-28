@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import type { AdminCategory } from "@/lib/admin/types";
-import { cn } from "@/lib/utils";
+import { useSite } from "@/context/catalog-context";
 
 type CatalogHeroProps = {
   categories: AdminCategory[];
@@ -11,11 +11,7 @@ type CatalogHeroProps = {
   query?: string;
 };
 
-const DEFAULT = {
-  title: "Коллекция",
-  description: "Сыворотки, уход и декоративная косметика — малые партии, точные дозировки.",
-  image: "/images/hero-dark.jpg",
-};
+const FALLBACK_IMAGE = "/images/hero-dark.jpg";
 
 export function CatalogHero({
   categories,
@@ -23,12 +19,13 @@ export function CatalogHero({
   productCount,
   query,
 }: CatalogHeroProps) {
+  const { catalog, brand } = useSite();
   const active = categories.find((c) => c.id === activeCategoryId);
-  const title = query ? `«${query}»` : (active?.title ?? DEFAULT.title);
+  const title = query ? `«${query}»` : (active?.title ?? catalog.defaultTitle);
   const description = query
     ? `${productCount} ${productCount === 1 ? "результат" : "результатов"} в каталоге`
-    : (active?.description ?? DEFAULT.description);
-  const image = active?.image ?? DEFAULT.image;
+    : (active?.description ?? catalog.defaultDescription);
+  const image = active?.image ?? FALLBACK_IMAGE;
 
   return (
     <section className="relative -mt-[3.75rem] flex min-h-[min(52vh,520px)] items-end overflow-hidden bg-black text-white">
@@ -53,7 +50,9 @@ export function CatalogHero({
       </div>
 
       <div className="container-page relative w-full pb-12 pt-28 md:pb-16 md:pt-32">
-        <p className="label-caps !text-white/55">Каталог · AM Beauty</p>
+        <p className="label-caps !text-white/55">
+          {catalog.label} · {brand}
+        </p>
         <h1 className="headline-xl mt-4 max-w-2xl !text-white">{title}</h1>
         <p className="mt-4 max-w-md text-sm leading-relaxed text-white/70">{description}</p>
         <div className="mt-8 flex flex-wrap items-center gap-6 border-t border-white/15 pt-6">

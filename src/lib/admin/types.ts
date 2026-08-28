@@ -3,6 +3,98 @@ import type { DeliverySelection } from "@/lib/delivery/types";
 import type { OrderStatus } from "@/store/account-store";
 import type { Product, Review } from "@/data/types";
 
+export type AdminLink = {
+  label: string;
+  href: string;
+};
+
+export type AdminCompanyInfo = {
+  legalName: string;
+  shortLegalName: string;
+  inn: string;
+  ogrnip: string;
+  okved: string;
+  legalAddress: string;
+  postalAddress: string;
+  bankName: string;
+  bik: string;
+  account: string;
+  corrAccount: string;
+  headName: string;
+  supportResponse: string;
+  siteUrl: string;
+};
+
+export type AdminHomeContent = {
+  heroLabel: string;
+  heroTitle: string;
+  heroSubtitle: string;
+  heroImage: string;
+  heroCta: string;
+  heroFootnote: string;
+  manifestoLabel: string;
+  manifestoTitle: string;
+  manifestoText: string;
+  manifestoImage: string;
+  featuredLabel: string;
+  featuredTitle: string;
+  featuredHint: string;
+  categoriesTitle: string;
+  ritualSteps: { num: string; title: string; text: string }[];
+  ritualImage: string;
+  benefits: { title: string; text: string }[];
+  newsletterTitle: string;
+  newsletterText: string;
+};
+
+export type AdminAboutContent = {
+  label: string;
+  title: string;
+  paragraph1: string;
+  paragraph2: string;
+  image: string;
+  badges: string[];
+};
+
+export type AdminContactsContent = {
+  title: string;
+  faq: { q: string; a: string }[];
+};
+
+export type AdminCatalogContent = {
+  label: string;
+  defaultTitle: string;
+  defaultDescription: string;
+};
+
+export type AdminBlogPost = {
+  slug: string;
+  title: string;
+  excerpt: string;
+  body: string;
+  date: string;
+  published: boolean;
+};
+
+export type AdminSiteSettings = {
+  brand: string;
+  tagline: string;
+  email: string;
+  phone: string;
+  phoneHref: string;
+  workingHours: string;
+  freeShippingThreshold: number;
+  shippingCost: number;
+  footerTagline: string;
+  marquee: string[];
+  nav: AdminLink[];
+  company: AdminCompanyInfo;
+  home: AdminHomeContent;
+  about: AdminAboutContent;
+  contacts: AdminContactsContent;
+  catalog: AdminCatalogContent;
+};
+
 export type AdminProduct = Product & {
   stock: number;
   published: boolean;
@@ -11,21 +103,6 @@ export type AdminProduct = Product & {
 export type AdminCategory = CategoryMeta & {
   published: boolean;
   sortOrder: number;
-};
-
-export type AdminSiteSettings = {
-  brand: string;
-  tagline: string;
-  heroLabel: string;
-  heroTitle: string;
-  heroSubtitle: string;
-  heroImage: string;
-  email: string;
-  phone: string;
-  phoneHref: string;
-  workingHours: string;
-  freeShippingThreshold: number;
-  shippingCost: number;
 };
 
 export type AdminOrderItem = {
@@ -81,6 +158,7 @@ export type AdminDatabase = {
   products: AdminProduct[];
   categories: AdminCategory[];
   site: AdminSiteSettings;
+  blog: AdminBlogPost[];
   orders: AdminOrder[];
   reviews: AdminReview[];
   promos: AdminPromo[];
@@ -103,5 +181,6 @@ export type PublicCatalog = {
   products: Product[];
   categories: AdminCategory[];
   reviews: Review[];
+  blog: AdminBlogPost[];
   site: AdminSiteSettings;
 };
