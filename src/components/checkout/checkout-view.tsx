@@ -17,7 +17,6 @@ import { ConsentFields } from "@/components/legal/consent-fields";
 import { formatPrice } from "@/data/products";
 import { useDeliveryQuote, usePickupPointsQuote } from "@/hooks/use-delivery-quote";
 import { useOrderTotals } from "@/hooks/use-order-totals";
-import { createPayment } from "@/lib/payment";
 import {
   CARRIER_LABELS,
   MODE_LABELS,
@@ -211,48 +210,67 @@ export function CheckoutView() {
       pickupPoint: mode === "pickup" ? (pickupPoint ?? undefined) : undefined,
     };
 
-    const result = await createPayment({
-      orderId,
-      amount: total,
-      description: `Заказ AM Beauty ${orderId}`,
-      returnUrl: `${typeof window !== "undefined" ? window.location.origin : ""}/checkout/success`,
+    const orderPayload = {
+      id: orderId,
+      date: new Date().toISOString().slice(0, 10),
+      status: "processing" as const,
+      items: lines.map((l) => ({
+        slug: l.product.slug,
+        name: l.product.shortName,
+        qty: l.qty,
+        price: l.product.price,
+        image: l.product.image,
+      })),
+      delivery: deliverySelection,
+      payment,
+      subtotal,
+      discount,
+      shipping,
+      total,
+      promoCode,
+      customerName: contact.name.trim(),
+      customerEmail: contact.email.trim(),
+      customerPhone: contact.phone.trim(),
+    };
+
+    const res = await fetch("/api/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(orderPayload),
+    });
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      toast.error(data.error ?? "Не удалось оформить заказ");
+      setLoading(false);
+      return;
+    }
+
+    updateProfile(contact);
+    addOrder({
+      id: orderPayload.id,
+      date: orderPayload.date,
+      status: orderPayload.status,
+      items: orderPayload.items,
+      delivery: orderPayload.delivery,
+      payment: orderPayload.payment,
+      subtotal: orderPayload.subtotal,
+      discount: orderPayload.discount,
+      shipping: orderPayload.shipping,
+      total: orderPayload.total,
+      promoCode: orderPayload.promoCode,
     });
 
-    if (result.ok) {
-      updateProfile(contact);
-      addOrder({
-        id: orderId,
-        date: new Date().toISOString().slice(0, 10),
-        status: "processing",
-        items: lines.map((l) => ({
-          slug: l.product.slug,
-          name: l.product.shortName,
-          qty: l.qty,
-          price: l.product.price,
-          image: l.product.image,
-        })),
-        delivery: deliverySelection,
-        payment,
-        subtotal,
-        discount,
-        shipping,
-        total,
-        promoCode,
-      });
+    clearCart();
+    resetDelivery();
 
-      clearCart();
-      resetDelivery();
-
-      const deliveryParam = encodeURIComponent(
-        `${CARRIER_LABELS[carrier!]} · ${mode === "pickup" && pickupPoint ? pickupPoint.name : address}`,
-      );
-      const redirectUrl = result.redirectUrl.includes("?")
-        ? `${result.redirectUrl}&delivery=${deliveryParam}`
-        : `${result.redirectUrl}?delivery=${deliveryParam}`;
-      router.push(redirectUrl);
-    } else {
-      toast.error(result.error);
-    }
+    const deliveryParam = encodeURIComponent(
+      `${CARRIER_LABELS[carrier!]} · ${mode === "pickup" && pickupPoint ? pickupPoint.name : address}`,
+    );
+    const redirectUrl = String(data.redirectUrl).includes("?")
+      ? `${data.redirectUrl}&delivery=${deliveryParam}`
+      : `${data.redirectUrl}?delivery=${deliveryParam}`;
+    router.push(redirectUrl);
 
     setLoading(false);
   };

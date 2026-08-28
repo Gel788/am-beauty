@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { readDb, updateDb } from "@/lib/admin/db";
+import { sortOrdersNewestFirst } from "@/lib/orders/create-order";
 
 export async function GET() {
   const db = await readDb();
-  return NextResponse.json({ orders: db.orders });
+  return NextResponse.json({ orders: sortOrdersNewestFirst(db.orders) });
 }
 
 export async function PATCH(request: Request) {

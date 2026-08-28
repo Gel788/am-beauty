@@ -17,16 +17,21 @@ import {
   formatAdminPrice,
   orderStatusLabel,
 } from "@/lib/admin/format";
+import { CARRIER_LABELS, MODE_LABELS } from "@/lib/delivery/types";
 import type { OrderStatus } from "@/store/account-store";
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [filter, setFilter] = useState<OrderStatus | "all">("all");
+  const [loading, setLoading] = useState(true);
 
   const load = () => {
+    setLoading(true);
     fetch("/api/admin/orders")
       .then((r) => r.json())
-      .then((d) => setOrders(d.orders));
+      .then((d) => setOrders(d.orders ?? []))
+      .catch(() => toast.error("Не удалось загрузить заказы"))
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
@@ -46,6 +51,16 @@ export default function AdminOrdersPage() {
   };
 
   const filtered = filter === "all" ? orders : orders.filter((o) => o.status === filter);
+
+  const deliveryLabel = (order: AdminOrder) => {
+    const d = order.delivery;
+    const carrier = CARRIER_LABELS[d.carrier];
+    const mode = MODE_LABELS[d.mode];
+    if (d.mode === "pickup" && d.pickupPoint) {
+      return `${carrier} · ${mode} — ${d.city}, ${d.pickupPoint.name}`;
+    }
+    return `${carrier} · ${mode} — ${d.city}${d.address ? `, ${d.address}` : ""}`;
+  };
 
   return (
     <AdminShell title="Заказы" description="Управление статусами и трек-номерами">
@@ -73,6 +88,7 @@ export default function AdminOrdersPage() {
               <tr>
                 <AdminTh>Заказ</AdminTh>
                 <AdminTh>Клиент</AdminTh>
+                <AdminTh>Доставка</AdminTh>
                 <AdminTh>Статус</AdminTh>
                 <AdminTh>Сумма</AdminTh>
                 <AdminTh>Трек</AdminTh>
@@ -88,6 +104,10 @@ export default function AdminOrdersPage() {
                   <AdminTd>
                     <p className="text-sm">{order.customerName}</p>
                     <p className="text-xs text-grey">{order.customerEmail}</p>
+                    <p className="text-xs text-grey">{order.customerPhone}</p>
+                  </AdminTd>
+                  <AdminTd>
+                    <p className="max-w-[220px] text-xs leading-relaxed text-charcoal">{deliveryLabel(order)}</p>
                   </AdminTd>
                   <AdminTd>
                     <select
@@ -123,8 +143,14 @@ export default function AdminOrdersPage() {
               ))}
             </tbody>
           </AdminTable>
-          {filtered.length === 0 ? (
-            <p className="py-8 text-center text-sm text-grey">Заказов нет</p>
+          {loading ? (
+            <p className="py-8 text-center text-sm text-grey">Загрузка заказов…</p>
+          ) : filtered.length === 0 ? (
+            <p className="py-8 text-center text-sm text-grey">
+              {orders.length === 0
+                ? "Заказов пока нет — они появятся после оформления на сайте"
+                : "Нет заказов с этим статусом"}
+            </p>
           ) : null}
         </AdminPanel>
       </div>
