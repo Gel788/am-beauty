@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "start:standalone": "node .next/standalone/server.js",
+    "build:static": "NEXT_STATIC_EXPORT=true next build",
     "build:production": "bash scripts/build-production.sh",
+    "deploy:regru": "bash scripts/deploy-regru.sh",
     "lint": "eslint"
   },
   "engines": {
