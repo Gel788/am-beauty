@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#F5F0E8"/>
+      <stop offset="100%" stop-color="#E5DAD0"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0%" stop-color="#FFFCF8"/>
+      <stop offset="100%" stop-color="#D8CEC0"/>
+    </linearGradient>
+    <linearGradient id="liquid" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#3D2E24"/>
+      <stop offset="100%" stop-color="#7A5C44"/>
+    </linearGradient>
+    <filter id="sh"><feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#1C1917" flood-opacity="0.12"/></filter>
+  </defs>
+  <rect width="800" height="1000" fill="url(#bg)"/>
+  <ellipse cx="400" cy="920" rx="160" ry="24" fill="#1C1917" opacity="0.06"/>
+  <g filter="url(#sh)" transform="translate(280 120)">
+    <rect x="88" y="0" width="16" height="56" rx="3" fill="#7A6B5C"/>
+    <rect x="82" y="50" width="28" height="12" rx="2" fill="#5C5048"/>
+    <path d="M48 62 L144 62 L136 380 Q132 410 96 410 Q60 410 56 380 Z" fill="url(#glass)" stroke="#C4B5A4" stroke-width="1"/>
+    <path d="M56 220 L136 220 L132 380 Q130 400 96 400 Q62 400 60 380 Z" fill="url(#liquid)" opacity="0.9"/>
+    <rect x="68" y="410" width="56" height="20" rx="4" fill="#B8A898"/>
+    <text x="96" y="424" text-anchor="middle" font-family="Georgia,serif" font-size="8" fill="#4A4038" letter-spacing="2">NIGHT</text>
+  </g>
+</svg>

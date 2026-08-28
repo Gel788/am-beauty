@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F0EBE3"/>
+      <stop offset="100%" stop-color="#DDD2C6"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0.3" y1="0" x2="0.7" y2="1">
+      <stop offset="0%" stop-color="#FAF7F2"/>
+      <stop offset="100%" stop-color="#D4C8BA"/>
+    </linearGradient>
+    <linearGradient id="liquid" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#5A6B58"/>
+      <stop offset="100%" stop-color="#9AAA92"/>
+    </linearGradient>
+    <filter id="sh"><feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#1C1917" flood-opacity="0.1"/></filter>
+  </defs>
+  <rect width="800" height="1000" fill="url(#bg)"/>
+  <ellipse cx="400" cy="920" rx="160" ry="24" fill="#1C1917" opacity="0.05"/>
+  <g filter="url(#sh)" transform="translate(280 120)">
+    <rect x="88" y="0" width="16" height="56" rx="3" fill="#7A8A72"/>
+    <rect x="82" y="50" width="28" height="12" rx="2" fill="#5A6458"/>
+    <path d="M48 62 L144 62 L136 380 Q132 410 96 410 Q60 410 56 380 Z" fill="url(#glass)" stroke="#BCC4B6" stroke-width="1"/>
+    <path d="M56 240 L136 240 L132 380 Q130 400 96 400 Q62 400 60 380 Z" fill="url(#liquid)" opacity="0.82"/>
+    <rect x="68" y="410" width="56" height="20" rx="4" fill="#B0BAA8"/>
+    <text x="96" y="424" text-anchor="middle" font-family="Georgia,serif" font-size="8" fill="#4A5048" letter-spacing="2">CICA</text>
+  </g>
+</svg>

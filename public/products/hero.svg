@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0%" stop-color="#2A2420"/>
+      <stop offset="50%" stop-color="#1E1A17"/>
+      <stop offset="100%" stop-color="#141210"/>
+    </linearGradient>
+    <radialGradient id="spot" cx="50%" cy="35%" r="55%">
+      <stop offset="0%" stop-color="#C4A882" stop-opacity="0.22"/>
+      <stop offset="60%" stop-color="#8A6E52" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#141210" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="glass" x1="0.25" y1="0" x2="0.75" y2="1">
+      <stop offset="0%" stop-color="#FFF8F0" stop-opacity="0.92"/>
+      <stop offset="45%" stop-color="#E8DDD0" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#B8A898" stop-opacity="0.75"/>
+    </linearGradient>
+    <linearGradient id="serum" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#4A3528"/>
+      <stop offset="55%" stop-color="#7A5C44"/>
+      <stop offset="100%" stop-color="#B8926A"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="40" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="shadow" x="-20%" y="-10%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="40" stdDeviation="48" flood-color="#000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="1400" fill="url(#bg)"/>
+  <rect width="1200" height="1400" fill="url(#spot)"/>
+  <ellipse cx="600" cy="1180" rx="220" ry="28" fill="#000" opacity="0.35"/>
+  <g filter="url(#glow)" opacity="0.35">
+    <ellipse cx="600" cy="520" rx="180" ry="320" fill="#C4A882"/>
+  </g>
+  <g filter="url(#shadow)" transform="translate(400 200)">
+    <rect x="118" y="0" width="20" height="88" rx="4" fill="#9A8B7C"/>
+    <rect x="108" y="78" width="40" height="18" rx="3" fill="#6B5D50"/>
+    <path d="M68 96 L188 96 L172 560 Q166 610 128 610 Q90 610 84 560 Z" fill="url(#glass)" stroke="#D4C4B0" stroke-width="1.2"/>
+    <path d="M84 340 L168 340 L162 560 Q158 590 128 590 Q98 590 94 560 Z" fill="url(#serum)" opacity="0.92"/>
+    <ellipse cx="128" cy="340" rx="42" ry="5" fill="#B8926A" opacity="0.35"/>
+    <rect x="96" y="610" width="64" height="32" rx="5" fill="#C8BAA8"/>
+    <text x="128" y="632" text-anchor="middle" font-family="Georgia,serif" font-size="10" fill="#3D3228" letter-spacing="4">AM BEAUTY</text>
+    <text x="128" y="648" text-anchor="middle" font-family="Georgia,serif" font-size="7" fill="#6B5D50" letter-spacing="2">BAKUCHIOL NIGHT</text>
+  </g>
+</svg>

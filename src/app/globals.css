@@ -1,26 +1,283 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --white: #ffffff;
+  --cream: #f9f9f7;
+  --black: #000000;
+  --charcoal: #1a1a1a;
+  --grey: #767676;
+  --grey-light: #b3b3b3;
+  --line: #e0e0e0;
+  --gold: #c9a96e;
+
+  --background: var(--white);
+  --foreground: var(--black);
+  --card: var(--white);
+  --card-foreground: var(--black);
+  --popover: var(--white);
+  --popover-foreground: var(--black);
+  --primary: var(--black);
+  --primary-foreground: var(--white);
+  --secondary: var(--cream);
+  --secondary-foreground: var(--charcoal);
+  --muted: var(--cream);
+  --muted-foreground: var(--grey);
+  --accent: var(--black);
+  --accent-foreground: var(--white);
+  --destructive: #8b0000;
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--black);
+  --radius: 0px;
+
+  --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  color-scheme: light;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-white: var(--white);
+  --color-cream: var(--cream);
+  --color-black: var(--black);
+  --color-charcoal: var(--charcoal);
+  --color-grey: var(--grey);
+  --color-grey-light: var(--grey-light);
+  --color-gold: var(--gold);
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background font-sans text-[15px] leading-relaxed text-foreground antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-sans font-light tracking-[0.04em] text-foreground;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+::selection {
+  background: color-mix(in srgb, var(--black) 12%, transparent);
+}
+
+.label-caps {
+  font-size: 0.625rem;
+  font-weight: 400;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--grey);
+}
+
+.headline-xl {
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 300;
+  line-height: 1.15;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.headline-lg {
+  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+  font-weight: 300;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.headline-massive {
+  font-size: clamp(3rem, 11vw, 8rem);
+  font-weight: 200;
+  line-height: 0.92;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.marquee-track {
+  animation: marquee-scroll 32s linear infinite;
+}
+
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.img-zoom {
+  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.group:hover .img-zoom {
+  transform: scale(1.06);
+}
+
+.scroll-snap-x {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.scroll-snap-x::-webkit-scrollbar {
+  display: none;
+}
+
+.snap-center {
+  scroll-snap-align: center;
+}
+
+.hero-kenburns {
+  animation: kenburns 18s ease-in-out infinite alternate;
+}
+
+@keyframes kenburns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+
+.container-page {
+  @apply mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-16;
+}
+
+.container-narrow {
+  @apply mx-auto max-w-3xl px-6 text-center;
+}
+
+.section-pad {
+  @apply py-20 md:py-28 lg:py-36;
+}
+
+.section-pad-sm {
+  @apply py-14 md:py-20;
+}
+
+.hairline {
+  height: 1px;
+  background: var(--line);
+}
+
+.link-underline {
+  font-size: 0.625rem;
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--black);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: opacity 0.3s var(--ease);
+}
+
+.link-underline:hover {
+  opacity: 0.55;
+}
+
+.btn-chanel {
+  display: inline-flex;
+  height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--black);
+  background: var(--black);
+  padding-inline: 2.5rem;
+  font-size: 0.625rem;
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--white);
+  transition: background-color 0.35s var(--ease), color 0.35s var(--ease);
+}
+
+.btn-chanel:hover {
+  background: transparent;
+  color: var(--black);
+}
+
+.btn-chanel-outline {
+  display: inline-flex;
+  height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--black);
+  background: transparent;
+  padding-inline: 2.5rem;
+  font-size: 0.625rem;
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--black);
+  transition: background-color 0.35s var(--ease), color 0.35s var(--ease);
+}
+
+.btn-chanel-outline:hover {
+  background: var(--black);
+  color: var(--white);
+}
+
+.section-invert {
+  background: var(--black);
+  color: var(--white);
+}
+
+.section-invert .label-caps {
+  color: color-mix(in srgb, var(--white) 50%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .marquee-track,
+  .hero-kenburns {
+    animation: none;
+  }
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 0.75rem 1.25rem;
+  background: var(--black);
+  color: var(--white);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
 }

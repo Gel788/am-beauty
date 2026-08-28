@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2A2420"/>
+      <stop offset="100%" stop-color="#1A1614"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#C4A882" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#1A1614" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="glass" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0%" stop-color="#FFF8F0" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#B8A898" stop-opacity="0.7"/>
+    </linearGradient>
+    <linearGradient id="liquid" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#8A7358"/>
+      <stop offset="100%" stop-color="#D4B896"/>
+    </linearGradient>
+    <filter id="sh"><feDropShadow dx="0" dy="20" stdDeviation="24" flood-color="#000" flood-opacity="0.4"/></filter>
+  </defs>
+  <rect width="800" height="1000" fill="url(#bg)"/>
+  <rect width="800" height="1000" fill="url(#glow)"/>
+  <ellipse cx="400" cy="900" rx="140" ry="20" fill="#000" opacity="0.3"/>
+  <g filter="url(#sh)" transform="translate(280 140)">
+    <rect x="88" y="0" width="16" height="56" rx="3" fill="#9A8B7C"/>
+    <rect x="82" y="50" width="28" height="12" rx="2" fill="#6C6058"/>
+    <path d="M48 62 L144 62 L136 380 Q132 410 96 410 Q60 410 56 380 Z" fill="url(#glass)" stroke="#D4C4B0" stroke-width="1"/>
+    <path d="M56 200 L136 200 L132 380 Q130 400 96 400 Q62 400 60 380 Z" fill="url(#liquid)" opacity="0.88"/>
+    <rect x="68" y="410" width="56" height="20" rx="4" fill="#C8BAA8"/>
+    <text x="96" y="424" text-anchor="middle" font-family="Georgia,serif" font-size="7" fill="#4A4038" letter-spacing="2">DEW</text>
+  </g>
+</svg>
