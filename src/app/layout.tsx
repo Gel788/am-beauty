@@ -8,6 +8,8 @@ import { hydrateCatalog } from "@/data/products";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 
+export const dynamic = "force-dynamic";
+
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 const sans = Geist({

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { readDb, updateDb } from "@/lib/admin/db";
+import { revalidateStorefront } from "@/lib/admin/revalidate-storefront";
 import { assertMediaFilesExist } from "@/lib/admin/media-url.server";
 import { normalizeMediaSrc } from "@/lib/admin/media-url";
 import type { AdminProduct } from "@/lib/admin/types";
@@ -103,6 +104,7 @@ export async function POST(request: Request) {
 
     const product = db.products.find((p) => p.slug === createdSlug) ?? db.products.at(-1);
 
+    revalidateStorefront();
     return NextResponse.json({ product }, { status: 201 });
   } catch (err) {
     const message = err instanceof Error ? err.message : "SAVE_FAILED";
@@ -146,6 +148,7 @@ export async function PATCH(request: Request) {
     });
 
     const product = db.products.find((p) => p.slug === body.slug);
+    revalidateStorefront();
     return NextResponse.json({ product });
   } catch (err) {
     if (err instanceof Error && err.message.startsWith("IMAGE_NOT_FOUND:")) {
@@ -178,6 +181,7 @@ export async function DELETE(request: Request) {
       }
       data.reviews = data.reviews.filter((r) => r.productSlug !== body.slug);
     });
+    revalidateStorefront();
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[admin/products DELETE]", err);

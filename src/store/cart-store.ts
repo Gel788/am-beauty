@@ -17,6 +17,7 @@ type CartState = {
   clearCart: () => void;
   applyPromo: (code: string) => boolean;
   clearPromo: () => void;
+  pruneInvalidItems: () => void;
 };
 
 const PROMO_CODES: Record<string, number> = {
@@ -86,6 +87,10 @@ export const useCartStore = create<CartState>()(
         return true;
       },
       clearPromo: () => set({ promoCode: null }),
+      pruneInvalidItems: () =>
+        set((state) => ({
+          items: state.items.filter((i) => Boolean(getProduct(i.slug))),
+        })),
     }),
     { name: "am-beauty-cart" },
   ),

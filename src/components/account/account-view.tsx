@@ -11,11 +11,14 @@ import { CommercePageHeader } from "@/components/commerce/commerce-page-header";
 import { CommerceTrustMarquee, CommerceTrustPills } from "@/components/commerce/commerce-trust-marquee";
 import { AccountNav, AccountSidebar, type AccountTabId } from "@/components/account/account-sidebar";
 import { AccountOrderRow } from "@/components/account/account-order-row";
-import { formatPrice, getBestsellers, products } from "@/data/products";
+import { formatPrice, getBestsellers } from "@/data/products";
+import { useCatalogProducts } from "@/context/catalog-context";
 import {
   useAccountStore,
   type AccountAddress,
+  type AccountOrder,
 } from "@/store/account-store";
+import { adminOrderToAccount } from "@/lib/orders/account-orders";
 import { useWishlistStore } from "@/store/wishlist-store";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -93,9 +96,11 @@ function AccountContent() {
   const updateAddress = useAccountStore((s) => s.updateAddress);
   const removeAddress = useAccountStore((s) => s.removeAddress);
   const setDefaultAddress = useAccountStore((s) => s.setDefaultAddress);
+  const syncOrders = useAccountStore((s) => s.syncOrders);
 
+  const catalogProducts = useCatalogProducts();
   const wishlistSlugs = useWishlistStore((s) => s.slugs);
-  const wishlistProducts = products.filter((p) => wishlistSlugs.includes(p.slug));
+  const wishlistProducts = catalogProducts.filter((p) => wishlistSlugs.includes(p.slug));
 
   const [form, setForm] = useState(profile);
 
@@ -111,6 +116,62 @@ function AccountContent() {
   useEffect(() => {
     setForm({ name: profile.name, email: profile.email, phone: profile.phone });
   }, [profile.name, profile.email, profile.phone]);
+
+  const refreshOrders = useCallback(async () => {
+    const email = profile.email.trim();
+    const localOrders = useAccountStore.getState().orders;
+    const remote: AccountOrder[] = [];
+
+    try {
+      if (email) {
+        const res = await fetch(
+          `/api/account/orders?email=${encodeURIComponent(email)}`,
+          { cache: "no-store" },
+        );
+        if (res.ok) {
+          const data = (await res.json()) as { orders: AccountOrder[] };
+          remote.push(...data.orders);
+        }
+      }
+
+      const knownIds = new Set(remote.map((o) => o.id));
+      const missing = localOrders.filter((o) => !knownIds.has(o.id));
+      if (missing.length > 0) {
+        const byId = await Promise.all(
+          missing.map(async (local) => {
+            const res = await fetch(`/api/orders?id=${encodeURIComponent(local.id)}`, {
+              cache: "no-store",
+            });
+            if (!res.ok) return null;
+            const data = (await res.json()) as { order: Parameters<typeof adminOrderToAccount>[0] };
+            return adminOrderToAccount(data.order);
+          }),
+        );
+        remote.push(...byId.filter((o): o is AccountOrder => o !== null));
+      }
+
+      if (remote.length > 0) syncOrders(remote);
+    } catch {
+      /* ignore network errors */
+    }
+  }, [profile.email, syncOrders]);
+
+  useEffect(() => {
+    void refreshOrders();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void refreshOrders();
+    };
+    window.addEventListener("focus", refreshOrders);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.removeEventListener("focus", refreshOrders);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [refreshOrders]);
+
+  useEffect(() => {
+    if (activeTab === "orders" || activeTab === "overview") void refreshOrders();
+  }, [activeTab, refreshOrders]);
 
   const changeTab = useCallback(
     (tab: AccountTabId) => {

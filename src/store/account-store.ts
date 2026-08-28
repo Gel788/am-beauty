@@ -53,6 +53,7 @@ type AccountState = {
   setDefaultAddress: (id: string) => void;
   addOrder: (order: AccountOrder) => void;
   updateOrderStatus: (id: string, status: OrderStatus) => void;
+  syncOrders: (orders: AccountOrder[]) => void;
 };
 
 function generateId(prefix: string) {
@@ -125,6 +126,20 @@ export const useAccountStore = create<AccountState>()(
         set((state) => ({
           orders: state.orders.map((o) => (o.id === id ? { ...o, status } : o)),
         })),
+
+      syncOrders: (orders) =>
+        set((state) => {
+          const byId = new Map(state.orders.map((o) => [o.id, o]));
+          for (const order of orders) {
+            const existing = byId.get(order.id);
+            byId.set(order.id, existing ? { ...existing, ...order } : order);
+          }
+          return {
+            orders: [...byId.values()].sort(
+              (a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id),
+            ),
+          };
+        }),
     }),
     { name: "am-beauty-account" },
   ),

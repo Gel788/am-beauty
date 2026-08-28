@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { readDb, updateDb } from "@/lib/admin/db";
+import { revalidateStorefront } from "@/lib/admin/revalidate-storefront";
 import { sortOrdersNewestFirst } from "@/lib/orders/create-order";
 
 export async function GET() {
@@ -30,5 +31,6 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
   }
 
+  revalidateStorefront();
   return NextResponse.json({ order });
 }
