@@ -4,7 +4,9 @@ import type { AdminCustomer, AdminDatabase, DashboardStats } from "@/lib/admin/t
 import { seedDatabase } from "@/lib/admin/seed";
 import { mergeSiteSettings } from "@/lib/admin/site-merge";
 
-export const DB_DIR = path.join(process.cwd(), ".data");
+export const DB_DIR = process.env.ADMIN_DB_DIR
+  ? path.resolve(process.env.ADMIN_DB_DIR)
+  : path.join(process.cwd(), ".data");
 export const DB_PATH = path.join(DB_DIR, "admin-db.json");
 
 function normalizeDb(partial: Partial<AdminDatabase>): AdminDatabase {

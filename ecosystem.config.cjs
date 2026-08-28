@@ -1,3 +1,5 @@
+const path = require("node:path");
+
 /** PM2 config for VPS — next start from repo root (Turbopack build, без standalone) */
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://ambeauty-cosmetica.ru";
 
@@ -17,6 +19,7 @@ module.exports = {
         PORT: 3000,
         HOSTNAME: "0.0.0.0",
         NEXT_PUBLIC_SITE_URL: siteUrl,
+        ADMIN_DB_DIR: path.join(__dirname, ".data"),
       },
     },
   ],

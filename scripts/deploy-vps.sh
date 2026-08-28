@@ -8,23 +8,9 @@ cd "$APP_DIR"
 git pull origin main
 
 mkdir -p public/uploads/images public/uploads/videos public/videos .data
-
-merge_db() {
-  local root_db=".data/admin-db.json"
-  local legacy_db=".next/standalone/.data/admin-db.json"
-  mkdir -p .data
-  if [ -f "$legacy_db" ] && [ -f "$root_db" ]; then
-    if [ "$legacy_db" -nt "$root_db" ]; then
-      cp "$legacy_db" "$root_db"
-    fi
-  elif [ -f "$legacy_db" ]; then
-    cp "$legacy_db" "$root_db"
-  fi
-  chmod 664 .data/admin-db.json 2>/dev/null || true
-  chmod 775 .data 2>/dev/null || true
-}
-
-merge_db
+python3 scripts/merge-admin-db.py "$APP_DIR"
+chmod 664 .data/admin-db.json 2>/dev/null || true
+chmod 775 .data 2>/dev/null || true
 
 npm ci
 npm run build
@@ -35,6 +21,8 @@ if ls public/videos/*.{mp4,MP4,mov,MOV,webm,WEBM} 1>/dev/null 2>&1; then
 fi
 
 pm2 delete am-beauty 2>/dev/null || true
+# Единая БД в корне проекта — не в standalone
+export ADMIN_DB_DIR="$APP_DIR/.data"
 NEXT_PUBLIC_SITE_URL="${NEXT_PUBLIC_SITE_URL:-https://ambeauty-cosmetica.ru}" \
   pm2 start ecosystem.config.cjs --update-env
 pm2 save
