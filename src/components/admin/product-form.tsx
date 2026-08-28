@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   AdminButton,
@@ -18,6 +18,7 @@ import { MediaField } from "@/components/admin/media-field";
 import { MediaGallery } from "@/components/admin/media-gallery";
 import type { AdminCategory, AdminProduct } from "@/lib/admin/types";
 import type { ProductLine, SkinType } from "@/data/types";
+import { slugify } from "@/lib/admin/slug";
 
 const LINES: ProductLine[] = ["atelier", "glow", "pure"];
 const SKIN_TYPES: SkinType[] = ["all", "dry", "oily", "combination", "sensitive"];
@@ -54,9 +55,21 @@ export function ProductForm({ product, categories, mode }: ProductFormProps) {
       relatedSlugs: [],
       bundleSlugs: [],
       stock: 10,
-      published: false,
+      published: true,
     },
   );
+
+  useEffect(() => {
+    if (mode === "create" && categories.length && !categories.some((c) => c.id === form.category)) {
+      setForm((prev) => ({ ...prev, category: categories[0]!.id }));
+    }
+  }, [categories, mode, form.category]);
+
+  const slugPreview = useMemo(() => {
+    if (mode === "edit" && product?.slug) return product.slug;
+    const name = form.name?.trim();
+    return name ? slugify(name) : "novyy-tovar";
+  }, [form.name, mode, product?.slug]);
 
   const set = <K extends keyof AdminProduct>(key: K, value: AdminProduct[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -85,7 +98,8 @@ export function ProductForm({ product, categories, mode }: ProductFormProps) {
 
     setSaving(false);
     if (!res.ok) {
-      toast.error("Не удалось сохранить");
+      const data = await res.json().catch(() => ({}));
+      toast.error(data.error ?? "Не удалось сохранить");
       return;
     }
 
@@ -122,6 +136,11 @@ export function ProductForm({ product, categories, mode }: ProductFormProps) {
               onChange={(e) => set("shortName", e.target.value)}
             />
           </AdminField>
+          {mode === "create" ? (
+            <AdminField label="URL (slug)" hint="Генерируется из названия">
+              <AdminInput value={slugPreview} readOnly className="bg-cream text-grey" />
+            </AdminField>
+          ) : null}
           <AdminField label="Категория">
             <AdminSelect
               value={form.category}

@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { mkdir, readdir, stat, unlink, writeFile } from "node:fs/promises";
+import { chmod, mkdir, readdir, stat, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomBytes } from "node:crypto";
 import type { MediaFile, MediaKind } from "@/lib/admin/media-types";
@@ -92,6 +92,7 @@ export async function saveUpload(file: File): Promise<MediaFile> {
 
   const buffer = Buffer.from(await file.arrayBuffer());
   await writeFile(absolute, buffer);
+  await chmod(absolute, 0o644);
 
   const st = await stat(absolute);
   return {

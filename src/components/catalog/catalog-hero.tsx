@@ -28,7 +28,7 @@ export function CatalogHero({
   const image = active?.image ?? FALLBACK_IMAGE;
 
   return (
-    <section className="relative -mt-[3.75rem] flex min-h-[min(52vh,520px)] items-end overflow-hidden bg-black text-white">
+    <section className="relative -mt-[3.75rem] flex min-h-[min(38vh,360px)] items-end overflow-hidden bg-black text-white sm:min-h-[min(44vh,440px)] md:min-h-[min(52vh,520px)]">
       <div className="absolute inset-0">
         <Image
           src={image}

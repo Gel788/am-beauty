@@ -1,10 +1,18 @@
 "use client";
 
 import Image from "next/image";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 type VideoMode = "hover" | "always" | "off";
+
+function videoMimeType(src: string) {
+  const lower = src.toLowerCase();
+  if (lower.endsWith(".mp4")) return "video/mp4";
+  if (lower.endsWith(".webm")) return "video/webm";
+  if (lower.endsWith(".mov")) return "video/quicktime";
+  return undefined;
+}
 
 type ProductMediaProps = {
   src: string;
@@ -41,26 +49,33 @@ export function ProductMedia({
 }: ProductMediaProps) {
   const [hovering, setHovering] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
+  const [videoFailed, setVideoFailed] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const mode: VideoMode = videoMode ?? (videoSrc ? "hover" : "off");
   const showVideo =
-    mode === "always" ? videoReady : mode === "hover" && hovering && videoReady;
+    !videoFailed &&
+    (mode === "always" ? videoReady : mode === "hover" && hovering && videoReady);
+
+  useEffect(() => {
+    setVideoReady(false);
+    setVideoFailed(false);
+  }, [videoSrc]);
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !videoSrc || mode === "off") return;
+    if (!video || !videoSrc || mode === "off" || videoFailed) return;
 
     if (mode === "always" || hovering) {
       void video.play().catch(() => {
-        // autoplay blocked
+        setVideoFailed(true);
       });
       return;
     }
 
     video.pause();
     video.currentTime = 0;
-  }, [hovering, videoSrc, mode]);
+  }, [hovering, videoSrc, mode, videoFailed]);
 
   return (
     <div
@@ -87,8 +102,9 @@ export function ProductMedia({
         />
       </div>
 
-      {videoSrc && mode !== "off" ? (
+      {videoSrc && mode !== "off" && !videoFailed ? (
         <video
+          key={videoSrc}
           ref={videoRef}
           src={videoSrc}
           muted
@@ -102,12 +118,19 @@ export function ProductMedia({
           aria-hidden
           onCanPlay={() => setVideoReady(true)}
           onLoadedData={() => setVideoReady(true)}
-          onError={() => setVideoReady(false)}
+          onError={() => {
+            setVideoFailed(true);
+            setVideoReady(false);
+          }}
           className={cn(
             "product-media-video pointer-events-none absolute inset-0 size-full border-0 object-contain object-bottom outline-none transition-opacity duration-300 motion-reduce:transition-none",
             showVideo ? "opacity-100" : "opacity-0",
           )}
-        />
+        >
+          {videoMimeType(videoSrc) ? (
+            <source src={videoSrc} type={videoMimeType(videoSrc)} />
+          ) : null}
+        </video>
       ) : null}
 
       {children}

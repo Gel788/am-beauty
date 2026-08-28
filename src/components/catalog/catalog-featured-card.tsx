@@ -19,9 +19,12 @@ export function CatalogFeaturedCard({ product }: CatalogFeaturedCardProps) {
   const inWishlist = useWishlistStore((s) => s.has(product.slug));
 
   return (
-    <article className="group relative overflow-hidden border border-border bg-white lg:col-span-2">
+    <article className="group relative overflow-hidden border border-border bg-white">
       <div className="grid md:grid-cols-[1.1fr_1fr]">
-        <Link href={`/products/${product.slug}`} className="relative block min-h-[280px] overflow-hidden bg-cream md:min-h-[420px]">
+        <Link
+          href={`/products/${product.slug}`}
+          className="relative block min-h-[220px] overflow-hidden bg-cream sm:min-h-[280px] md:min-h-[420px]"
+        >
           <Image
             src={product.image}
             alt={product.name}
@@ -41,7 +44,7 @@ export function CatalogFeaturedCard({ product }: CatalogFeaturedCardProps) {
           )}
         </Link>
 
-        <div className="flex flex-col justify-center p-8 md:p-10 lg:p-12">
+        <div className="flex flex-col justify-center p-6 sm:p-8 md:p-10 lg:p-12">
           <p className="label-caps">Бестселлер</p>
           <div className="mt-3 flex items-center gap-1.5 text-[11px] text-grey">
             <Star className="size-3 fill-gold text-gold" strokeWidth={1} />
@@ -59,10 +62,10 @@ export function CatalogFeaturedCard({ product }: CatalogFeaturedCardProps) {
               <p className="text-sm text-grey line-through">{formatPrice(product.compareAt)}</p>
             ) : null}
           </div>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Link
               href={`/products/${product.slug}`}
-              className="inline-flex min-h-11 items-center justify-center bg-black px-8 text-[10px] tracking-[0.2em] text-white uppercase transition-colors hover:bg-charcoal"
+              className="inline-flex min-h-11 w-full items-center justify-center bg-black px-8 text-[10px] tracking-[0.2em] text-white uppercase transition-colors hover:bg-charcoal sm:w-auto"
             >
               Подробнее
             </Link>
@@ -72,7 +75,7 @@ export function CatalogFeaturedCard({ product }: CatalogFeaturedCardProps) {
                 addItem(product.slug);
                 toast.success(`${product.shortName} в корзине`);
               }}
-              className="inline-flex min-h-11 cursor-pointer items-center justify-center border border-border px-8 text-[10px] tracking-[0.2em] uppercase transition-colors hover:border-black"
+              className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center border border-border px-8 text-[10px] tracking-[0.2em] uppercase transition-colors hover:border-black sm:w-auto"
             >
               В корзину
             </button>

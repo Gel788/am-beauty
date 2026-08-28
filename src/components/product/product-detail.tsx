@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ProductCard } from "@/components/catalog/product-card";
 import { Reveal } from "@/components/reveal";
 import { getProductsBySlugs, type Product } from "@/data/products";
@@ -26,6 +26,10 @@ export function ProductDetail({ product }: { product: Product }) {
   const hasVideo = Boolean(product.video);
   const [activeSlide, setActiveSlide] = useState<Slide>(hasVideo ? "video" : 0);
   const [qty, setQty] = useState(1);
+
+  useEffect(() => {
+    setActiveSlide(hasVideo ? "video" : 0);
+  }, [product.slug, hasVideo]);
 
   const related = getProductsBySlugs(product.relatedSlugs);
   const bundle = getProductsBySlugs(product.bundleSlugs);
@@ -52,11 +56,12 @@ export function ProductDetail({ product }: { product: Product }) {
             </nav>
 
             <div className="mt-8 grid gap-10 lg:mt-10 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:gap-12 xl:gap-16">
-              <ProductDetailGallery
-                product={product}
-                activeSlide={activeSlide}
-                onSlideChange={setActiveSlide}
-              />
+            <ProductDetailGallery
+              key={product.slug}
+              product={product}
+              activeSlide={activeSlide}
+              onSlideChange={setActiveSlide}
+            />
 
               <div className="lg:sticky lg:top-20 lg:self-start">
                 <div className="border border-border bg-white p-6 lg:p-8">

@@ -5,6 +5,15 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 HOST="${DEPLOY_HOST:-root@89.108.113.147}"
 REMOTE_DIR="${REMOTE_DIR:-/var/www/am-beauty}"
+SSH_OPTS=(-o StrictHostKeyChecking=no)
+
+if [ -n "${SSHPASS:-}" ]; then
+  SSH_CMD=(sshpass -e ssh "${SSH_OPTS[@]}")
+  RSYNC_CMD=(sshpass -e rsync -avz --progress)
+else
+  SSH_CMD=(ssh "${SSH_OPTS[@]}")
+  RSYNC_CMD=(rsync -avz --progress)
+fi
 
 if [ ! -d "$ROOT/public/videos" ]; then
   echo "Нет папки public/videos"
@@ -19,7 +28,7 @@ if [ ${#files[@]} -eq 0 ]; then
 fi
 
 echo "→ $HOST:$REMOTE_DIR/public/videos/"
-ssh "$HOST" "mkdir -p $REMOTE_DIR/public/videos $REMOTE_DIR/.next/standalone/public/videos"
-rsync -avz --progress "${files[@]}" "$HOST:$REMOTE_DIR/public/videos/"
-ssh "$HOST" "cp -n $REMOTE_DIR/public/videos/* $REMOTE_DIR/.next/standalone/public/videos/ 2>/dev/null || true"
+"${SSH_CMD[@]}" "$HOST" "mkdir -p $REMOTE_DIR/public/videos $REMOTE_DIR/.next/standalone/public/videos"
+"${RSYNC_CMD[@]}" "${files[@]}" "$HOST:$REMOTE_DIR/public/videos/"
+"${SSH_CMD[@]}" "$HOST" "chmod 644 $REMOTE_DIR/public/videos/*; cp -f $REMOTE_DIR/public/videos/* $REMOTE_DIR/.next/standalone/public/videos/ 2>/dev/null || true"
 echo "OK: videos synced"

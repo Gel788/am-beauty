@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { QuickProductCreate } from "@/components/admin/quick-product-create";
 import {
   AdminBadge,
   AdminPanel,
@@ -13,15 +14,20 @@ import {
   AdminTd,
   AdminTh,
 } from "@/components/admin/admin-ui";
-import type { AdminProduct } from "@/lib/admin/types";
+import type { AdminCategory, AdminProduct } from "@/lib/admin/types";
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<AdminProduct[]>([]);
+  const [categories, setCategories] = useState<AdminCategory[]>([]);
 
   const load = () => {
-    fetch("/api/admin/products")
-      .then((r) => r.json())
-      .then((d) => setProducts(d.products));
+    Promise.all([
+      fetch("/api/admin/products").then((r) => r.json()),
+      fetch("/api/admin/categories").then((r) => r.json()),
+    ]).then(([productsRes, categoriesRes]) => {
+      setProducts(productsRes.products);
+      setCategories(categoriesRes.categories);
+    });
   };
 
   useEffect(() => {
@@ -45,6 +51,10 @@ export default function AdminProductsPage() {
       title="Товары"
       description="Быстрое редактирование и полные карточки"
     >
+      <div className="space-y-6">
+        {categories.length > 0 ? (
+          <QuickProductCreate categories={categories} onCreated={load} />
+        ) : null}
       <AdminPanel
         action={
           <Link
@@ -152,6 +162,7 @@ export default function AdminProductsPage() {
           </tbody>
         </AdminTable>
       </AdminPanel>
+      </div>
     </AdminShell>
   );
 }

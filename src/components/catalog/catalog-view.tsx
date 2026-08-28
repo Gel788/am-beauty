@@ -132,8 +132,8 @@ export function CatalogView() {
       <MarqueeStrip items={marquee} />
 
       <div className="container-page py-12 md:py-16 lg:py-20">
-        <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-6">
-          <div>
+        <div className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+          <div className="min-w-0">
             <p className="label-caps">Подбор</p>
             <p className="mt-2 text-sm text-grey">
               {filtered.length}{" "}
@@ -142,7 +142,7 @@ export function CatalogView() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
             <label className="sr-only" htmlFor="catalog-sort">
               Сортировка
             </label>
@@ -150,7 +150,7 @@ export function CatalogView() {
               id="catalog-sort"
               value={filters.sort}
               onChange={(e) => update({ sort: e.target.value as SortOption })}
-              className="h-11 min-w-[180px] cursor-pointer border border-border bg-white px-4 text-[11px] tracking-[0.14em] uppercase transition-colors hover:border-gold focus:border-gold focus:outline-none"
+              className="h-11 w-full cursor-pointer border border-border bg-white px-4 text-[11px] tracking-[0.14em] uppercase transition-colors hover:border-gold focus:border-gold focus:outline-none sm:min-w-[180px] sm:w-auto"
             >
               <option value="popular">По популярности</option>
               <option value="price-asc">Цена ↑</option>
@@ -160,7 +160,7 @@ export function CatalogView() {
 
             <Button
               variant="outline"
-              className="cursor-pointer gap-2 lg:hidden"
+              className="h-11 w-full cursor-pointer gap-2 sm:w-auto lg:hidden"
               onClick={openMobileFilters}
             >
               <SlidersHorizontal className="size-4" strokeWidth={1} />
@@ -277,8 +277,12 @@ function ProductGrid({
   reduceMotion: boolean | null;
 }) {
   const content = (
-    <div className="grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-2 md:gap-x-8 lg:grid-cols-3">
-      {featured ? <CatalogFeaturedCard product={featured} /> : null}
+    <div className="grid grid-cols-1 gap-8 min-[480px]:grid-cols-2 min-[480px]:gap-x-5 min-[480px]:gap-y-10 lg:grid-cols-3 lg:gap-x-8">
+      {featured ? (
+        <div className="min-[480px]:col-span-2 lg:col-span-2">
+          <CatalogFeaturedCard product={featured} />
+        </div>
+      ) : null}
       {products.map((p, i) => (
         <ProductCard key={p.slug} product={p} priority={i < 2 && !featured} />
       ))}

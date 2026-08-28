@@ -59,6 +59,7 @@ export async function POST(request: Request) {
       slug,
       name,
       shortName: body.shortName?.trim() || name,
+      video: body.video?.trim() || undefined,
       gallery: body.gallery?.length ? body.gallery : base.gallery,
       benefits: body.benefits ?? base.benefits,
       ingredients: body.ingredients ?? base.ingredients,
@@ -92,6 +93,8 @@ export async function PATCH(request: Request) {
       ...current,
       ...body,
       slug: body.slug,
+      video:
+        "video" in body ? body.video?.trim() || undefined : current.video,
     } as AdminProduct;
   });
 
