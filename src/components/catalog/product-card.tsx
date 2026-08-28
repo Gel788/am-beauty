@@ -36,7 +36,7 @@ export function ProductCard({ product, className, priority }: ProductCardProps) 
 
   return (
     <article className={cn("group text-center", className)}>
-      <Link href={`/products/${product.slug}`} className="block">
+      <Link href={`/products/${product.slug}`} scroll className="block">
         <ProductMedia
           src={product.image}
           alt={product.name}

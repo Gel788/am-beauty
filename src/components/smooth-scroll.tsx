@@ -4,6 +4,7 @@ import { ReactLenis } from "lenis/react";
 import { useReducedMotion } from "motion/react";
 import { usePathname } from "next/navigation";
 import { type ReactNode, useEffect, useState } from "react";
+import { LenisScrollToTop, NativeScrollToTop } from "@/components/scroll-to-top";
 
 export function SmoothScroll({ children }: { children: ReactNode }) {
   const reduce = useReducedMotion();
@@ -21,10 +22,18 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
     pathname.startsWith("/checkout") ||
     pathname.startsWith("/account");
 
-  if (disableLenis) return children;
+  if (disableLenis) {
+    return (
+      <>
+        <NativeScrollToTop />
+        {children}
+      </>
+    );
+  }
 
   return (
     <ReactLenis root options={{ autoRaf: true, lerp: 0.1, duration: 1.2 }}>
+      <LenisScrollToTop />
       {children}
     </ReactLenis>
   );
