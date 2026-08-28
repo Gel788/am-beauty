@@ -2,9 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import {
+  AdminOrderPreview,
+  AdminOrderPreviewButton,
+} from "@/components/admin/admin-order-preview";
 import { AdminShell } from "@/components/admin/admin-shell";
 import {
-  AdminBadge,
   AdminPanel,
   AdminTable,
   AdminTd,
@@ -24,6 +27,8 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [filter, setFilter] = useState<OrderStatus | "all">("all");
   const [loading, setLoading] = useState(true);
+  const [previewOrder, setPreviewOrder] = useState<AdminOrder | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -38,6 +43,12 @@ export default function AdminOrdersPage() {
     load();
   }, []);
 
+  useEffect(() => {
+    if (!previewOrder || !previewOpen) return;
+    const next = orders.find((o) => o.id === previewOrder.id);
+    if (next) setPreviewOrder(next);
+  }, [orders, previewOpen, previewOrder?.id]);
+
   const updateOrder = async (id: string, patch: { status?: OrderStatus; trackingNumber?: string }) => {
     const res = await fetch("/api/admin/orders", {
       method: "PATCH",
@@ -47,7 +58,18 @@ export default function AdminOrdersPage() {
     if (res.ok) {
       toast.success("Заказ обновлён");
       load();
+      if (previewOrder?.id === id) {
+        const data = await res.json();
+        setPreviewOrder(data.order ?? previewOrder);
+      }
+      return;
     }
+    toast.error("Не удалось обновить заказ");
+  };
+
+  const openPreview = (order: AdminOrder) => {
+    setPreviewOrder(order);
+    setPreviewOpen(true);
   };
 
   const filtered = filter === "all" ? orders : orders.filter((o) => o.status === filter);
@@ -63,7 +85,7 @@ export default function AdminOrdersPage() {
   };
 
   return (
-    <AdminShell title="Заказы" description="Управление статусами и трек-номерами">
+    <AdminShell title="Заказы" description="Управление статусами, трек-номерами и составом заказов">
       <div className="space-y-6">
         <div className="flex flex-wrap gap-2">
           {(["all", ...ORDER_STATUS_OPTIONS] as const).map((status) => (
@@ -92,11 +114,12 @@ export default function AdminOrdersPage() {
                 <AdminTh>Статус</AdminTh>
                 <AdminTh>Сумма</AdminTh>
                 <AdminTh>Трек</AdminTh>
+                <AdminTh />
               </tr>
             </thead>
             <tbody>
               {filtered.map((order) => (
-                <tr key={order.id}>
+                <tr key={order.id} className="group">
                   <AdminTd>
                     <p className="text-[11px] tracking-[0.12em] uppercase">{order.id}</p>
                     <p className="text-xs text-grey">{formatAdminDate(order.date)}</p>
@@ -139,6 +162,9 @@ export default function AdminOrdersPage() {
                       }}
                     />
                   </AdminTd>
+                  <AdminTd>
+                    <AdminOrderPreviewButton onClick={() => openPreview(order)} />
+                  </AdminTd>
                 </tr>
               ))}
             </tbody>
@@ -154,6 +180,16 @@ export default function AdminOrdersPage() {
           ) : null}
         </AdminPanel>
       </div>
+
+      <AdminOrderPreview
+        order={previewOrder}
+        open={previewOpen}
+        onOpenChange={(open) => {
+          setPreviewOpen(open);
+          if (!open) setPreviewOrder(null);
+        }}
+        onUpdate={updateOrder}
+      />
     </AdminShell>
   );
 }
