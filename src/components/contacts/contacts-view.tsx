@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { toast } from "sonner";
+import Link from "next/link";
+import { legalLinks } from "@/data/company";
 import { PageHeader } from "@/components/ui/page-header";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,7 +16,7 @@ const faq = [
   },
   {
     q: "Можно ли вернуть товар?",
-    a: "Да, в течение 14 дней при сохранении упаковки и чека.",
+    a: "Да, в течение 7 дней при дистанционной покупке, если сохранены товарный вид и упаковка не вскрыта. Подробнее — в разделе «Возврат».",
   },
   {
     q: "Есть ли тестеры?",
@@ -100,6 +102,13 @@ export function ContactsView() {
             <Button type="submit" className="cursor-pointer">
               Отправить
             </Button>
+            <p className="text-xs text-grey">
+              Отправляя форму, вы соглашаетесь с{" "}
+              <Link href={legalLinks.privacy} className="underline underline-offset-2">
+                политикой конфиденциальности
+              </Link>
+              .
+            </p>
           </form>
         </div>
 

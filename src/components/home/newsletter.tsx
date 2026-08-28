@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { toast } from "sonner";
+import { legalLinks } from "@/data/company";
 import { Input } from "@/components/ui/input";
 
 export function HomeNewsletter() {
@@ -30,6 +32,13 @@ export function HomeNewsletter() {
             Подписаться
           </button>
         </form>
+        <p className="mx-auto mt-4 max-w-md text-xs text-grey">
+          Нажимая «Подписаться», вы соглашаетесь с{" "}
+          <Link href={legalLinks.privacy} className="underline underline-offset-2">
+            политикой конфиденциальности
+          </Link>
+          .
+        </p>
       </div>
     </section>
   );

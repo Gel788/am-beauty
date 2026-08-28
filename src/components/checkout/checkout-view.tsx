@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { OrderSummary } from "@/components/commerce/order-summary";
+import { ConsentFields } from "@/components/legal/consent-fields";
 import { formatPrice } from "@/data/products";
 import { createPayment } from "@/lib/payment";
 import { useCartStore, useCartTotals } from "@/store/cart-store";
@@ -39,6 +40,9 @@ export function CheckoutView() {
   const [form, setForm] = useState<DeliveryForm>(emptyForm);
   const [errors, setErrors] = useState<Partial<Record<keyof DeliveryForm, string>>>({});
   const [payment, setPayment] = useState<"card" | "sbp">("card");
+  const [acceptOffer, setAcceptOffer] = useState(false);
+  const [acceptPrivacy, setAcceptPrivacy] = useState(false);
+  const [consentErrors, setConsentErrors] = useState<{ offer?: string; privacy?: string }>({});
   const { lines, subtotal, discount, shipping, total, promoCode } = useCartTotals();
   const clearCart = useCartStore((s) => s.clearCart);
 
@@ -67,6 +71,12 @@ export function CheckoutView() {
   };
 
   const handlePay = async () => {
+    const nextConsent: { offer?: string; privacy?: string } = {};
+    if (!acceptPrivacy) nextConsent.privacy = "Необходимо согласие на обработку персональных данных";
+    if (!acceptOffer) nextConsent.offer = "Необходимо принять условия оферты";
+    setConsentErrors(nextConsent);
+    if (Object.keys(nextConsent).length > 0) return;
+
     setLoading(true);
     const orderId = `AM-${Date.now()}`;
     const result = await createPayment({
@@ -215,7 +225,21 @@ export function CheckoutView() {
                   </li>
                 ))}
               </ul>
-              <div className="flex gap-3">
+              <ConsentFields
+                acceptOffer={acceptOffer}
+                acceptPrivacy={acceptPrivacy}
+                onAcceptOfferChange={(v) => {
+                  setAcceptOffer(v);
+                  if (v) setConsentErrors((e) => ({ ...e, offer: undefined }));
+                }}
+                onAcceptPrivacyChange={(v) => {
+                  setAcceptPrivacy(v);
+                  if (v) setConsentErrors((e) => ({ ...e, privacy: undefined }));
+                }}
+                offerError={consentErrors.offer}
+                privacyError={consentErrors.privacy}
+              />
+              <div className="flex gap-3 pt-2">
                 <Button variant="outline" className="cursor-pointer" onClick={() => setStep(1)}>
                   Назад
                 </Button>
