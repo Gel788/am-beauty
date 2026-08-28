@@ -27,8 +27,7 @@ function getCarrierTariff(tariffs: DeliveryTariff[], carrier: DeliveryCarrier, m
 }
 
 function getBestTariff(tariffs: DeliveryTariff[], carrier: DeliveryCarrier, mode: DeliveryMode) {
-  return getCarrierTariff(tariffs, carrier, mode)
-    ?? tariffs.find((t) => t.carrier === carrier);
+  return getCarrierTariff(tariffs, carrier, mode) ?? tariffs.find((t) => t.carrier === carrier);
 }
 
 export function DeliveryCarrierSelect({
@@ -53,7 +52,7 @@ export function DeliveryCarrierSelect({
 
   if (tariffs.length === 0) {
     return (
-      <p className="text-sm text-grey">
+      <p className="border-l-2 border-gold py-1 pl-4 text-sm text-grey">
         Укажите город, чтобы рассчитать стоимость доставки.
       </p>
     );
@@ -71,7 +70,7 @@ export function DeliveryCarrierSelect({
               type="button"
               onClick={() => onSelectMode(mode)}
               className={cn(
-                "flex-1 border px-3 py-2 text-[10px] tracking-[0.16em] uppercase transition-colors cursor-pointer",
+                "flex-1 border px-3 py-2.5 text-[10px] tracking-[0.16em] uppercase transition-colors cursor-pointer motion-safe:duration-300",
                 selectedMode === mode
                   ? "border-black bg-black text-white"
                   : "border-border text-grey hover:border-black hover:text-black",
@@ -98,11 +97,18 @@ export function DeliveryCarrierSelect({
               aria-checked={isSelected}
               onClick={() => onSelectCarrier(carrier)}
               className={cn(
-                "flex w-full items-center gap-4 border p-4 text-left transition-colors cursor-pointer motion-safe:transition-[border-color,background-color] motion-reduce:transition-none",
-                isSelected ? "border-black bg-cream/80" : "border-border hover:border-black/40",
+                "flex w-full items-center gap-4 border p-4 text-left transition-colors cursor-pointer motion-safe:duration-300",
+                isSelected
+                  ? "border-black bg-cream/80 ring-1 ring-black"
+                  : "border-border hover:border-black/40",
               )}
             >
-              <span className="flex size-10 shrink-0 items-center justify-center border border-border bg-white">
+              <span
+                className={cn(
+                  "flex size-10 shrink-0 items-center justify-center border bg-white",
+                  isSelected ? "border-gold" : "border-border",
+                )}
+              >
                 <Icon className="size-4" aria-hidden />
               </span>
               <span className="min-w-0 flex-1">
@@ -114,8 +120,12 @@ export function DeliveryCarrierSelect({
                   {tariff.estimated ? " · ориентировочно" : ""}
                 </span>
               </span>
-              <span className="shrink-0 text-sm">
-                {tariff.price === 0 ? "Бесплатно" : formatPrice(tariff.price)}
+              <span className="shrink-0 text-sm tabular-nums">
+                {tariff.price === 0 ? (
+                  <span className="text-gold">Бесплатно</span>
+                ) : (
+                  formatPrice(tariff.price)
+                )}
               </span>
             </button>
           );

@@ -29,7 +29,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
-import { PageHeader } from "@/components/ui/page-header";
+import { CommercePageHeader } from "@/components/commerce/commerce-page-header";
+import { CommerceTrustMarquee } from "@/components/commerce/commerce-trust-marquee";
 import { ProductCard } from "@/components/catalog/product-card";
 import { cn } from "@/lib/utils";
 
@@ -49,9 +50,18 @@ function statusVariant(status: AccountOrder["status"]) {
       return "secondary" as const;
     case "cancelled":
       return "destructive" as const;
+    case "processing":
+    case "shipped":
+      return "outline" as const;
     default:
       return "outline" as const;
   }
+}
+
+function statusAccent(status: AccountOrder["status"]) {
+  if (status === "processing" || status === "shipped") return "text-gold";
+  if (status === "delivered") return "text-black";
+  return "text-grey";
 }
 
 function AccountNav({
@@ -79,10 +89,10 @@ function AccountNav({
             "flex shrink-0 items-center gap-2 px-4 py-3 text-[10px] tracking-[0.16em] uppercase transition-colors cursor-pointer motion-safe:transition-colors motion-reduce:transition-none",
             vertical
               ? active === id
-                ? "border-l-2 border-black bg-cream/60 pl-[14px] text-black"
+                ? "border-l-2 border-gold bg-cream/60 pl-[14px] text-black"
                 : "border-l-2 border-transparent text-grey hover:text-black"
               : active === id
-                ? "border-b-2 border-black text-black"
+                ? "border-b-2 border-gold text-black"
                 : "text-grey hover:text-black",
           )}
         >
@@ -99,7 +109,7 @@ function OrderRow({ order }: { order: AccountOrder }) {
   const deliveryLabel = `${CARRIER_LABELS[order.delivery.carrier]} · ${MODE_LABELS[order.delivery.mode]}`;
 
   return (
-    <li className="border border-border">
+    <li className="border border-border bg-white transition-colors hover:border-black/20">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -109,8 +119,10 @@ function OrderRow({ order }: { order: AccountOrder }) {
           <p className="text-[11px] tracking-[0.14em] uppercase">{order.id}</p>
           <p className="mt-1 text-xs text-grey">{order.date}</p>
         </div>
-        <Badge variant={statusVariant(order.status)}>{ORDER_STATUS_LABELS[order.status]}</Badge>
-        <span className="text-sm">{formatPrice(order.total)}</span>
+        <Badge variant={statusVariant(order.status)} className={statusAccent(order.status)}>
+          {ORDER_STATUS_LABELS[order.status]}
+        </Badge>
+        <span className="font-display text-lg tracking-wide tabular-nums">{formatPrice(order.total)}</span>
         <ChevronDown
           className={cn("size-4 text-grey transition-transform motion-safe:transition-transform motion-reduce:transition-none", open && "rotate-180")}
           aria-hidden
@@ -252,14 +264,25 @@ function AccountContent() {
     }
   }, [tabParam]);
 
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hash === "#wishlist") {
+      changeTab("wishlist");
+    }
+  }, [changeTab]);
+
   const greeting = profile.name.trim() || "Гость";
   const recentOrder = orders[0];
 
   return (
+    <>
     <div className="container-page section-pad pb-16">
-      <PageHeader label="Аккаунт" title="Личный кабинет" align="left" />
+      <CommercePageHeader
+        label="Аккаунт"
+        title="Личный кабинет"
+        description="Заказы, адреса доставки и избранные продукты."
+      />
 
-      <div className="mt-12 grid gap-10 lg:grid-cols-[220px_1fr] lg:gap-16">
+      <div className="mt-12 grid gap-10 lg:grid-cols-[240px_1fr] lg:gap-16">
         <aside className="hidden lg:block">
           <AccountNav active={activeTab} onChange={changeTab} vertical />
         </aside>
@@ -273,9 +296,11 @@ function AccountContent() {
             {activeTab === "overview" ? (
               <div className="space-y-10">
                 <div className="border border-border bg-cream/40 p-6 md:p-8">
-                  <p className="text-[10px] tracking-[0.22em] uppercase text-grey">Добро пожаловать</p>
-                  <h2 className="mt-2 font-display text-2xl md:text-3xl">{greeting}</h2>
-                  <p className="mt-2 text-sm text-grey">
+                  <p className="border-l-2 border-gold py-0.5 pl-3 text-[10px] tracking-[0.22em] uppercase text-grey">
+                    Добро пожаловать
+                  </p>
+                  <h2 className="mt-4 font-display text-2xl md:text-3xl">{greeting}</h2>
+                  <p className="mt-2 max-w-md text-sm leading-relaxed text-grey">
                     Управляйте заказами, адресами и избранным в одном месте.
                   </p>
                 </div>
@@ -286,9 +311,9 @@ function AccountContent() {
                     { label: "Адресов", value: addresses.length },
                     { label: "В избранном", value: wishlistSlugs.length },
                   ].map((stat) => (
-                    <div key={stat.label} className="border border-border p-5 text-center">
-                      <p className="font-display text-3xl">{stat.value}</p>
-                      <p className="mt-1 text-[10px] tracking-[0.16em] uppercase text-grey">{stat.label}</p>
+                    <div key={stat.label} className="border border-border bg-white p-6 text-center">
+                      <p className="font-display text-4xl text-gold/90">{stat.value}</p>
+                      <p className="mt-2 text-[10px] tracking-[0.16em] uppercase text-grey">{stat.label}</p>
                     </div>
                   ))}
                 </div>
@@ -296,7 +321,9 @@ function AccountContent() {
                 {recentOrder ? (
                   <section>
                     <div className="flex items-center justify-between gap-4">
-                      <h3 className="text-[10px] tracking-[0.22em] uppercase">Последний заказ</h3>
+                      <h3 className="border-l-2 border-gold py-0.5 pl-3 text-[10px] tracking-[0.22em] uppercase">
+                        Последний заказ
+                      </h3>
                       <Button variant="link" size="sm" className="cursor-pointer" onClick={() => changeTab("orders")}>
                         Все заказы
                       </Button>
@@ -319,7 +346,9 @@ function AccountContent() {
 
             {activeTab === "orders" ? (
               <section>
-                <h2 className="text-[10px] tracking-[0.22em] uppercase">История заказов</h2>
+                <h2 className="border-l-2 border-gold py-0.5 pl-3 text-[10px] tracking-[0.22em] uppercase">
+                  История заказов
+                </h2>
                 {orders.length === 0 ? (
                   <EmptyState
                     className="!py-12"
@@ -346,7 +375,9 @@ function AccountContent() {
 
             {activeTab === "profile" ? (
               <section className="max-w-lg">
-                <h2 className="text-[10px] tracking-[0.22em] uppercase">Профиль</h2>
+                <h2 className="border-l-2 border-gold py-0.5 pl-3 text-[10px] tracking-[0.22em] uppercase">
+                  Профиль
+                </h2>
                 <form
                   className="mt-5 grid gap-3"
                   onSubmit={(e) => {
@@ -388,7 +419,9 @@ function AccountContent() {
             {activeTab === "addresses" ? (
               <section className="max-w-xl">
                 <div className="flex items-center justify-between gap-4">
-                  <h2 className="text-[10px] tracking-[0.22em] uppercase">Адреса доставки</h2>
+                  <h2 className="border-l-2 border-gold py-0.5 pl-3 text-[10px] tracking-[0.22em] uppercase">
+                    Адреса доставки
+                  </h2>
                   {!addingAddress ? (
                     <Button
                       variant="outline"
@@ -426,7 +459,13 @@ function AccountContent() {
                 ) : (
                   <ul className="mt-6 space-y-3">
                     {addresses.map((addr) => (
-                      <li key={addr.id} className="border border-border p-5">
+                      <li
+                        key={addr.id}
+                        className={cn(
+                          "border p-5 transition-colors",
+                          addr.isDefault ? "border-gold/60 bg-cream/30" : "border-border bg-white",
+                        )}
+                      >
                         {editingAddress === addr.id ? (
                           <AddressForm
                             initial={addr}
@@ -499,7 +538,9 @@ function AccountContent() {
 
             {activeTab === "wishlist" ? (
               <section id="wishlist">
-                <h2 className="text-[10px] tracking-[0.22em] uppercase">Избранное</h2>
+                <h2 className="border-l-2 border-gold py-0.5 pl-3 text-[10px] tracking-[0.22em] uppercase">
+                  Избранное
+                </h2>
                 {wishlistProducts.length === 0 ? (
                   <EmptyState
                     className="!py-12"
@@ -521,6 +562,8 @@ function AccountContent() {
         </div>
       </div>
     </div>
+    <CommerceTrustMarquee />
+    </>
   );
 }
 

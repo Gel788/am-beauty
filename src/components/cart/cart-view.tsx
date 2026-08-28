@@ -2,16 +2,20 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Minus, Plus, Trash2 } from "lucide-react";
+import { Heart, Minus, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ProductCard } from "@/components/catalog/product-card";
+import { CommercePageHeader } from "@/components/commerce/commerce-page-header";
+import { CommerceTrustMarquee, CommerceTrustPills } from "@/components/commerce/commerce-trust-marquee";
 import { OrderSummary } from "@/components/commerce/order-summary";
+import { Reveal } from "@/components/reveal";
 import { formatPrice, getBestsellers } from "@/data/products";
 import { useCartStore, useCartTotals } from "@/store/cart-store";
+import { useWishlistStore } from "@/store/wishlist-store";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
-import { PageHeader } from "@/components/ui/page-header";
+import { cn } from "@/lib/utils";
 
 export function CartView() {
   const { lines, subtotal, discount, shipping, total, promoCode } = useCartTotals();
@@ -19,164 +23,263 @@ export function CartView() {
   const removeItem = useCartStore((s) => s.removeItem);
   const applyPromo = useCartStore((s) => s.applyPromo);
   const clearPromo = useCartStore((s) => s.clearPromo);
-  const suggestions = getBestsellers(4);
+  const toggleWishlist = useWishlistStore((s) => s.toggle);
+  const hasInWishlist = useWishlistStore((s) => s.has);
+
+  const cartSlugs = new Set(lines.map((l) => l.product.slug));
+  const suggestions = getBestsellers(4).filter((p) => !cartSlugs.has(p.slug));
+  const crossSell = suggestions.length > 0 ? suggestions : getBestsellers(4);
 
   if (lines.length === 0) {
     return (
-      <div className="container-page section-pad">
-        <EmptyState
-          title="Корзина пуста"
-          description="Добавьте продукты из каталога — доставка бесплатно от 7 500 ₽."
-          actionLabel="В каталог"
-          actionHref="/catalog"
-        />
-        <section className="mt-8 border-t border-border pt-16">
-          <h2 className="headline-lg text-center">Вам может понравиться</h2>
-          <div className="mt-10 grid grid-cols-2 gap-6 md:grid-cols-4">
-            {suggestions.map((p) => (
-              <ProductCard key={p.slug} product={p} />
-            ))}
+      <>
+        <div className="container-page section-pad">
+          <CommercePageHeader
+            label="Корзина"
+            title="Ваш ритуал"
+            description="Добавьте продукты из каталога — доставка бесплатно от 7 500 ₽."
+            align="center"
+          />
+          <div className="mt-12">
+            <EmptyState
+              title="Корзина пуста"
+              description="Откройте каталог и выберите средства для вашего ухода."
+              actionLabel="В каталог"
+              actionHref="/catalog"
+            />
           </div>
-        </section>
-      </div>
+          <section className="mt-16 border-t border-border pt-16">
+            <Reveal>
+              <p className="text-center text-[10px] tracking-[0.32em] text-grey uppercase">
+                Рекомендуем
+              </p>
+              <h2 className="headline-lg mt-4 text-center !normal-case !tracking-[0.02em]">
+                Вам может понравиться
+              </h2>
+            </Reveal>
+            <div className="mt-10 grid grid-cols-2 gap-6 md:grid-cols-4">
+              {getBestsellers(4).map((p) => (
+                <ProductCard key={p.slug} product={p} />
+              ))}
+            </div>
+          </section>
+        </div>
+        <CommerceTrustMarquee />
+      </>
     );
   }
 
+  const itemWord =
+    lines.length === 1 ? "товар" : lines.length < 5 ? "товара" : "товаров";
+
   return (
     <>
-      <div className="container-page section-pad pb-32 lg:pb-16">
-        <PageHeader label="Корзина" title={`${lines.length} ${lines.length === 1 ? "товар" : "товара"}`} align="left" />
+      <div className="pb-32 lg:pb-0">
+        <div className="container-page section-pad">
+          <CommercePageHeader
+            label="Корзина"
+            title={`${lines.length} ${itemWord}`}
+            description="Проверьте состав заказа перед оформлением."
+          />
 
-        <div className="mt-12 grid gap-12 lg:grid-cols-[1fr_380px] lg:gap-16">
-          <ul className="divide-y divide-border">
-            {lines.map(({ product, qty }) => (
-              <li key={product.slug} className="flex gap-5 py-8 first:pt-0">
-                <Link
-                  href={`/products/${product.slug}`}
-                  className="relative block size-28 shrink-0 bg-cream sm:size-32"
+          <div className="mt-12 grid gap-12 lg:mt-14 lg:grid-cols-[1fr_400px] lg:gap-16">
+            <div>
+              <ul className="divide-y divide-border">
+                {lines.map(({ product, qty }) => {
+                  const inWishlist = hasInWishlist(product.slug);
+                  return (
+                    <li key={product.slug} className="group flex gap-5 py-8 first:pt-0">
+                      <Link
+                        href={`/products/${product.slug}`}
+                        className="relative block size-28 shrink-0 overflow-hidden bg-cream transition-colors group-hover:bg-cream/80 sm:size-32"
+                      >
+                        <div className="absolute inset-2.5 sm:inset-3">
+                          <Image
+                            src={product.image}
+                            alt={product.name}
+                            fill
+                            className="object-contain object-bottom"
+                            sizes="128px"
+                          />
+                        </div>
+                      </Link>
+                      <div className="flex min-w-0 flex-1 flex-col">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <Link
+                              href={`/products/${product.slug}`}
+                              className="text-[11px] tracking-[0.16em] uppercase transition-opacity hover:opacity-60"
+                            >
+                              {product.shortName}
+                            </Link>
+                            <p className="mt-1 text-xs text-grey">{product.volume}</p>
+                          </div>
+                          <div className="flex shrink-0 gap-1">
+                            <button
+                              type="button"
+                              aria-label={inWishlist ? "Убрать из избранного" : "В избранное"}
+                              aria-pressed={inWishlist}
+                              onClick={() => {
+                                toggleWishlist(product.slug);
+                                toast.success(
+                                  inWishlist ? "Убрано из избранного" : "В избранном",
+                                );
+                              }}
+                              className="cursor-pointer p-2 text-grey transition-colors hover:text-black"
+                            >
+                              <Heart
+                                className={cn("size-4", inWishlist && "fill-black text-black")}
+                                strokeWidth={1}
+                              />
+                            </button>
+                            <button
+                              type="button"
+                              aria-label="Удалить"
+                              onClick={() => {
+                                removeItem(product.slug);
+                                toast.success("Удалено из корзины");
+                              }}
+                              className="cursor-pointer p-2 text-grey transition-colors hover:text-black"
+                            >
+                              <Trash2 className="size-4" strokeWidth={1} />
+                            </button>
+                          </div>
+                        </div>
+                        <p className="mt-2 text-sm tabular-nums">{formatPrice(product.price)}</p>
+
+                        <div className="mt-auto flex flex-wrap items-center justify-between gap-4 pt-4">
+                          <div
+                            className="flex items-center border border-border bg-white"
+                            role="group"
+                            aria-label="Количество"
+                          >
+                            <button
+                              type="button"
+                              aria-label="Уменьшить"
+                              onClick={() => setQty(product.slug, qty - 1)}
+                              className="flex size-10 cursor-pointer items-center justify-center transition-colors hover:bg-cream"
+                            >
+                              <Minus className="size-3.5" strokeWidth={1} />
+                            </button>
+                            <span className="w-10 text-center text-sm tabular-nums">{qty}</span>
+                            <button
+                              type="button"
+                              aria-label="Увеличить"
+                              onClick={() => setQty(product.slug, qty + 1)}
+                              className="flex size-10 cursor-pointer items-center justify-center transition-colors hover:bg-cream"
+                            >
+                              <Plus className="size-3.5" strokeWidth={1} />
+                            </button>
+                          </div>
+                          <p className="font-display text-lg tracking-wide tabular-nums">
+                            {formatPrice(product.price * qty)}
+                          </p>
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+
+              <CommerceTrustPills className="mt-8 flex flex-wrap gap-2" />
+            </div>
+
+            <div className="lg:sticky lg:top-24 lg:self-start">
+              <OrderSummary
+                lines={lines}
+                subtotal={subtotal}
+                discount={discount}
+                shipping={shipping}
+                total={total}
+                promoCode={promoCode}
+                showThumbnails={false}
+              />
+
+              <form
+                className="mt-6 flex gap-2"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const fd = new FormData(e.currentTarget);
+                  const code = String(fd.get("promo") ?? "");
+                  if (!code.trim()) return;
+                  if (applyPromo(code)) toast.success("Промокод применён");
+                  else toast.error("Неверный промокод");
+                }}
+              >
+                <Input
+                  name="promo"
+                  placeholder="Промокод"
+                  defaultValue={promoCode ?? ""}
+                  className="h-11"
+                  aria-label="Промокод"
+                />
+                <Button
+                  type="submit"
+                  variant="outline"
+                  className="h-11 shrink-0 cursor-pointer text-[10px] tracking-[0.16em] uppercase"
                 >
-                  <div className="absolute inset-2.5 sm:inset-3">
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      fill
-                      className="object-contain object-bottom"
-                      sizes="128px"
-                    />
-                  </div>
-                </Link>
-                <div className="flex min-w-0 flex-1 flex-col">
-                  <Link
-                    href={`/products/${product.slug}`}
-                    className="text-[11px] tracking-[0.16em] uppercase hover:opacity-60"
-                  >
-                    {product.shortName}
-                  </Link>
-                  <p className="mt-1 text-xs text-grey">{product.volume}</p>
-                  <p className="mt-2 text-sm">{formatPrice(product.price)}</p>
-
-                  <div className="mt-auto flex flex-wrap items-center justify-between gap-4 pt-4">
-                    <div className="flex items-center border border-border" role="group" aria-label="Количество">
-                      <button
-                        type="button"
-                        aria-label="Уменьшить"
-                        onClick={() => setQty(product.slug, qty - 1)}
-                        className="flex size-10 cursor-pointer items-center justify-center"
-                      >
-                        <Minus className="size-3.5" strokeWidth={1} />
-                      </button>
-                      <span className="w-10 text-center text-sm">{qty}</span>
-                      <button
-                        type="button"
-                        aria-label="Увеличить"
-                        onClick={() => setQty(product.slug, qty + 1)}
-                        className="flex size-10 cursor-pointer items-center justify-center"
-                      >
-                        <Plus className="size-3.5" strokeWidth={1} />
-                      </button>
-                    </div>
-                    <p className="text-sm font-medium">{formatPrice(product.price * qty)}</p>
-                  </div>
-                </div>
+                  Применить
+                </Button>
+              </form>
+              {promoCode ? (
                 <button
                   type="button"
-                  aria-label="Удалить"
                   onClick={() => {
-                    removeItem(product.slug);
-                    toast.success("Удалено из корзины");
+                    clearPromo();
+                    toast.success("Промокод удалён");
                   }}
-                  className="cursor-pointer self-start p-2 text-grey transition-colors hover:text-black"
+                  className="mt-2 cursor-pointer text-[10px] tracking-[0.16em] text-grey uppercase underline"
                 >
-                  <Trash2 className="size-4" strokeWidth={1} />
+                  Убрать промокод
                 </button>
-              </li>
-            ))}
-          </ul>
+              ) : null}
 
-          <div className="lg:sticky lg:top-24 lg:self-start">
-            <OrderSummary
-              lines={lines}
-              subtotal={subtotal}
-              discount={discount}
-              shipping={shipping}
-              total={total}
-              promoCode={promoCode}
-            />
-
-            <form
-              className="mt-6 flex gap-2"
-              onSubmit={(e) => {
-                e.preventDefault();
-                const fd = new FormData(e.currentTarget);
-                const code = String(fd.get("promo") ?? "");
-                if (!code.trim()) return;
-                if (applyPromo(code)) toast.success("Промокод применён");
-                else toast.error("Неверный промокод");
-              }}
-            >
-              <Input
-                name="promo"
-                placeholder="Промокод"
-                defaultValue={promoCode ?? ""}
-                className="h-11"
-                aria-label="Промокод"
-              />
-              <Button type="submit" variant="outline" className="shrink-0 cursor-pointer">
-                OK
-              </Button>
-            </form>
-            {promoCode ? (
-              <button
-                type="button"
-                onClick={() => {
-                  clearPromo();
-                  toast.success("Промокод удалён");
-                }}
-                className="mt-2 cursor-pointer text-[10px] tracking-[0.16em] text-grey uppercase underline"
+              <Button
+                nativeButton={false}
+                className="mt-6 h-12 w-full cursor-pointer text-[10px] tracking-[0.2em] uppercase"
+                render={<Link href="/checkout" />}
               >
-                Убрать промокод
-              </button>
-            ) : null}
-
-            <Button
-              nativeButton={false}
-              className="mt-6 h-12 w-full cursor-pointer"
-              render={<Link href="/checkout" />}
-            >
-              Оформить заказ
-            </Button>
-            <p className="mt-4 text-center text-xs text-grey">Безопасная оплата · Возврат 14 дней</p>
+                Оформить заказ
+              </Button>
+              <p className="mt-4 text-center text-xs text-grey">
+                Безопасная оплата · Возврат 14 дней
+              </p>
+            </div>
           </div>
+
+          {crossSell.length > 0 ? (
+            <section className="mt-20 border-t border-border pt-16">
+              <Reveal>
+                <p className="text-[10px] tracking-[0.32em] text-grey uppercase">
+                  Дополните ритуал
+                </p>
+                <h2 className="headline-lg mt-4 !normal-case !tracking-[0.02em]">
+                  Покупают вместе
+                </h2>
+              </Reveal>
+              <div className="mt-10 grid grid-cols-2 gap-6 md:grid-cols-4">
+                {crossSell.slice(0, 4).map((p) => (
+                  <ProductCard key={p.slug} product={p} />
+                ))}
+              </div>
+            </section>
+          ) : null}
         </div>
+
+        <CommerceTrustMarquee />
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white p-4 lg:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white/90 p-4 backdrop-blur-md lg:hidden">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-[10px] tracking-[0.18em] text-grey uppercase">Итого</p>
-            <p className="text-base font-medium">{formatPrice(total)}</p>
+            <p className="text-[10px] tracking-[0.18em] text-grey uppercase">К оплате</p>
+            <p className="font-display text-xl tracking-wide tabular-nums">{formatPrice(total)}</p>
           </div>
-          <Button nativeButton={false} className="h-11 flex-1 cursor-pointer" render={<Link href="/checkout" />}>
+          <Button
+            nativeButton={false}
+            className="h-11 flex-1 cursor-pointer text-[10px] tracking-[0.2em] uppercase"
+            render={<Link href="/checkout" />}
+          >
             Оформить
           </Button>
         </div>

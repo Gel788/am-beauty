@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { formatPrice } from "@/data/products";
 import {
   FREE_SHIPPING_THRESHOLD,
@@ -21,20 +22,26 @@ export function ShippingProgress({ subtotal, className, compact }: ShippingProgr
   if (subtotal <= 0) return null;
 
   return (
-    <div className={cn("space-y-2", className)}>
-      <p className={cn("text-grey", compact ? "text-xs" : "text-sm")}>
+    <div className={cn("space-y-3", className)}>
+      <p className={cn("text-grey", compact ? "text-xs leading-relaxed" : "text-sm")}>
         {free ? (
-          <>Бесплатная доставка — вы достигли порога {formatPrice(FREE_SHIPPING_THRESHOLD)}</>
+          <>
+            <span className="text-gold">Бесплатная доставка</span> — порог{" "}
+            {formatPrice(FREE_SHIPPING_THRESHOLD)} достигнут
+          </>
         ) : (
           <>
-            До бесплатной доставки осталось{" "}
+            До бесплатной доставки{" "}
             <span className="text-black">{formatPrice(remaining)}</span>
           </>
         )}
       </p>
-      <div className="h-px w-full bg-border">
+      <div className="h-0.5 w-full bg-border">
         <div
-          className="h-px bg-black transition-all duration-500"
+          className={cn(
+            "h-0.5 transition-all duration-500 motion-reduce:transition-none",
+            free ? "bg-gold" : "bg-black",
+          )}
           style={{ width: `${progress}%` }}
         />
       </div>

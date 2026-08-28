@@ -198,7 +198,7 @@ export function Header() {
             </Link>
 
             <Link
-              href="/account#wishlist"
+              href="/account?tab=wishlist"
               aria-label="Избранное"
               className={cn("relative flex size-10 items-center justify-center hover:opacity-50", iconColor)}
             >
@@ -324,7 +324,7 @@ export function Header() {
                   Аккаунт
                 </Link>
                 <Link
-                  href="/account#wishlist"
+                  href="/account?tab=wishlist"
                   onClick={closeMenu}
                   className="flex flex-1 items-center justify-center gap-2 border border-border py-3 text-[10px] tracking-[0.2em] uppercase"
                 >

@@ -54,17 +54,20 @@ export function PickupPointPicker({
   return (
     <div className="space-y-3">
       <div className="relative">
-        <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-grey" aria-hidden />
+        <Search
+          className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-grey"
+          aria-hidden
+        />
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Поиск по адресу или индексу"
           aria-label="Поиск пункта выдачи"
-          className="h-10 pl-10"
+          className="h-11 pl-10"
         />
       </div>
 
-      <ScrollArea className="h-56 border border-border">
+      <ScrollArea className="h-64 border border-border bg-white">
         <ul className="divide-y divide-border" role="listbox" aria-label="Пункты выдачи">
           {filtered.map((point) => {
             const isSelected = selected?.id === point.id;
@@ -76,11 +79,16 @@ export function PickupPointPicker({
                   aria-selected={isSelected}
                   onClick={() => onSelect(point)}
                   className={cn(
-                    "flex w-full gap-3 p-3 text-left transition-colors cursor-pointer motion-safe:transition-colors motion-reduce:transition-none",
-                    isSelected ? "bg-cream" : "hover:bg-cream/50",
+                    "flex w-full gap-3 p-4 text-left transition-colors cursor-pointer motion-safe:duration-300",
+                    isSelected
+                      ? "bg-cream ring-1 ring-inset ring-gold"
+                      : "hover:bg-cream/50",
                   )}
                 >
-                  <MapPin className="mt-0.5 size-4 shrink-0 text-grey" aria-hidden />
+                  <MapPin
+                    className={cn("mt-0.5 size-4 shrink-0", isSelected ? "text-gold" : "text-grey")}
+                    aria-hidden
+                  />
                   <span className="min-w-0">
                     <span className="block text-[11px] tracking-[0.12em] uppercase">{point.name}</span>
                     <span className="mt-0.5 block text-xs text-grey">{point.address}</span>
