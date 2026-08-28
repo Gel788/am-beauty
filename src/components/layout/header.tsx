@@ -156,12 +156,53 @@ export function Header() {
       href="/"
       onClick={closeMenu}
       className={cn(
-        "font-display text-[1.375rem] leading-none font-light tracking-[0.08em] transition-colors sm:text-[1.5rem]",
+        "block whitespace-nowrap text-center font-display text-[1.25rem] leading-none font-light tracking-[0.04em] transition-colors sm:text-[1.375rem]",
         onHero ? "text-white" : "text-black",
       )}
     >
       {site.brand}
     </Link>
+  );
+
+  const desktopNav = (
+    <nav className="hidden min-w-0 items-center gap-5 xl:gap-7 lg:flex" aria-label="Основное меню">
+      {navItems.map((item) => (
+        <Link
+          key={item.href}
+          href={item.href}
+          className={cn(navLinkClass(item.href), "whitespace-nowrap")}
+          aria-current={isActive(pathname, item.href) ? "page" : undefined}
+        >
+          {item.label}
+        </Link>
+      ))}
+    </nav>
+  );
+
+  const utilityIcons = (
+    <>
+      <HeaderIconButton aria-label="Поиск" onClick={() => setSearchOpen(true)} className={iconTone}>
+        <Search className={iconClass} />
+      </HeaderIconButton>
+
+      <HeaderIconLink href="/account" aria-label="Аккаунт" className={iconTone}>
+        <User className={iconClass} />
+      </HeaderIconLink>
+
+      <HeaderIconLink
+        href="/account?tab=wishlist"
+        aria-label={`Избранное${wishlistCount > 0 ? `, ${wishlistCount}` : ""}`}
+        className={iconTone}
+      >
+        <Heart className={iconClass} />
+        <CountBadge count={wishlistCount} onHero={onHero} />
+      </HeaderIconLink>
+
+      <HeaderIconLink href="/cart" aria-label={`Корзина${count > 0 ? `, ${count}` : ""}`} className={iconTone}>
+        <ShoppingBag className={iconClass} />
+        <CountBadge count={count} onHero={onHero} />
+      </HeaderIconLink>
+    </>
   );
 
   return (
@@ -175,106 +216,53 @@ export function Header() {
         )}
       >
         {/* Mobile */}
-        <div
-          className={cn(
-            "container-page relative grid max-w-full grid-cols-[auto_1fr_auto] items-center gap-2 lg:hidden",
-            HEADER_H,
-          )}
-        >
-          <HeaderIconButton
-            aria-label={menuOpen ? "Закрыть меню" : "Открыть меню"}
-            aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((v) => !v)}
-            className={iconTone}
-          >
-            {menuOpen ? (
-              <X className="size-5" strokeWidth={1.25} />
-            ) : (
-              <Menu className="size-5" strokeWidth={1.25} />
-            )}
-          </HeaderIconButton>
-
-          <div className="justify-self-center">{brandLink}</div>
-
-          <div className="flex items-center justify-end gap-0.5">
+        <div className={cn("container-page relative max-w-full lg:hidden", HEADER_H)}>
+          <div className="flex h-full items-center justify-between">
             <HeaderIconButton
-              aria-label="Поиск"
-              onClick={() => setSearchOpen(true)}
+              aria-label={menuOpen ? "Закрыть меню" : "Открыть меню"}
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((v) => !v)}
               className={iconTone}
             >
-              <Search className={iconClass} />
+              {menuOpen ? (
+                <X className="size-5" strokeWidth={1.25} />
+              ) : (
+                <Menu className="size-5" strokeWidth={1.25} />
+              )}
             </HeaderIconButton>
-            <HeaderIconLink
-              href="/cart"
-              aria-label={`Корзина${count > 0 ? `, ${count}` : ""}`}
-              className={iconTone}
-            >
-              <ShoppingBag className={iconClass} />
-              <CountBadge count={count} onHero={onHero} />
-            </HeaderIconLink>
+
+            <div className="pointer-events-none absolute inset-x-0 flex justify-center px-20">
+              <div className="pointer-events-auto">{brandLink}</div>
+            </div>
+
+            <div className="relative z-10 flex items-center gap-0.5">
+              <HeaderIconButton
+                aria-label="Поиск"
+                onClick={() => setSearchOpen(true)}
+                className={iconTone}
+              >
+                <Search className={iconClass} />
+              </HeaderIconButton>
+              <HeaderIconLink
+                href="/cart"
+                aria-label={`Корзина${count > 0 ? `, ${count}` : ""}`}
+                className={iconTone}
+              >
+                <ShoppingBag className={iconClass} />
+                <CountBadge count={count} onHero={onHero} />
+              </HeaderIconLink>
+            </div>
           </div>
         </div>
 
         {/* Desktop */}
-        <div className={cn("container-page hidden max-w-full items-center lg:grid lg:grid-cols-[1fr_auto_1fr]", HEADER_H)}>
-          <nav className="flex items-center gap-7 xl:gap-9" aria-label="Основное меню">
-            {navItems.slice(0, 2).map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={navLinkClass(item.href)}
-                aria-current={isActive(pathname, item.href) ? "page" : undefined}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+        <div className={cn("container-page hidden max-w-full lg:block", HEADER_H)}>
+          <div className="grid h-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4">
+            <div className="min-w-0 justify-self-start">{desktopNav}</div>
 
-          {brandLink}
+            <div className="justify-self-center px-2">{brandLink}</div>
 
-          <div className="flex items-center justify-end gap-1">
-            <nav className="mr-3 flex items-center gap-7 xl:mr-4 xl:gap-9">
-              {navItems.slice(2).map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={navLinkClass(item.href)}
-                  aria-current={isActive(pathname, item.href) ? "page" : undefined}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-
-            <div
-              className={cn(
-                "mr-1 hidden h-5 w-px sm:block",
-                onHero ? "bg-white/20" : "bg-border",
-              )}
-              aria-hidden
-            />
-
-            <HeaderIconButton aria-label="Поиск" onClick={() => setSearchOpen(true)} className={iconTone}>
-              <Search className={iconClass} />
-            </HeaderIconButton>
-
-            <HeaderIconLink href="/account" aria-label="Аккаунт" className={iconTone}>
-              <User className={iconClass} />
-            </HeaderIconLink>
-
-            <HeaderIconLink
-              href="/account?tab=wishlist"
-              aria-label={`Избранное${wishlistCount > 0 ? `, ${wishlistCount}` : ""}`}
-              className={iconTone}
-            >
-              <Heart className={iconClass} />
-              <CountBadge count={wishlistCount} onHero={onHero} />
-            </HeaderIconLink>
-
-            <HeaderIconLink href="/cart" aria-label={`Корзина${count > 0 ? `, ${count}` : ""}`} className={iconTone}>
-              <ShoppingBag className={iconClass} />
-              <CountBadge count={count} onHero={onHero} />
-            </HeaderIconLink>
+            <div className="relative z-10 flex items-center justify-self-end gap-0.5">{utilityIcons}</div>
           </div>
         </div>
       </header>
@@ -294,30 +282,38 @@ export function Header() {
           >
             <div
               className={cn(
-                "container-page flex max-w-full items-center justify-between border-b border-border bg-white",
+                "container-page relative max-w-full border-b border-border bg-white",
                 HEADER_H,
               )}
             >
-              <button
-                type="button"
-                aria-label="Закрыть меню"
-                onClick={closeMenu}
-                className="flex size-10 cursor-pointer items-center justify-center text-black"
-              >
-                <X className="size-5" strokeWidth={1} />
-              </button>
-              <span className="text-[10px] tracking-[0.28em] text-grey uppercase">Меню</span>
-              <button
-                type="button"
-                aria-label="Поиск"
-                onClick={() => {
-                  closeMenu();
-                  setSearchOpen(true);
-                }}
-                className="flex size-10 cursor-pointer items-center justify-center text-black"
-              >
-                <Search className={iconClass} />
-              </button>
+              <div className="flex h-full items-center justify-between">
+                <button
+                  type="button"
+                  aria-label="Закрыть меню"
+                  onClick={closeMenu}
+                  className="relative z-10 flex size-10 cursor-pointer items-center justify-center text-black"
+                >
+                  <X className="size-5" strokeWidth={1} />
+                </button>
+
+                <div className="pointer-events-none absolute inset-x-0 flex justify-center px-16">
+                  <span className="pointer-events-none font-display text-[1.25rem] leading-none font-light tracking-[0.04em] text-black">
+                    {site.brand}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  aria-label="Поиск"
+                  onClick={() => {
+                    closeMenu();
+                    setSearchOpen(true);
+                  }}
+                  className="relative z-10 flex size-10 cursor-pointer items-center justify-center text-black"
+                >
+                  <Search className={iconClass} />
+                </button>
+              </div>
             </div>
 
             <nav className="flex-1 overflow-y-auto overscroll-y-contain" aria-label="Мобильное меню">
@@ -333,7 +329,7 @@ export function Header() {
                       href={item.href}
                       onClick={closeMenu}
                       className={cn(
-                        "group flex items-baseline gap-4 border-b border-border px-6 py-5 last:border-b-0 sm:px-8",
+                        "group flex items-center gap-4 border-b border-border px-6 py-5 last:border-b-0 sm:px-8",
                         isActive(pathname, item.href) ? "bg-cream/40" : "bg-white",
                       )}
                     >
@@ -342,7 +338,7 @@ export function Header() {
                       </span>
                       <span
                         className={cn(
-                          "font-display text-2xl leading-none tracking-[0.02em] transition-colors",
+                          "font-display text-2xl leading-tight tracking-[0.02em] transition-colors",
                           isActive(pathname, item.href) ? "text-black" : "text-charcoal group-hover:text-black",
                         )}
                       >
