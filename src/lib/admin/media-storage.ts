@@ -4,6 +4,7 @@ import path from "node:path";
 import { randomBytes } from "node:crypto";
 import type { MediaFile, MediaKind } from "@/lib/admin/media-types";
 import { urlToMediaPath } from "@/lib/admin/media-types";
+import { processUploadImage } from "@/lib/admin/image-process";
 
 export type { MediaFile, MediaKind } from "@/lib/admin/media-types";
 
@@ -125,13 +126,22 @@ export async function saveUpload(file: File): Promise<MediaFile> {
 
   const root = await ensureMediaDirs();
   const folder = check.kind === "image" ? "images" : "videos";
-  const mime = mimeFromFile(file, check.kind);
-  const ext = EXT_BY_MIME[mime] || path.extname(file.name).toLowerCase() || "";
-  const filename = safeName(file.name || `upload${ext}`);
+
+  let buffer = Buffer.from(await file.arrayBuffer());
+  let mime = mimeFromFile(file, check.kind);
+  let ext = EXT_BY_MIME[mime] || path.extname(file.name).toLowerCase() || "";
+
+  if (check.kind === "image") {
+    const processed = await processUploadImage(buffer);
+    buffer = Buffer.from(processed.buffer);
+    mime = processed.mime;
+    ext = processed.extension;
+  }
+
+  const filename = safeName((file.name || `upload${ext}`).replace(/\.[^.]+$/, ext));
   const relative = `${folder}/${filename}`;
   const absolute = path.join(root, relative);
 
-  const buffer = Buffer.from(await file.arrayBuffer());
   await writeFile(absolute, buffer);
   await chmod(absolute, 0o644);
 
