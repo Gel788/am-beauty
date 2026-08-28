@@ -4,10 +4,14 @@ import Image from "next/image";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
+type VideoMode = "hover" | "always" | "off";
+
 type ProductMediaProps = {
   src: string;
   alt: string;
   videoSrc?: string;
+  videoMode?: VideoMode;
+  videoControls?: boolean;
   priority?: boolean;
   sizes?: string;
   className?: string;
@@ -27,6 +31,8 @@ export function ProductMedia({
   src,
   alt,
   videoSrc,
+  videoMode,
+  videoControls = false,
   priority,
   sizes = "50vw",
   className,
@@ -35,42 +41,42 @@ export function ProductMedia({
   inset = "md",
   children,
 }: ProductMediaProps) {
-  const [active, setActive] = useState(false);
+  const [hovering, setHovering] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  const mode: VideoMode = videoMode ?? (videoSrc ? "hover" : "off");
+  const showVideo =
+    mode === "always" ? videoReady : mode === "hover" && hovering && videoReady;
+
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !videoSrc || !active) return;
+    if (!video || !videoSrc || mode === "off") return;
 
-    const play = async () => {
-      try {
-        await video.play();
-      } catch {
-        // autoplay blocked — остаётся постер
-      }
-    };
+    if (mode === "always" || hovering) {
+      void video.play().catch(() => {
+        // autoplay blocked
+      });
+      return;
+    }
 
-    void play();
-    return () => {
-      video.pause();
-      video.currentTime = 0;
-    };
-  }, [active, videoSrc]);
+    video.pause();
+    video.currentTime = 0;
+  }, [hovering, videoSrc, mode]);
 
   return (
     <div
       className={cn("relative overflow-hidden bg-cream", aspect, className)}
-      onMouseEnter={() => videoSrc && setActive(true)}
-      onMouseLeave={() => videoSrc && setActive(false)}
-      onFocus={() => videoSrc && setActive(true)}
-      onBlur={() => videoSrc && setActive(false)}
+      onMouseEnter={() => mode === "hover" && setHovering(true)}
+      onMouseLeave={() => mode === "hover" && setHovering(false)}
+      onFocus={() => mode === "hover" && setHovering(true)}
+      onBlur={() => mode === "hover" && setHovering(false)}
     >
       <div
         className={cn(
           "absolute transition-opacity duration-300 motion-reduce:transition-none",
           insetMap[inset],
-          videoSrc && active && videoReady ? "opacity-0" : "opacity-100",
+          showVideo ? "opacity-0" : "opacity-100",
         )}
       >
         <Image
@@ -83,21 +89,24 @@ export function ProductMedia({
         />
       </div>
 
-      {videoSrc ? (
+      {videoSrc && mode !== "off" ? (
         <video
           ref={videoRef}
           src={videoSrc}
           muted
           loop
           playsInline
+          controls={videoControls}
           preload="metadata"
           poster={src}
-          aria-hidden
+          aria-label={videoControls ? `Видео: ${alt}` : undefined}
+          aria-hidden={!videoControls}
           onLoadedData={() => setVideoReady(true)}
           onError={() => setVideoReady(false)}
           className={cn(
             "absolute inset-0 size-full object-contain object-bottom transition-opacity duration-300 motion-reduce:transition-none",
-            active && videoReady ? "opacity-100" : "opacity-0",
+            showVideo ? "opacity-100" : "opacity-0",
+            videoControls && showVideo && "z-[1]",
           )}
         />
       ) : null}

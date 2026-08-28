@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { ChevronDown, Heart, Minus, Plus } from "lucide-react";
+import { ChevronDown, Heart, Minus, Play, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { ProductCard } from "@/components/catalog/product-card";
 import { ProductMedia } from "@/components/ui/product-media";
@@ -15,7 +15,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export function ProductDetail({ product }: { product: Product }) {
-  const [activeImage, setActiveImage] = useState(0);
+  const hasVideo = Boolean(product.video);
+  const [activeSlide, setActiveSlide] = useState<"video" | number>(hasVideo ? "video" : 0);
   const [qty, setQty] = useState(1);
   const addItem = useCartStore((s) => s.addItem);
   const toggleWishlist = useWishlistStore((s) => s.toggle);
@@ -103,26 +104,59 @@ export function ProductDetail({ product }: { product: Product }) {
         <div className="mt-10 grid gap-12 lg:grid-cols-2 lg:gap-20">
           <div>
             <ProductMedia
-              src={product.gallery[activeImage] ?? product.image}
+              src={
+                typeof activeSlide === "number"
+                  ? (product.gallery[activeSlide] ?? product.image)
+                  : product.image
+              }
               alt={product.name}
+              videoSrc={product.video}
+              videoMode={activeSlide === "video" ? "always" : "off"}
+              videoControls={activeSlide === "video"}
               priority
               aspect="aspect-[4/5] lg:aspect-square"
               sizes="(max-width:1024px) 100vw, 50vw"
               zoom={false}
               inset="lg"
             />
-            {product.gallery.length > 1 ? (
-              <div className="mt-3 flex gap-2" role="tablist" aria-label="Фото товара">
+            {hasVideo || product.gallery.length > 1 ? (
+              <div className="mt-3 flex gap-2" role="tablist" aria-label="Медиа товара">
+                {hasVideo ? (
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeSlide === "video"}
+                    aria-label="Видео"
+                    onClick={() => setActiveSlide("video")}
+                    className={cn(
+                      "relative size-16 cursor-pointer overflow-hidden border bg-cream",
+                      activeSlide === "video" ? "border-black" : "border-border",
+                    )}
+                  >
+                    <div className="absolute inset-1.5">
+                      <Image
+                        src={product.image}
+                        alt=""
+                        fill
+                        className="object-contain object-bottom"
+                        sizes="64px"
+                      />
+                    </div>
+                    <span className="absolute inset-0 flex items-center justify-center bg-black/25">
+                      <Play className="size-4 fill-white text-white" strokeWidth={1} />
+                    </span>
+                  </button>
+                ) : null}
                 {product.gallery.map((src: string, i: number) => (
                   <button
                     key={src}
                     type="button"
                     role="tab"
-                    aria-selected={i === activeImage}
-                    onClick={() => setActiveImage(i)}
+                    aria-selected={activeSlide === i}
+                    onClick={() => setActiveSlide(i)}
                     className={cn(
                       "relative size-16 cursor-pointer overflow-hidden border",
-                      i === activeImage ? "border-black" : "border-border",
+                      activeSlide === i ? "border-black" : "border-border",
                     )}
                   >
                     <div className="absolute inset-1.5">
