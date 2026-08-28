@@ -61,7 +61,7 @@ export function ProductDetailGallery({
     <div className="lg:sticky lg:top-20 lg:self-start">
       <div className={cn("flex gap-3 lg:gap-5", hasThumbs && "lg:flex-row-reverse")}>
         <div className="relative min-w-0 flex-1">
-          <div className="relative overflow-hidden bg-cream">
+          <div className="relative overflow-hidden border border-border bg-white p-4 sm:p-5 lg:p-6">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={slideKey(activeSlide)}

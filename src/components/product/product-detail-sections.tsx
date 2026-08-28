@@ -35,7 +35,7 @@ export function ProductDetailMarquee({ product }: { product: Product }) {
 
 export function ProductDetailBenefits({ product }: { product: Product }) {
   return (
-    <section className="section-pad bg-cream/60">
+    <section className="section-pad-sm border-b border-border bg-cream/60">
       <div className="container-page">
         <Reveal>
           <p className="text-center text-[10px] tracking-[0.32em] text-grey uppercase">Преимущества</p>
@@ -67,7 +67,7 @@ export function ProductDetailBenefits({ product }: { product: Product }) {
 
 export function ProductDetailRitual({ product }: { product: Product }) {
   return (
-    <section className="container-page section-pad">
+    <section className="container-page section-pad-sm border-b border-border">
       <Reveal>
         <p className="text-[10px] tracking-[0.32em] text-grey uppercase">Ритуал</p>
         <h2 className="headline-lg mt-4 !normal-case !tracking-[0.02em]">Как применять</h2>
@@ -95,14 +95,22 @@ export function ProductDetailRitual({ product }: { product: Product }) {
 
 export function ProductDetailSpecs({ product }: { product: Product }) {
   return (
-    <section className="container-page pb-16">
-      <div className="mx-auto max-w-3xl">
+    <section className="section-pad-sm border-b border-border bg-white">
+      <div className="container-page">
+        <Reveal>
+          <p className="text-center text-[10px] tracking-[0.32em] text-grey uppercase">Детали</p>
+          <h2 className="headline-lg mt-4 text-center !normal-case !tracking-[0.02em]">
+            Состав и характеристики
+          </h2>
+        </Reveal>
+        <div className="mx-auto mt-10 max-w-3xl">
         <DetailAccordion title="Состав INCI" defaultOpen>
           <p className="font-mono text-xs leading-[1.9] text-grey">{product.ingredients.join(" · ")}</p>
         </DetailAccordion>
         <DetailAccordion title="Тип кожи">
           <p className="text-sm leading-relaxed text-grey">{product.skinTypeLabel}</p>
         </DetailAccordion>
+        </div>
       </div>
     </section>
   );

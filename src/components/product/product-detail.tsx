@@ -15,6 +15,10 @@ import {
   ProductDetailRitual,
   ProductDetailSpecs,
 } from "@/components/product/product-detail-sections";
+import {
+  ProductDetailFactsStrip,
+  ProductDetailSidebarExtras,
+} from "@/components/product/product-detail-extras";
 
 type Slide = "video" | number;
 
@@ -30,39 +34,52 @@ export function ProductDetail({ product }: { product: Product }) {
   return (
     <>
       <div className="pb-28 lg:pb-0">
-        <div className="container-page pt-6 lg:pt-10">
-          <nav
-            aria-label="Хлебные крошки"
-            className="text-[10px] tracking-[0.18em] text-grey uppercase"
-          >
-            <Link href="/" className="transition-colors hover:text-black">
-              Главная
-            </Link>
-            <span className="mx-2">/</span>
-            <Link href="/catalog" className="transition-colors hover:text-black">
-              Каталог
-            </Link>
-            <span className="mx-2">/</span>
-            <span className="text-black">{product.shortName}</span>
-          </nav>
+        <section className="border-b border-border bg-cream/50">
+          <div className="container-page pt-6 pb-10 lg:pt-10 lg:pb-14">
+            <nav
+              aria-label="Хлебные крошки"
+              className="text-[10px] tracking-[0.18em] text-grey uppercase"
+            >
+              <Link href="/" className="transition-colors hover:text-black">
+                Главная
+              </Link>
+              <span className="mx-2">/</span>
+              <Link href="/catalog" className="transition-colors hover:text-black">
+                Каталог
+              </Link>
+              <span className="mx-2">/</span>
+              <span className="text-black">{product.shortName}</span>
+            </nav>
 
-          <div className="mt-8 grid gap-10 lg:mt-12 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:gap-16 xl:gap-24">
-            <ProductDetailGallery
-              product={product}
-              activeSlide={activeSlide}
-              onSlideChange={setActiveSlide}
-            />
+            <div className="mt-8 grid gap-10 lg:mt-10 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:gap-12 xl:gap-16">
+              <ProductDetailGallery
+                product={product}
+                activeSlide={activeSlide}
+                onSlideChange={setActiveSlide}
+              />
 
-            <div className="lg:sticky lg:top-20 lg:self-start lg:py-4">
-              <ProductDetailHeroMeta product={product} />
-              <ProductDetailBuyBox product={product} qty={qty} onQtyChange={setQty} />
+              <div className="lg:sticky lg:top-20 lg:self-start">
+                <div className="border border-border bg-white p-6 lg:p-8">
+                  <ProductDetailHeroMeta product={product} />
+                  <ProductDetailBuyBox product={product} qty={qty} onQtyChange={setQty} />
+                  <div className="hidden lg:block">
+                    <ProductDetailSidebarExtras product={product} />
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
+        </section>
+
+        <ProductDetailFactsStrip product={product} />
+
+        <div className="lg:hidden">
+          <div className="container-page py-10">
+            <ProductDetailSidebarExtras product={product} />
           </div>
         </div>
 
-        <div className="mt-16 lg:mt-24">
-          <ProductDetailMarquee product={product} />
-        </div>
+        <ProductDetailMarquee product={product} />
 
         <ProductDetailBenefits product={product} />
         <ProductDetailRitual product={product} />
