@@ -6,18 +6,33 @@ APP_DIR="${APP_DIR:-/var/www/am-beauty}"
 
 cd "$APP_DIR"
 git pull origin main
-mkdir -p public/uploads/images public/uploads/videos public/videos
+
+mkdir -p public/uploads/images public/uploads/videos public/videos .data
+
+# Если БД осталась в старом standalone-каталоге — подтягиваем в корень
+if [ -f .next/standalone/.data/admin-db.json ]; then
+  if [ ! -f .data/admin-db.json ] || [ .next/standalone/.data/admin-db.json -nt .data/admin-db.json ]; then
+    cp .next/standalone/.data/admin-db.json .data/admin-db.json
+  fi
+fi
 
 npm ci
 npm run build
 
-# Видео не в git — копируем из public/videos если есть (ручная загрузка на VPS)
-if [ -d public/videos ] && ls public/videos/*.{mp4,MP4,mov,MOV,webm,WEBM} 1>/dev/null 2>&1; then
-  mkdir -p .next/standalone/public/videos
-  cp -n public/videos/*.{mp4,MP4,mov,MOV,webm,WEBM} .next/standalone/public/videos/ 2>/dev/null || true
+# Видео не в git — убеждаемся что лежат в public/videos
+if ls public/videos/*.{mp4,MP4,mov,MOV,webm,WEBM} 1>/dev/null 2>&1; then
+  chmod 644 public/videos/* 2>/dev/null || true
 fi
 
-pm2 restart am-beauty --update-env
+pm2 delete am-beauty 2>/dev/null || true
+NEXT_PUBLIC_SITE_URL="${NEXT_PUBLIC_SITE_URL:-https://ambeauty-cosmetica.ru}" \
+  pm2 start ecosystem.config.cjs --update-env
 pm2 save
+
+if [ -f deploy/nginx.am-beauty.conf ]; then
+  cp deploy/nginx.am-beauty.conf /etc/nginx/sites-available/am-beauty
+  ln -sf /etc/nginx/sites-available/am-beauty /etc/nginx/sites-enabled/am-beauty
+  nginx -t && systemctl reload nginx
+fi
 
 echo "OK: deployed $(git rev-parse --short HEAD)"

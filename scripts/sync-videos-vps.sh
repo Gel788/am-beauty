@@ -30,5 +30,5 @@ fi
 echo "→ $HOST:$REMOTE_DIR/public/videos/"
 "${SSH_CMD[@]}" "$HOST" "mkdir -p $REMOTE_DIR/public/videos $REMOTE_DIR/.next/standalone/public/videos"
 "${RSYNC_CMD[@]}" "${files[@]}" "$HOST:$REMOTE_DIR/public/videos/"
-"${SSH_CMD[@]}" "$HOST" "chmod 644 $REMOTE_DIR/public/videos/*; cp -f $REMOTE_DIR/public/videos/* $REMOTE_DIR/.next/standalone/public/videos/ 2>/dev/null || true"
+"${SSH_CMD[@]}" "$HOST" "chmod 644 $REMOTE_DIR/public/videos/* 2>/dev/null || true"
 echo "OK: videos synced"

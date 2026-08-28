@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { ContentImage } from "@/components/ui/content-image";
 import { Reveal } from "@/components/reveal";
 
 const steps = [

@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import { ContentImage } from "@/components/ui/content-image";
 import { motion, useScroll, useTransform } from "motion/react";
 import { ArrowDownRight } from "lucide-react";
 import { products } from "@/data/products";
