@@ -19,13 +19,13 @@ export function HomeCategories() {
           <Reveal delay={0.1} className="mt-12">
             <Link
               href={`/catalog?category=${lead.id}`}
-              className="group relative block aspect-[16/9] overflow-hidden md:aspect-[21/9]"
+              className="group relative block aspect-[4/3] overflow-hidden sm:aspect-[16/9] md:aspect-[21/9]"
             >
               <Image
                 src={lead.image}
                 alt={lead.title}
                 fill
-                className="img-zoom object-cover"
+                className="img-zoom object-cover object-[center_30%] sm:object-center"
                 sizes="100vw"
               />
               <div className="absolute inset-0 bg-black/30 transition-colors duration-500 group-hover:bg-black/40" />
@@ -45,13 +45,13 @@ export function HomeCategories() {
             <Reveal key={cat.id} delay={0.08 * (i + 1)}>
               <Link
                 href={`/catalog?category=${cat.id}`}
-                className="group relative flex min-h-[220px] items-end bg-black p-6 md:min-h-[280px] md:p-8"
+                className="group relative flex min-h-[280px] items-end bg-black p-6 md:min-h-[300px] md:p-8"
               >
                 <Image
                   src={cat.image}
                   alt={cat.title}
                   fill
-                  className="img-zoom object-cover opacity-60"
+                  className="img-zoom object-cover object-center opacity-80 md:opacity-60"
                   sizes="33vw"
                 />
                 <div className="relative">

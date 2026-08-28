@@ -133,8 +133,10 @@
   transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.group:hover .img-zoom {
-  transform: scale(1.06);
+@media (hover: hover) {
+  .group:hover .img-zoom {
+    transform: scale(1.06);
+  }
 }
 
 .scroll-snap-x {
@@ -153,6 +155,13 @@
 
 .hero-kenburns {
   animation: kenburns 18s ease-in-out infinite alternate;
+}
+
+@media (max-width: 767px) {
+  .hero-kenburns {
+    animation: none;
+    transform: none;
+  }
 }
 
 @keyframes kenburns {

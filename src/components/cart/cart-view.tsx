@@ -53,9 +53,17 @@ export function CartView() {
               <li key={product.slug} className="flex gap-5 py-8 first:pt-0">
                 <Link
                   href={`/products/${product.slug}`}
-                  className="relative size-28 shrink-0 overflow-hidden bg-cream sm:size-32"
+                  className="relative block size-28 shrink-0 bg-cream sm:size-32"
                 >
-                  <Image src={product.image} alt={product.name} fill className="object-cover" sizes="128px" />
+                  <div className="absolute inset-2.5 sm:inset-3">
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      fill
+                      className="object-contain object-bottom"
+                      sizes="128px"
+                    />
+                  </div>
                 </Link>
                 <div className="flex min-w-0 flex-1 flex-col">
                   <Link

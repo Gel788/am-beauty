@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { Reveal } from "@/components/reveal";
 import { MarqueeStrip } from "@/components/marquee-strip";
@@ -15,6 +15,16 @@ const steps = [
 export function HomeRitual() {
   const ref = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const update = () => setIsDesktop(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"],
@@ -24,14 +34,17 @@ export function HomeRitual() {
   return (
     <>
       <section ref={ref} className="section-invert grid min-h-[90vh] lg:grid-cols-2">
-        <div className="relative min-h-[45vh] overflow-hidden lg:min-h-full">
-          <motion.div className="absolute inset-0" style={reduce ? undefined : { y: imageY }}>
+        <div className="relative min-h-[52vh] overflow-hidden sm:min-h-[48vh] lg:min-h-full">
+          <motion.div
+            className="absolute inset-0"
+            style={reduce || !isDesktop ? undefined : { y: imageY }}
+          >
             <Image
               src="/images/cica-texture.jpg"
               alt="Текстура сыворотки"
               fill
-              className="object-cover"
-              sizes="50vw"
+              className="object-cover object-[center_35%] lg:object-center"
+              sizes="(max-width:1024px) 100vw, 50vw"
             />
           </motion.div>
         </div>

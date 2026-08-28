@@ -383,8 +383,10 @@ export function Header() {
                         onClick={() => goSearch(p.shortName)}
                         className="flex w-full cursor-pointer items-center gap-5 py-5 text-left hover:opacity-60"
                       >
-                        <div className="relative size-16 overflow-hidden bg-cream">
-                          <Image src={p.image} alt="" fill className="object-cover" sizes="64px" />
+                        <div className="relative size-16 bg-cream">
+                          <div className="absolute inset-1.5">
+                            <Image src={p.image} alt="" fill className="object-contain object-bottom" sizes="64px" />
+                          </div>
                         </div>
                         <div className="text-left">
                           <p className="text-[11px] tracking-[0.18em] uppercase">{p.shortName}</p>

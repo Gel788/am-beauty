@@ -197,7 +197,15 @@ export function CheckoutView() {
                 {lines.map((l) => (
                   <li key={l.product.slug} className="flex items-center gap-4 py-4">
                     <div className="relative size-14 shrink-0 bg-cream">
-                      <Image src={l.product.image} alt="" fill className="object-cover" sizes="56px" />
+                      <div className="absolute inset-1.5">
+                        <Image
+                          src={l.product.image}
+                          alt=""
+                          fill
+                          className="object-contain object-bottom"
+                          sizes="56px"
+                        />
+                      </div>
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[11px] tracking-[0.14em] uppercase">{l.product.shortName}</p>

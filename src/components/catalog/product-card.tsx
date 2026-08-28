@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { Heart, Star } from "lucide-react";
 import { toast } from "sonner";
@@ -8,6 +7,7 @@ import { formatPrice, type Product } from "@/data/products";
 import { useCartStore } from "@/store/cart-store";
 import { useWishlistStore } from "@/store/wishlist-store";
 import { cn } from "@/lib/utils";
+import { ProductMedia } from "@/components/ui/product-media";
 
 type ProductCardProps = {
   product: Product;
@@ -37,7 +37,12 @@ export function ProductCard({ product, className, priority }: ProductCardProps) 
   return (
     <article className={cn("group text-center", className)}>
       <Link href={`/products/${product.slug}`} className="block">
-        <div className="relative aspect-[3/4] overflow-hidden bg-cream">
+        <ProductMedia
+          src={product.image}
+          alt={product.name}
+          priority={priority}
+          sizes="(max-width:768px) 50vw, 25vw"
+        >
           {product.badge ? (
             <span className="absolute top-0 left-0 z-10 bg-black px-2.5 py-1.5 text-[9px] tracking-[0.18em] text-white uppercase">
               {product.badge}
@@ -52,15 +57,7 @@ export function ProductCard({ product, className, priority }: ProductCardProps) 
           >
             <Heart className={cn("size-4", inWishlist && "fill-black")} strokeWidth={1} />
           </button>
-          <Image
-            src={product.image}
-            alt={product.name}
-            fill
-            priority={priority}
-            className="img-zoom object-cover"
-            sizes="(max-width:768px) 50vw, 25vw"
-          />
-        </div>
+        </ProductMedia>
 
         <div className="mt-4 space-y-1">
           <div className="flex items-center justify-center gap-1 text-[11px] text-grey">

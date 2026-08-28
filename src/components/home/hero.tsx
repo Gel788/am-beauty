@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { products } from "@/data/products";
 import { MarqueeStrip } from "@/components/marquee-strip";
@@ -10,7 +10,17 @@ import { MarqueeStrip } from "@/components/marquee-strip";
 export function HomeHero() {
   const ref = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
+  const [isDesktop, setIsDesktop] = useState(false);
   const lead = products[0];
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const update = () => setIsDesktop(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -27,15 +37,15 @@ export function HomeHero() {
       >
         <motion.div
           className="absolute inset-0 overflow-hidden"
-          style={reduce ? undefined : { y: imageY }}
+          style={reduce || !isDesktop ? undefined : { y: imageY }}
         >
-          <div className={`absolute inset-[-8%] ${reduce ? "" : "hero-kenburns"}`}>
+          <div className={`absolute inset-0 md:inset-[-8%] ${reduce ? "" : "hero-kenburns max-md:!transform-none"}`}>
             <Image
               src="/images/hero-dark.jpg"
               alt=""
               fill
               priority
-              className="object-cover object-[center_35%]"
+              className="object-cover object-[center_42%] md:object-[center_35%]"
               sizes="100vw"
             />
           </div>

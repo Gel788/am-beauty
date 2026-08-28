@@ -13,8 +13,7 @@ export function HomeManifesto() {
     target: ref,
     offset: ["start end", "end start"],
   });
-  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.92, 1, 0.96]);
-  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0.4, 1, 1, 0.5]);
+  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.96, 1, 0.98]);
 
   return (
     <section ref={ref} className="relative overflow-hidden bg-cream py-24 md:py-36">
@@ -30,15 +29,17 @@ export function HomeManifesto() {
 
         <motion.div
           className="relative aspect-[4/5] lg:col-span-7 lg:-mr-16 lg:aspect-auto lg:min-h-[70vh]"
-          style={reduce ? undefined : { scale, opacity }}
+          style={reduce ? undefined : { scale }}
         >
-          <Image
-            src="/images/peptide-v2.jpg"
-            alt="Сыворотка AM Beauty"
-            fill
-            className="object-cover"
-            sizes="60vw"
-          />
+          <div className="absolute inset-3 sm:inset-4 md:inset-0">
+            <Image
+              src="/images/peptide-v2.jpg"
+              alt="Сыворотка AM Beauty"
+              fill
+              className="object-contain object-center md:object-cover"
+              sizes="(max-width:768px) 90vw, 60vw"
+            />
+          </div>
         </motion.div>
       </div>
 

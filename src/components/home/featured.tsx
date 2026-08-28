@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
 import { formatPrice, products } from "@/data/products";
+import { ProductMedia } from "@/components/ui/product-media";
 import { Reveal, Stagger, StaggerItem } from "@/components/reveal";
 
 const trio = products.slice(0, 3);
@@ -36,18 +36,16 @@ export function HomeFeatured() {
             <StaggerItem key={p.slug}>
               <Link
                 href={`/products/${p.slug}`}
-                className="group relative block w-[78vw] shrink-0 snap-center sm:w-[52vw] md:w-[38vw] lg:w-[28vw]"
+                className="group relative block w-[85vw] shrink-0 snap-center sm:w-[52vw] md:w-[38vw] lg:w-[28vw]"
               >
-                <div className="relative aspect-[3/4] overflow-hidden bg-cream">
-                  <Image
-                    src={p.image}
-                    alt={p.name}
-                    fill
-                    priority={i === 0}
-                    className="img-zoom object-cover"
-                    sizes="40vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-90" />
+                <ProductMedia
+                  src={p.image}
+                  alt={p.name}
+                  priority={i === 0}
+                  sizes="(max-width:768px) 85vw, 40vw"
+                  inset="lg"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent md:from-black/70 md:via-transparent" />
                   <div className="absolute inset-x-0 bottom-0 p-6 text-white md:p-8">
                     <p className="text-[10px] tracking-[0.36em] text-white/50 uppercase">
                       N°{String(i + 1).padStart(2, "0")}
@@ -61,7 +59,7 @@ export function HomeFeatured() {
                       Смотреть
                     </span>
                   </div>
-                </div>
+                </ProductMedia>
               </Link>
             </StaggerItem>
           ))}

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { ChevronDown, Heart, Minus, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { ProductCard } from "@/components/catalog/product-card";
+import { ProductMedia } from "@/components/ui/product-media";
 import { formatPrice, getProductsBySlugs, type Product } from "@/data/products";
 import { getReviewsForProduct } from "@/data/reviews";
 import { useCartStore } from "@/store/cart-store";
@@ -101,16 +102,15 @@ export function ProductDetail({ product }: { product: Product }) {
 
         <div className="mt-10 grid gap-12 lg:grid-cols-2 lg:gap-20">
           <div>
-            <div className="relative aspect-square overflow-hidden bg-cream">
-              <Image
-                src={product.gallery[activeImage] ?? product.image}
-                alt={product.name}
-                fill
-                priority
-                className="object-cover"
-                sizes="50vw"
-              />
-            </div>
+            <ProductMedia
+              src={product.gallery[activeImage] ?? product.image}
+              alt={product.name}
+              priority
+              aspect="aspect-[4/5] lg:aspect-square"
+              sizes="(max-width:1024px) 100vw, 50vw"
+              zoom={false}
+              inset="lg"
+            />
             {product.gallery.length > 1 ? (
               <div className="mt-3 flex gap-2" role="tablist" aria-label="Фото товара">
                 {product.gallery.map((src: string, i: number) => (
@@ -125,7 +125,9 @@ export function ProductDetail({ product }: { product: Product }) {
                       i === activeImage ? "border-black" : "border-border",
                     )}
                   >
-                    <Image src={src} alt="" fill className="object-cover" sizes="64px" />
+                    <div className="absolute inset-1.5">
+                      <Image src={src} alt="" fill className="object-contain object-bottom" sizes="64px" />
+                    </div>
                   </button>
                 ))}
               </div>
