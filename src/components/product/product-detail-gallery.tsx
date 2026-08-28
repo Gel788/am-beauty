@@ -58,10 +58,10 @@ export function ProductDetailGallery({
   };
 
   return (
-    <div className="min-w-0 lg:sticky lg:top-20 lg:self-start">
-      <div className={cn("flex gap-3 lg:gap-5", hasThumbs && "lg:flex-row-reverse")}>
-        <div className="relative min-w-0 flex-1">
-          <div className="relative overflow-hidden border border-border bg-cream">
+    <div className="w-full min-w-0 max-w-full overflow-hidden lg:sticky lg:top-20 lg:self-start">
+      <div className={cn("flex w-full min-w-0 max-w-full gap-3 lg:gap-5", hasThumbs && "lg:flex-row-reverse")}>
+        <div className="relative min-w-0 w-full max-w-full flex-1">
+          <div className="relative w-full max-w-full overflow-hidden border border-border bg-cream">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={slideKey(activeSlide)}
@@ -94,7 +94,7 @@ export function ProductDetailGallery({
 
           {hasThumbs ? (
             <div
-              className="mt-3 flex gap-2 overflow-x-auto pb-1 lg:hidden"
+              className="scroll-snap-x mt-3 flex w-full max-w-full gap-2 overflow-x-auto overscroll-x-contain pb-1 lg:hidden"
               role="tablist"
               aria-label="Медиа товара"
             >

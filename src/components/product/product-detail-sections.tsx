@@ -4,6 +4,7 @@ import { ChevronDown } from "lucide-react";
 import type { Review } from "@/data/types";
 import type { Product } from "@/data/products";
 import { Reveal } from "@/components/reveal";
+import { cn } from "@/lib/utils";
 
 export function ProductDetailMarquee({ product }: { product: Product }) {
   const items = [
@@ -23,7 +24,7 @@ export function ProductDetailMarquee({ product }: { product: Product }) {
   ));
 
   return (
-    <div className="overflow-hidden border-y border-border bg-black py-3" aria-hidden>
+    <div className="overflow-x-clip border-y border-border bg-black py-3" aria-hidden>
       <div className="marquee-track flex w-max items-center gap-12 px-6 text-[10px] tracking-[0.28em] text-white/70 uppercase md:gap-20">
         <span className="inline-flex items-center gap-12 md:gap-20">{row}</span>
         <span className="inline-flex items-center gap-12 md:gap-20">{row}</span>
@@ -35,9 +36,9 @@ export function ProductDetailMarquee({ product }: { product: Product }) {
 /** Единый блок: эффекты, ритуал, состав — без трёх разрозненных секций */
 export function ProductDetailEditorial({ product }: { product: Product }) {
   return (
-    <section className="border-b border-border bg-white">
-      <div className="container-page py-12 md:py-16 lg:py-20">
-        <div className="grid gap-12 lg:grid-cols-2 lg:gap-0">
+    <section className="overflow-x-clip border-b border-border bg-white">
+      <div className="container-page max-w-full py-12 md:py-16 lg:py-20">
+        <div className="grid min-w-0 gap-12 lg:grid-cols-2 lg:gap-0">
           <EditorialColumn
             label="Преимущества"
             title="Почему это работает"
@@ -52,7 +53,7 @@ export function ProductDetailEditorial({ product }: { product: Product }) {
                   >
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <p className="pt-0.5 text-[15px] leading-relaxed text-charcoal">{benefit}</p>
+                  <p className="min-w-0 pt-0.5 text-[15px] leading-relaxed break-words text-charcoal">{benefit}</p>
                 </li>
               ))}
             </ul>
@@ -69,7 +70,7 @@ export function ProductDetailEditorial({ product }: { product: Product }) {
                   <span className="w-14 shrink-0 pt-0.5 text-[10px] tracking-[0.2em] text-gold uppercase">
                     Шаг {String(i + 1).padStart(2, "0")}
                   </span>
-                  <p className="text-[15px] leading-relaxed text-charcoal">{step}</p>
+                  <p className="min-w-0 text-[15px] leading-relaxed break-words text-charcoal">{step}</p>
                 </li>
               ))}
             </ol>
@@ -78,7 +79,7 @@ export function ProductDetailEditorial({ product }: { product: Product }) {
 
         <div className="mt-12 border border-border bg-cream/40 md:mt-14">
           <DetailAccordion title="Состав INCI" defaultOpen>
-            <p className="text-sm leading-[1.85] text-charcoal/90">{product.ingredients.join(" · ")}</p>
+            <p className="text-sm leading-[1.85] break-words text-charcoal/90">{product.ingredients.join(" · ")}</p>
           </DetailAccordion>
           <DetailAccordion title="Тип кожи">
             <p className="text-sm leading-relaxed text-charcoal/90">{product.skinTypeLabel}</p>
@@ -106,7 +107,7 @@ function EditorialColumn({
   children: React.ReactNode;
 }) {
   return (
-    <Reveal className={className}>
+    <Reveal className={cn("min-w-0", className)}>
       <p className="text-[10px] tracking-[0.28em] text-grey uppercase">{label}</p>
       <h2 className="mt-3 font-display text-[clamp(1.5rem,3vw,2rem)] leading-tight font-light tracking-[0.02em] text-black">
         {title}

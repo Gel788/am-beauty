@@ -44,10 +44,11 @@ export function ProductDetailBuyBox({
   return (
     <div
       className={cn(
-        variant === "sticky" && "border-t border-border bg-white/90 p-4 backdrop-blur-md",
+        "min-w-0 max-w-full",
+        variant === "sticky" && "border-t border-border bg-white/90 px-4 py-3 backdrop-blur-md sm:px-6",
       )}
     >
-      <div className={cn("flex items-baseline gap-4", variant === "inline" ? "mt-8" : "")}>
+      <div className={cn("flex min-w-0 flex-wrap items-baseline gap-x-4 gap-y-1", variant === "inline" ? "mt-8" : "")}>
         <p className="text-2xl tracking-wide">{formatPrice(product.price)}</p>
         {product.compareAt ? (
           <p className="text-sm text-grey line-through">{formatPrice(product.compareAt)}</p>
@@ -57,9 +58,9 @@ export function ProductDetailBuyBox({
         ) : null}
       </div>
 
-      <div className={cn("flex items-center gap-3", variant === "inline" ? "mt-6" : "mt-3")}>
+      <div className={cn("flex min-w-0 items-center gap-2 sm:gap-3", variant === "inline" ? "mt-6" : "mt-3")}>
         <div
-          className="flex items-center border border-border bg-white"
+          className="flex shrink-0 items-center border border-border bg-white"
           role="group"
           aria-label="Количество"
         >
@@ -67,30 +68,30 @@ export function ProductDetailBuyBox({
             type="button"
             aria-label="Уменьшить"
             onClick={() => onQtyChange(Math.max(1, qty - 1))}
-            className="flex size-11 cursor-pointer items-center justify-center transition-colors hover:bg-cream"
+            className="flex size-10 cursor-pointer items-center justify-center transition-colors hover:bg-cream sm:size-11"
           >
             <Minus className="size-4" strokeWidth={1} />
           </button>
-          <span className="w-10 text-center text-sm tabular-nums" aria-live="polite">
+          <span className="w-8 text-center text-sm tabular-nums sm:w-10" aria-live="polite">
             {qty}
           </span>
           <button
             type="button"
             aria-label="Увеличить"
             onClick={() => onQtyChange(qty + 1)}
-            className="flex size-11 cursor-pointer items-center justify-center transition-colors hover:bg-cream"
+            className="flex size-10 cursor-pointer items-center justify-center transition-colors hover:bg-cream sm:size-11"
           >
             <Plus className="size-4" strokeWidth={1} />
           </button>
         </div>
-        <Button className="h-11 flex-1 cursor-pointer text-[10px] tracking-[0.2em] uppercase" onClick={handleAdd}>
+        <Button className="h-10 min-w-0 flex-1 cursor-pointer px-3 text-[9px] tracking-[0.18em] uppercase sm:h-11 sm:px-4 sm:text-[10px] sm:tracking-[0.2em]" onClick={handleAdd}>
           В корзину
         </Button>
         {variant === "inline" ? (
           <Button
             variant="outline"
             size="icon"
-            className="size-11 shrink-0 cursor-pointer"
+            className="size-10 shrink-0 cursor-pointer sm:size-11"
             aria-label={inWishlist ? "Убрать из избранного" : "В избранное"}
             aria-pressed={inWishlist}
             onClick={() => {
@@ -141,13 +142,13 @@ export function ProductDetailHeroMeta({ product }: { product: Product }) {
         </button>
       </div>
 
-      <h1 className="mt-5 font-display text-[clamp(2rem,5vw,3.25rem)] leading-[1.05] font-light tracking-[0.02em] text-black">
+      <h1 className="mt-5 font-display text-[clamp(2rem,5vw,3.25rem)] leading-[1.05] font-light tracking-[0.02em] break-words text-black">
         {product.name}
       </h1>
 
-      <p className="mt-4 max-w-md text-base leading-relaxed text-grey italic">{product.note}</p>
+      <p className="mt-4 max-w-md text-base leading-relaxed break-words text-grey italic">{product.note}</p>
 
-      <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-grey">
+      <div className="mt-6 flex min-w-0 flex-wrap items-center gap-x-5 gap-y-2 text-sm text-grey">
         <span className="inline-flex items-center gap-1.5">
           <Star className="size-3.5 fill-black text-black" strokeWidth={1} />
           <span className="text-black">{product.rating}</span>
@@ -163,11 +164,11 @@ export function ProductDetailHeroMeta({ product }: { product: Product }) {
         ) : null}
       </div>
 
-      <p className="mt-8 border-l-2 border-gold py-1 pl-4 text-[11px] tracking-[0.2em] text-black uppercase">
+      <p className="mt-8 border-l-2 border-gold py-1 pl-4 text-[11px] tracking-[0.2em] break-words text-black uppercase">
         {product.actives}
       </p>
 
-      <p className="mt-6 max-w-lg text-[15px] leading-[1.75] text-charcoal">{product.description}</p>
+      <p className="mt-6 max-w-lg text-[15px] leading-[1.75] break-words text-charcoal">{product.description}</p>
     </>
   );
 }

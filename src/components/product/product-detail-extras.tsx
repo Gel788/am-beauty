@@ -19,13 +19,13 @@ export function ProductDetailFactsStrip({ product }: { product: Product }) {
   ];
 
   return (
-    <section className="border-y border-border bg-white" aria-label="Характеристики товара">
-      <div className="container-page">
-        <div className="grid grid-cols-2 divide-x divide-y divide-border md:grid-cols-4 md:divide-y-0">
+    <section className="overflow-x-clip border-y border-border bg-white" aria-label="Характеристики товара">
+      <div className="container-page max-w-full">
+        <div className="grid min-w-0 grid-cols-2 divide-x divide-y divide-border md:grid-cols-4 md:divide-y-0">
           {facts.map((fact) => (
-            <div key={fact.label} className="px-4 py-5 sm:px-6 sm:py-6">
+            <div key={fact.label} className="min-w-0 px-3 py-5 sm:px-6 sm:py-6">
               <p className="text-[9px] tracking-[0.2em] text-grey uppercase">{fact.label}</p>
-              <p className="mt-2 text-sm leading-snug text-charcoal">{fact.value}</p>
+              <p className="mt-2 text-sm leading-snug break-words text-charcoal">{fact.value}</p>
             </div>
           ))}
         </div>

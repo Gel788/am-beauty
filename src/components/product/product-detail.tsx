@@ -32,12 +32,12 @@ export function ProductDetail({ product }: { product: Product }) {
 
   return (
     <>
-      <div className="pb-28 lg:pb-0">
-        <section className="border-b border-border bg-cream/50">
-          <div className="container-page pt-6 pb-10 lg:pt-10 lg:pb-14">
+      <div className="overflow-x-clip pb-28 lg:pb-0">
+        <section className="overflow-x-clip border-b border-border bg-cream/50">
+          <div className="container-page max-w-full pt-6 pb-10 lg:pt-10 lg:pb-14">
             <nav
               aria-label="Хлебные крошки"
-              className="text-[10px] tracking-[0.18em] text-grey uppercase"
+              className="text-[10px] tracking-[0.18em] break-words text-grey uppercase"
             >
               <Link href="/" className="transition-colors hover:text-black">
                 Главная
@@ -50,7 +50,7 @@ export function ProductDetail({ product }: { product: Product }) {
               <span className="text-black">{product.shortName}</span>
             </nav>
 
-            <div className="mt-8 grid min-w-0 gap-10 lg:mt-10 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:gap-12 xl:gap-16">
+            <div className="mt-8 grid w-full min-w-0 max-w-full gap-10 lg:mt-10 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:gap-12 xl:gap-16">
             <ProductDetailGallery
               key={product.slug}
               product={product}
@@ -58,8 +58,8 @@ export function ProductDetail({ product }: { product: Product }) {
               onSlideChange={setActiveSlide}
             />
 
-              <div className="min-w-0 lg:sticky lg:top-20 lg:self-start">
-                <div className="border border-border bg-white p-6 lg:p-8">
+              <div className="min-w-0 max-w-full lg:sticky lg:top-20 lg:self-start">
+                <div className="min-w-0 border border-border bg-white p-4 sm:p-6 lg:p-8">
                   <ProductDetailHeroMeta product={product} />
                   <ProductDetailBuyBox product={product} qty={qty} onQtyChange={setQty} />
                   <div className="hidden lg:block">
@@ -115,7 +115,7 @@ export function ProductDetail({ product }: { product: Product }) {
         ) : null}
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 lg:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 max-w-[100vw] overflow-hidden pb-[env(safe-area-inset-bottom)] lg:hidden">
         <ProductDetailBuyBox
           product={product}
           qty={qty}
