@@ -329,3 +329,25 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+.product-media-video {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+}
+
+.product-media-video::-webkit-media-controls,
+.product-media-video::-webkit-media-controls-enclosure,
+.product-media-video::-webkit-media-controls-panel,
+.product-media-video::-webkit-media-controls-play-button,
+.product-media-video::-webkit-media-controls-start-playback-button,
+.product-media-video::-webkit-media-controls-timeline,
+.product-media-video::-webkit-media-controls-current-time-display,
+.product-media-video::-webkit-media-controls-time-remaining-display,
+.product-media-video::-webkit-media-controls-mute-button,
+.product-media-video::-webkit-media-controls-volume-slider,
+.product-media-video::-webkit-media-controls-fullscreen-button {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
