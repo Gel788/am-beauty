@@ -6,6 +6,8 @@ import { Providers } from "@/components/providers";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
 const sans = Geist({
   subsets: ["latin", "cyrillic"],
   variable: "--font-sans",
@@ -13,6 +15,7 @@ const sans = Geist({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: "AM Beauty — премиальная косметика",
     template: "%s · AM Beauty",
