@@ -9,16 +9,17 @@ import { PickupPointPicker } from "@/components/checkout/pickup-point-picker";
 import { OrderSummary } from "@/components/commerce/order-summary";
 import { ConsentFields } from "@/components/legal/consent-fields";
 import { formatPrice } from "@/data/products";
+import { useDeliveryQuote, usePickupPointsQuote } from "@/hooks/use-delivery-quote";
+import { useOrderTotals } from "@/hooks/use-order-totals";
 import { createPayment } from "@/lib/payment";
 import {
   CARRIER_LABELS,
   MODE_LABELS,
   type DeliveryCarrier,
   type DeliveryMode,
-  type DeliveryTariff,
 } from "@/lib/delivery/types";
 import { useAccountStore } from "@/store/account-store";
-import { useCartStore, useOrderTotals } from "@/store/cart-store";
+import { useCartStore } from "@/store/cart-store";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -52,41 +53,36 @@ export function CheckoutView() {
   const [consentErrors, setConsentErrors] = useState<{ offer?: string; privacy?: string }>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const profile = useAccountStore((s) => s.profile);
+  const profileName = useAccountStore((s) => s.profile.name);
+  const profileEmail = useAccountStore((s) => s.profile.email);
+  const profilePhone = useAccountStore((s) => s.profile.phone);
   const updateProfile = useAccountStore((s) => s.updateProfile);
   const addOrder = useAccountStore((s) => s.addOrder);
 
   const [contact, setContact] = useState<ContactForm>({
-    name: profile.name,
-    email: profile.email,
-    phone: profile.phone,
+    name: profileName,
+    email: profileEmail,
+    phone: profilePhone,
   });
 
-  const {
-    carrier,
-    mode,
-    tariff,
-    tariffs,
-    tariffsLoading,
-    pickupPoint,
-    pickupPoints,
-    pickupPointsLoading,
-    city,
-    postalCode,
-    address,
-    setCarrier,
-    setMode,
-    setTariff,
-    setTariffs,
-    setTariffsLoading,
-    setPickupPoint,
-    setPickupPoints,
-    setPickupPointsLoading,
-    setCity,
-    setPostalCode,
-    setAddress,
-    resetDelivery,
-  } = useCheckoutStore();
+  const carrier = useCheckoutStore((s) => s.carrier);
+  const mode = useCheckoutStore((s) => s.mode);
+  const tariff = useCheckoutStore((s) => s.tariff);
+  const tariffs = useCheckoutStore((s) => s.tariffs);
+  const tariffsLoading = useCheckoutStore((s) => s.tariffsLoading);
+  const pickupPoint = useCheckoutStore((s) => s.pickupPoint);
+  const pickupPoints = useCheckoutStore((s) => s.pickupPoints);
+  const pickupPointsLoading = useCheckoutStore((s) => s.pickupPointsLoading);
+  const city = useCheckoutStore((s) => s.city);
+  const postalCode = useCheckoutStore((s) => s.postalCode);
+  const address = useCheckoutStore((s) => s.address);
+  const setCarrier = useCheckoutStore((s) => s.setCarrier);
+  const setMode = useCheckoutStore((s) => s.setMode);
+  const setPickupPoint = useCheckoutStore((s) => s.setPickupPoint);
+  const setCity = useCheckoutStore((s) => s.setCity);
+  const setPostalCode = useCheckoutStore((s) => s.setPostalCode);
+  const setAddress = useCheckoutStore((s) => s.setAddress);
+  const resetDelivery = useCheckoutStore((s) => s.resetDelivery);
 
   const { lines, subtotal, discount, shipping, total, promoCode } = useOrderTotals();
   const clearCart = useCartStore((s) => s.clearCart);
@@ -98,153 +94,29 @@ export function CheckoutView() {
 
   const debouncedCity = useDebouncedValue(city, 500);
 
-  useEffect(() => {
-    if (profile.name || profile.email || profile.phone) {
-      setContact((c) => ({
-        name: c.name || profile.name,
-        email: c.email || profile.email,
-        phone: c.phone || profile.phone,
-      }));
-    }
-  }, [profile.name, profile.email, profile.phone]);
-
-  useEffect(() => {
-    if (!debouncedCity.trim()) {
-      setTariffs([]);
-      setTariff(null);
-      setTariffsLoading(false);
-      return;
-    }
-
-    const controller = new AbortController();
-    let cancelled = false;
-
-    (async () => {
-      setTariffsLoading(true);
-      try {
-        const res = await fetch("/api/delivery/tariffs", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          signal: controller.signal,
-          body: JSON.stringify({
-            city: debouncedCity,
-            postalCode: postalCode || undefined,
-            subtotal,
-            itemCount,
-          }),
-        });
-        if (!res.ok) throw new Error("tariffs failed");
-        const data = (await res.json()) as { tariffs: DeliveryTariff[] };
-        if (cancelled) return;
-
-        setTariffs(data.tariffs);
-
-        const current = useCheckoutStore.getState();
-        if (data.tariffs.length === 0) {
-          setTariff(null);
-          return;
-        }
-
-        if (current.carrier) {
-          const match =
-            data.tariffs.find(
-              (t) => t.carrier === current.carrier && t.mode === current.mode,
-            ) ?? data.tariffs.find((t) => t.carrier === current.carrier);
-          setTariff(match ?? null);
-          return;
-        }
-
-        const preferred =
-          data.tariffs.find((t) => t.mode === current.mode) ?? data.tariffs[0];
-        setCarrier(preferred.carrier);
-        setMode(preferred.mode);
-        setTariff(preferred);
-      } catch (error) {
-        if (cancelled || (error instanceof DOMException && error.name === "AbortError")) {
-          return;
-        }
-        toast.error("Не удалось рассчитать доставку");
-      } finally {
-        if (!cancelled) setTariffsLoading(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-      controller.abort();
-    };
-  }, [
-    debouncedCity,
+  useDeliveryQuote({
+    city: debouncedCity,
     postalCode,
     subtotal,
     itemCount,
-    setTariffs,
-    setTariff,
-    setTariffsLoading,
-    setCarrier,
-    setMode,
-  ]);
+  });
+  usePickupPointsQuote(debouncedCity, postalCode);
 
   useEffect(() => {
-    if (!carrier || mode !== "pickup" || !debouncedCity.trim()) {
-      setPickupPoints([]);
-      setPickupPointsLoading(false);
-      return;
-    }
-
-    const controller = new AbortController();
-    let cancelled = false;
-
-    (async () => {
-      setPickupPointsLoading(true);
-      try {
-        const params = new URLSearchParams({
-          carrier,
-          city: debouncedCity,
-          ...(postalCode ? { postalCode } : {}),
-        });
-        const res = await fetch(`/api/delivery/pickup-points?${params}`, {
-          signal: controller.signal,
-        });
-        if (!res.ok) throw new Error("pickup points failed");
-        const data = (await res.json()) as { points: typeof pickupPoints };
-        if (!cancelled) setPickupPoints(data.points);
-      } catch (error) {
-        if (cancelled || (error instanceof DOMException && error.name === "AbortError")) {
-          return;
-        }
-        toast.error("Не удалось загрузить пункты выдачи");
-      } finally {
-        if (!cancelled) setPickupPointsLoading(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-      controller.abort();
-    };
-  }, [
-    carrier,
-    mode,
-    debouncedCity,
-    postalCode,
-    setPickupPoints,
-    setPickupPointsLoading,
-  ]);
+    if (!profileName && !profileEmail && !profilePhone) return;
+    setContact((c) => ({
+      name: c.name || profileName,
+      email: c.email || profileEmail,
+      phone: c.phone || profilePhone,
+    }));
+  }, [profileName, profileEmail, profilePhone]);
 
   const handleCarrierSelect = (nextCarrier: DeliveryCarrier) => {
     setCarrier(nextCarrier);
-    const match = tariffs.find((t) => t.carrier === nextCarrier && t.mode === mode)
-      ?? tariffs.find((t) => t.carrier === nextCarrier);
-    if (match) setTariff(match);
   };
 
   const handleModeSelect = (nextMode: DeliveryMode) => {
     setMode(nextMode);
-    if (carrier) {
-      const match = tariffs.find((t) => t.carrier === carrier && t.mode === nextMode);
-      if (match) setTariff(match);
-    }
   };
 
   if (lines.length === 0) {
@@ -469,7 +341,7 @@ export function CheckoutView() {
                   <PickupPointPicker
                     points={pickupPoints}
                     selected={pickupPoint}
-                    loading={pickupPointsLoading}
+                    loading={pickupPointsLoading && pickupPoints.length === 0}
                     onSelect={(point) => {
                       setPickupPoint(point);
                       if (errors.pickup) setErrors((err) => ({ ...err, pickup: "" }));

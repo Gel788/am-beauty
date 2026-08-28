@@ -231,8 +231,12 @@ function AccountContent() {
   const [form, setForm] = useState(profile);
 
   useEffect(() => {
-    setForm(profile);
-  }, [profile]);
+    setForm({
+      name: profile.name,
+      email: profile.email,
+      phone: profile.phone,
+    });
+  }, [profile.name, profile.email, profile.phone]);
 
   const changeTab = useCallback(
     (tab: TabId) => {

@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { getProduct, type Product } from "@/data/products";
 import { FREE_SHIPPING_THRESHOLD, SHIPPING_COST } from "@/lib/commerce";
-import { useCheckoutStore } from "@/store/checkout-store";
 
 export type CartItem = {
   slug: string;
@@ -107,23 +106,4 @@ export function useCartTotals() {
   const shipping = getDefaultShipping(subtotal);
   const total = Math.max(0, subtotal - discount + shipping);
   return { lines, count, subtotal, discount, shipping, total, promoCode };
-}
-
-export function useOrderTotals() {
-  const cart = useCartTotals();
-  const deliveryTariff = useCheckoutStore((s) => s.tariff);
-
-  const shipping =
-    deliveryTariff != null
-      ? deliveryTariff.price
-      : getDefaultShipping(cart.subtotal);
-
-  const total = Math.max(0, cart.subtotal - cart.discount + shipping);
-
-  return {
-    ...cart,
-    shipping,
-    total,
-    deliveryTariff,
-  };
 }
