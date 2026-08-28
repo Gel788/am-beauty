@@ -68,7 +68,7 @@ export function ProductDetailGallery({
                 initial={reduce ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={reduce ? undefined : { opacity: 0 }}
-                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
               >
                 <ProductMedia
                   src={slideImage(product, activeSlide)}
@@ -76,10 +76,10 @@ export function ProductDetailGallery({
                   videoSrc={product.video}
                   videoMode={activeSlide === "video" ? "always" : "off"}
                   priority
-                  aspect="aspect-[4/5]"
+                  aspect="aspect-[3/4]"
                   sizes="(max-width:1024px) 100vw, 55vw"
-                  objectFit="cover"
-                  inset="none"
+                  objectFit="contain"
+                  inset="md"
                   zoom={false}
                 />
               </motion.div>

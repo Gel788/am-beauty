@@ -18,13 +18,12 @@ import { ProductDetailFactsStrip, ProductDetailSidebarExtras } from "@/component
 type Slide = "video" | number;
 
 export function ProductDetail({ product }: { product: Product }) {
-  const hasVideo = Boolean(product.video);
-  const [activeSlide, setActiveSlide] = useState<Slide>(hasVideo ? "video" : 0);
+  const [activeSlide, setActiveSlide] = useState<Slide>(0);
   const [qty, setQty] = useState(1);
 
   useEffect(() => {
-    setActiveSlide(hasVideo ? "video" : 0);
-  }, [product.slug, hasVideo]);
+    setActiveSlide(0);
+  }, [product.slug]);
 
   const related = getProductsBySlugs(product.relatedSlugs);
   const bundle = getProductsBySlugs(product.bundleSlugs);

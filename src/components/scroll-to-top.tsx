@@ -3,13 +3,13 @@
 import type { Lenis } from "lenis";
 import { useLenis } from "lenis/react";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 
 function resetScroll(lenis?: Lenis | null) {
+  lenis?.scrollTo(0, { immediate: true, force: true });
   window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   document.documentElement.scrollTop = 0;
   document.body.scrollTop = 0;
-  lenis?.scrollTo(0, { immediate: true, force: true });
 }
 
 /** Сброс скролла при смене страницы (внутри ReactLenis). */
@@ -18,10 +18,10 @@ export function LenisScrollToTop() {
   const lenis = useLenis();
   const prevPath = useRef(pathname);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (prevPath.current === pathname) return;
     prevPath.current = pathname;
-    requestAnimationFrame(() => resetScroll(lenis));
+    resetScroll(lenis);
   }, [pathname, lenis]);
 
   return null;
@@ -32,10 +32,10 @@ export function NativeScrollToTop() {
   const pathname = usePathname();
   const prevPath = useRef(pathname);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (prevPath.current === pathname) return;
     prevPath.current = pathname;
-    requestAnimationFrame(() => resetScroll());
+    resetScroll();
   }, [pathname]);
 
   return null;
