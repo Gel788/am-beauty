@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { ContentImage } from "@/components/ui/content-image";
 import { cn } from "@/lib/utils";
 
 type VideoMode = "hover" | "always" | "off";
@@ -92,14 +92,14 @@ export function ProductMedia({
           showVideo ? "opacity-0" : "opacity-100",
         )}
       >
-        <Image
+        <ContentImage
           src={src}
           alt={alt}
           fill
           priority={priority}
           sizes={sizes}
-          unoptimized={src.startsWith("/uploads/")}
-          className={cn("object-contain object-bottom", zoom && "img-zoom")}
+          objectFit="contain"
+          className={cn("object-bottom", zoom && "img-zoom")}
         />
       </div>
 

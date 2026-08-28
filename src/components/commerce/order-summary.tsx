@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { ContentImage } from "@/components/ui/content-image";
 import { formatPrice } from "@/data/products";
 import type { Product } from "@/data/products";
 import { ShippingProgress } from "@/components/commerce/shipping-progress";
@@ -43,12 +43,13 @@ export function OrderSummary({
             <li key={l.product.slug} className="flex items-center gap-3">
               <div className="relative size-12 shrink-0 bg-white">
                 <div className="absolute inset-1">
-                  <Image
+                  <ContentImage
                     src={l.product.image}
                     alt=""
                     fill
-                    className="object-contain object-bottom"
+                    objectFit="contain"
                     sizes="48px"
+                    className="object-bottom"
                   />
                 </div>
               </div>

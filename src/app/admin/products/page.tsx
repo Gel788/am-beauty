@@ -1,12 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { QuickProductCreate } from "@/components/admin/quick-product-create";
+import { AdminUploadImage } from "@/components/admin/admin-upload-image";
 import {
   AdminBadge,
   AdminPanel,
@@ -84,7 +84,14 @@ export default function AdminProductsPage() {
                   <div className="flex items-center gap-3">
                     <div className="relative size-12 shrink-0 border border-black/10 bg-cream">
                       <div className="absolute inset-1">
-                        <Image src={product.image} alt="" fill className="object-contain object-bottom" sizes="48px" />
+                        <AdminUploadImage
+                          src={product.image}
+                          alt=""
+                          fill
+                          objectFit="contain"
+                          sizes="48px"
+                          className="object-bottom"
+                        />
                       </div>
                     </div>
                     <div>

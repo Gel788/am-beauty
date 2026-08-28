@@ -16,7 +16,7 @@ export function ShopHero() {
   return (
     <section id="top" className="relative min-h-[100svh] overflow-hidden bg-[var(--ink)]">
       <motion.div className="absolute inset-0" style={{ scale, y }}>
-        <Image
+        <ContentImage
           src="/images/hero-v2.jpg"
           alt="Янтарная сыворотка AM Beauty"
           fill

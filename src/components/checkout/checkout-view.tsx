@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import Image from "next/image";
+import { ContentImage } from "@/components/ui/content-image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CreditCard, Smartphone } from "lucide-react";
@@ -529,12 +529,13 @@ export function CheckoutView() {
                     <li key={l.product.slug} className="flex items-center gap-4 p-4">
                       <div className="relative size-16 shrink-0 bg-cream">
                         <div className="absolute inset-2">
-                          <Image
+                          <ContentImage
                             src={l.product.image}
                             alt=""
                             fill
-                            className="object-contain object-bottom"
+                            objectFit="contain"
                             sizes="64px"
+                            className="object-bottom"
                           />
                         </div>
                       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { ContentImage } from "@/components/ui/content-image";
 import Link from "next/link";
 import { useRef } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
@@ -32,7 +32,7 @@ export function HomeManifesto() {
           style={reduce ? undefined : { scale }}
         >
           <div className="absolute inset-3 sm:inset-4 md:inset-0">
-            <Image
+            <ContentImage
               src={home.manifestoImage}
               alt="Сыворотка AM Beauty"
               fill

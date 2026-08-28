@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import { ContentImage } from "@/components/ui/content-image";
 import Link from "next/link";
 import { ChevronDown, Truck } from "lucide-react";
 import { formatPrice } from "@/data/products";
@@ -105,12 +105,13 @@ export function AccountOrderRow({ order, defaultOpen }: { order: AccountOrder; d
               title={item.name}
             >
               <div className="absolute inset-1">
-                <Image
+                <ContentImage
                   src={item.image}
                   alt=""
                   fill
-                  className="object-contain object-bottom"
+                  objectFit="contain"
                   sizes="44px"
+                  className="object-bottom"
                 />
               </div>
             </div>
@@ -167,12 +168,13 @@ export function AccountOrderRow({ order, defaultOpen }: { order: AccountOrder; d
                   className="relative size-14 shrink-0 border border-border bg-cream"
                 >
                   <div className="absolute inset-1.5">
-                    <Image
+                    <ContentImage
                       src={item.image}
                       alt=""
                       fill
-                      className="object-contain object-bottom"
+                      objectFit="contain"
                       sizes="56px"
+                      className="object-bottom"
                     />
                   </div>
                 </Link>

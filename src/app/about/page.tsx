@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import { ContentImage } from "@/components/ui/content-image";
 import { getPublicCatalog } from "@/lib/catalog/runtime";
 
 export const metadata: Metadata = {
@@ -21,7 +21,7 @@ export default async function AboutPage() {
           <p className="mt-4 leading-relaxed text-grey">{about.paragraph2}</p>
         </div>
         <div className="relative aspect-[4/3] overflow-hidden bg-cream">
-          <Image
+          <ContentImage
             src={about.image}
             alt="Продукция AM Beauty"
             fill

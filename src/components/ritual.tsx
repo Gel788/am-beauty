@@ -51,7 +51,7 @@ export function Ritual() {
         </div>
 
         <Reveal className="relative min-h-[380px] lg:min-h-[640px]">
-          <Image
+          <ContentImage
             src="/images/peptide-v2.jpg"
             alt=""
             fill

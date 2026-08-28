@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { ContentImage } from "@/components/ui/content-image";
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { Reveal } from "@/components/reveal";
@@ -37,7 +37,7 @@ export function HomeRitual() {
             className="absolute inset-0"
             style={reduce || !isDesktop ? undefined : { y: imageY }}
           >
-            <Image
+            <ContentImage
               src={home.ritualImage}
               alt="Текстура сыворотки"
               fill

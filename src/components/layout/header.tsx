@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import { ContentImage } from "@/components/ui/content-image";
 import { Heart, Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { lineLabels } from "@/data/categories";
@@ -381,7 +381,7 @@ export function Header() {
                       >
                         <div className="relative size-16 bg-cream">
                           <div className="absolute inset-1.5">
-                            <Image src={p.image} alt="" fill className="object-contain object-bottom" sizes="64px" />
+                            <ContentImage src={p.image} alt="" fill objectFit="contain" sizes="64px" className="object-bottom" />
                           </div>
                         </div>
                         <div className="text-left">

@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { ContentImage } from "@/components/ui/content-image";
 import Link from "next/link";
 import { ArrowLeft, Check } from "lucide-react";
 import { toast } from "sonner";
@@ -144,7 +144,7 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
                 className="group flex cursor-pointer gap-5 border border-border/80 bg-card p-4 transition-colors hover:border-accent/30"
               >
                 <div className="relative size-24 shrink-0 overflow-hidden bg-black">
-                  <Image
+                  <ContentImage
                     src={p.image}
                     alt={p.name}
                     fill

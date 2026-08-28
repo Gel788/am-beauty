@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import { ContentImage } from "@/components/ui/content-image";
 import { ViewTransition } from "react";
 import { cn } from "@/lib/utils";
 
@@ -17,17 +17,18 @@ export function ProductGallery({ images, alt, name }: ProductGalleryProps) {
   const mainImage = (
     <div className="relative size-full">
       {images.map((src, i) => (
-        <Image
+        <ContentImage
           key={src}
           src={src}
           alt={i === 0 ? alt : `${alt} — вид ${i + 1}`}
           fill
           priority={i === 0}
-          className={cn(
-            "object-cover transition-opacity duration-700 ease-out",
-            i === active ? "opacity-100" : "pointer-events-none opacity-0"
-          )}
+          objectFit="cover"
           sizes="(max-width: 1024px) 100vw, 55vw"
+          className={cn(
+            "transition-opacity duration-700 ease-out",
+            i === active ? "opacity-100" : "pointer-events-none opacity-0",
+          )}
         />
       ))}
     </div>
@@ -74,7 +75,7 @@ export function ProductGallery({ images, alt, name }: ProductGalleryProps) {
                 i === active ? "ring-2 ring-foreground ring-offset-2" : "opacity-70 hover:opacity-100"
               )}
             >
-              <Image src={src} alt="" fill className="object-cover" sizes="120px" />
+              <ContentImage src={src} alt="" fill objectFit="cover" sizes="120px" />
             </button>
           ))}
         </div>

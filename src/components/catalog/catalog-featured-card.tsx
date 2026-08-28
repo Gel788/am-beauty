@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { ContentImage } from "@/components/ui/content-image";
 import { Heart, Star } from "lucide-react";
 import { toast } from "sonner";
 import { formatPrice, type Product } from "@/data/products";
@@ -25,12 +25,13 @@ export function CatalogFeaturedCard({ product }: CatalogFeaturedCardProps) {
           href={`/products/${product.slug}`}
           className="relative block min-h-[220px] overflow-hidden bg-cream sm:min-h-[280px] md:min-h-[420px]"
         >
-          <Image
+          <ContentImage
             src={product.image}
             alt={product.name}
             fill
             priority
-            className="img-zoom object-contain object-bottom p-6 md:p-10"
+            objectFit="contain"
+            className="img-zoom object-bottom p-6 md:p-10"
             sizes="(max-width:768px) 100vw, 50vw"
           />
           {product.badge ? (

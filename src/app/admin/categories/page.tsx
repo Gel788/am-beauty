@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { AdminUploadImage } from "@/components/admin/admin-upload-image";
 import {
   AdminButton,
   AdminField,
@@ -188,7 +188,7 @@ export default function AdminCategoriesPage() {
                     <div className="flex items-center gap-3">
                       <div className="relative size-12 border border-black/10 bg-cream">
                         {cat.image ? (
-                          <Image src={cat.image} alt="" fill className="object-cover" sizes="48px" />
+                          <AdminUploadImage src={cat.image} alt="" fill objectFit="cover" sizes="48px" />
                         ) : null}
                       </div>
                       <div>

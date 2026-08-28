@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import type { ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Play } from "lucide-react";
 import type { Product } from "@/data/products";
 import { ProductMedia } from "@/components/ui/product-media";
+import { ContentImage } from "@/components/ui/content-image";
 import { cn } from "@/lib/utils";
 
 type Slide = "video" | number;
@@ -23,10 +23,6 @@ function slideKey(slide: Slide) {
 function slideImage(product: Product, slide: Slide) {
   if (slide === "video") return product.image;
   return product.gallery[slide] ?? product.image;
-}
-
-function uploadImageProps(src: string) {
-  return src.startsWith("/uploads/") ? { unoptimized: true as const } : {};
 }
 
 export function ProductDetailGallery({
@@ -106,13 +102,13 @@ export function ProductDetailGallery({
                     "video",
                     <>
                       <div className="absolute inset-1.5">
-                        <Image
+                        <ContentImage
                           src={product.image}
                           alt=""
                           fill
-                          className="object-contain object-bottom"
+                          objectFit="contain"
                           sizes="56px"
-                          {...uploadImageProps(product.image)}
+                          className="object-bottom"
                         />
                       </div>
                       <span className="absolute inset-0 flex items-center justify-center bg-black/20">
@@ -126,13 +122,13 @@ export function ProductDetailGallery({
                 thumbButton(
                   i,
                   <div className="absolute inset-1.5">
-                    <Image
+                    <ContentImage
                       src={src}
                       alt=""
                       fill
-                      className="object-contain object-bottom"
+                      objectFit="contain"
                       sizes="56px"
-                      {...uploadImageProps(src)}
+                      className="object-bottom"
                     />
                   </div>,
                   `Фото ${i + 1}`,
@@ -153,13 +149,13 @@ export function ProductDetailGallery({
                   "video",
                   <>
                     <div className="absolute inset-1.5">
-                      <Image
+                      <ContentImage
                         src={product.image}
                         alt=""
                         fill
-                        className="object-contain object-bottom"
+                        objectFit="contain"
                         sizes="68px"
-                        {...uploadImageProps(product.image)}
+                        className="object-bottom"
                       />
                     </div>
                     <span className="absolute inset-0 flex items-center justify-center bg-black/20">
@@ -173,13 +169,13 @@ export function ProductDetailGallery({
               thumbButton(
                 i,
                 <div className="absolute inset-1.5">
-                  <Image
+                  <ContentImage
                     src={src}
                     alt=""
                     fill
-                    className="object-contain object-bottom"
+                    objectFit="contain"
                     sizes="68px"
-                    {...uploadImageProps(src)}
+                    className="object-bottom"
                   />
                 </div>,
                 `Фото ${i + 1}`,

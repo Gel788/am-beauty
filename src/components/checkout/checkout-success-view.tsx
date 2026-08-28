@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { ContentImage } from "@/components/ui/content-image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
@@ -68,7 +68,7 @@ function CheckoutSuccessContent() {
                   <li key={item.slug} className="flex items-center gap-4 py-4 first:pt-0 last:pb-0">
                     <div className="relative size-14 shrink-0 bg-white">
                       <div className="absolute inset-1.5">
-                        <Image
+                        <ContentImage
                           src={item.image}
                           alt=""
                           fill

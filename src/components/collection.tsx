@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
+import { ContentImage } from "@/components/ui/content-image";
 import Link from "next/link";
 import { ViewTransition } from "react";
 import { toast } from "sonner";
@@ -135,7 +135,7 @@ function ShowcaseCard({
           <ViewTransition name={transitionName} share="morph" default="none">
             <div className="absolute inset-4 z-10 md:inset-6">
               <div className="relative size-full">
-                <Image
+                <ContentImage
                   src={product.image}
                   alt={product.name}
                   fill

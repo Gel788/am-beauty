@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { ContentImage } from "@/components/ui/content-image";
 import Link from "next/link";
 import { useCatalogCategories, useSite } from "@/context/catalog-context";
 import { Reveal } from "@/components/reveal";
@@ -23,7 +23,7 @@ export function HomeCategories() {
               href={`/catalog?category=${lead.id}`}
               className="group relative block aspect-[4/3] overflow-hidden sm:aspect-[16/9] md:aspect-[21/9]"
             >
-              <Image
+              <ContentImage
                 src={lead.image}
                 alt={lead.title}
                 fill
@@ -49,7 +49,7 @@ export function HomeCategories() {
                 href={`/catalog?category=${cat.id}`}
                 className="group relative flex min-h-[280px] items-end bg-black p-6 md:min-h-[300px] md:p-8"
               >
-                <Image
+                <ContentImage
                   src={cat.image}
                   alt={cat.title}
                   fill

@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { ContentImage } from "@/components/ui/content-image";
 import { cn } from "@/lib/utils";
 import type { AdminCategory } from "@/lib/admin/types";
 
@@ -60,7 +60,7 @@ function CategoryPill({
     >
       {image ? (
         <span className="relative size-9 overflow-hidden bg-cream md:size-10">
-          <Image src={image} alt="" fill className="object-cover" sizes="40px" />
+          <ContentImage src={image} alt="" fill objectFit="cover" sizes="40px" />
         </span>
       ) : (
         <span className="flex size-9 items-center justify-center bg-black text-[9px] tracking-widest text-white uppercase md:size-10">

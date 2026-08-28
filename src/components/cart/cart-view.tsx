@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import { ContentImage } from "@/components/ui/content-image";
 import { Heart, Minus, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ProductCard } from "@/components/catalog/product-card";
@@ -34,12 +34,13 @@ function CartThumbnailStrip({
         >
           <div className="relative size-14 border border-border bg-white">
             <div className="absolute inset-1.5">
-              <Image
+              <ContentImage
                 src={product.image}
                 alt=""
                 fill
-                className="object-contain object-bottom"
+                objectFit="contain"
                 sizes="56px"
+                className="object-bottom"
               />
             </div>
           </div>
@@ -154,12 +155,13 @@ export function CartView() {
                           className="relative block size-28 shrink-0 overflow-hidden border border-border bg-cream sm:size-32"
                         >
                           <div className="absolute inset-2.5 sm:inset-3">
-                            <Image
+                            <ContentImage
                               src={product.image}
                               alt={product.name}
                               fill
-                              className="object-contain object-bottom"
+                              objectFit="contain"
                               sizes="128px"
+                              className="object-bottom"
                             />
                           </div>
                         </Link>

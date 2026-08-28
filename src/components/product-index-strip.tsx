@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { ContentImage } from "@/components/ui/content-image";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { formatPrice, products } from "@/data/products";
@@ -42,7 +42,7 @@ export function ProductIndexStrip({ className, variant = "hero" }: ProductIndexS
               </span>
 
               <div className="relative z-10 mb-3 size-[4.5rem] overflow-hidden rounded-full ring-1 ring-white/20 transition-all duration-500 group-hover:-translate-y-1 group-hover:ring-[var(--copper)]/70 md:size-20">
-                <Image
+                <ContentImage
                   src={product.image}
                   alt=""
                   fill

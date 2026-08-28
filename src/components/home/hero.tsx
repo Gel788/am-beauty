@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { ContentImage } from "@/components/ui/content-image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
@@ -43,7 +43,7 @@ export function HomeHero() {
           style={reduce || !isDesktop ? undefined : { y: imageY }}
         >
           <div className={`absolute inset-0 md:inset-[-8%] ${reduce ? "" : "hero-kenburns max-md:!transform-none"}`}>
-            <Image
+            <ContentImage
               src={home.heroImage}
               alt=""
               fill
