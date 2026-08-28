@@ -98,6 +98,7 @@ export function ProductMedia({
           fill
           priority={priority}
           sizes={sizes}
+          unoptimized={src.startsWith("/uploads/")}
           className={cn("object-contain object-bottom", zoom && "img-zoom")}
         />
       </div>

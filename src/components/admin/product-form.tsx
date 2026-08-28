@@ -196,14 +196,19 @@ export function ProductForm({ product, categories, mode }: ProductFormProps) {
 
       <AdminPanel title="Медиа">
         <div className="space-y-6">
-          <MediaField
-            label="Главное фото"
-            accept="image"
-            value={form.image ?? ""}
-            onChange={(url) => {
-              set("image", url);
-              if (!form.gallery?.length) set("gallery", url ? [url] : []);
+          <MediaGallery
+            label="Фото товара"
+            images={form.gallery ?? []}
+            mainImage={form.image}
+            onChange={(gallery) => {
+              set("gallery", gallery);
+              if (!gallery.length) {
+                set("image", "");
+              } else if (!form.image || !gallery.includes(form.image)) {
+                set("image", gallery[0]!);
+              }
             }}
+            onMainChange={(url) => set("image", url)}
           />
           <MediaField
             label="Видео товара"
@@ -211,13 +216,6 @@ export function ProductForm({ product, categories, mode }: ProductFormProps) {
             value={form.video ?? ""}
             onChange={(url) => set("video", url || undefined)}
             hint="MP4, WebM или MOV — показывается в карточке товара"
-          />
-          <MediaGallery
-            label="Галерея"
-            images={form.gallery ?? []}
-            mainImage={form.image}
-            onChange={(gallery) => set("gallery", gallery)}
-            onMainChange={(url) => set("image", url)}
           />
         </div>
       </AdminPanel>

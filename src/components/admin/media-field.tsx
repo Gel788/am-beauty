@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Film, ImageIcon, Loader2, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { AdminButton } from "@/components/admin/admin-form";
+import { AdminUploadImage } from "@/components/admin/admin-upload-image";
 import { cn } from "@/lib/utils";
 import type { MediaFile, MediaKind } from "@/lib/admin/media-types";
 
@@ -93,7 +93,7 @@ function MediaPicker({
                   className="group relative aspect-square cursor-pointer overflow-hidden border border-black/10 bg-cream hover:border-gold"
                 >
                   {file.kind === "image" ? (
-                    <Image src={file.url} alt="" fill className="object-cover" sizes="160px" />
+                    <AdminUploadImage src={file.url} alt="" fill objectFit="cover" sizes="160px" />
                   ) : (
                     <div className="flex h-full flex-col items-center justify-center gap-2 text-grey">
                       <Film className="size-8" strokeWidth={1.25} />
@@ -179,7 +179,7 @@ export function MediaField({
           <div className="space-y-3">
             {accept === "image" ? (
               <div className="relative mx-auto aspect-[4/3] max-w-xs border border-black/10 bg-white">
-                <Image src={value} alt="" fill className="object-contain p-2" sizes="320px" />
+                <AdminUploadImage src={value} alt="" fill objectFit="contain" sizes="320px" className="p-2" />
               </div>
             ) : (
               <video

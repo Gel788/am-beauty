@@ -25,6 +25,10 @@ function slideImage(product: Product, slide: Slide) {
   return product.gallery[slide] ?? product.image;
 }
 
+function uploadImageProps(src: string) {
+  return src.startsWith("/uploads/") ? { unoptimized: true as const } : {};
+}
+
 export function ProductDetailGallery({
   product,
   activeSlide,
@@ -108,6 +112,7 @@ export function ProductDetailGallery({
                           fill
                           className="object-contain object-bottom"
                           sizes="56px"
+                          {...uploadImageProps(product.image)}
                         />
                       </div>
                       <span className="absolute inset-0 flex items-center justify-center bg-black/20">
@@ -121,7 +126,14 @@ export function ProductDetailGallery({
                 thumbButton(
                   i,
                   <div className="absolute inset-1.5">
-                    <Image src={src} alt="" fill className="object-contain object-bottom" sizes="56px" />
+                    <Image
+                      src={src}
+                      alt=""
+                      fill
+                      className="object-contain object-bottom"
+                      sizes="56px"
+                      {...uploadImageProps(src)}
+                    />
                   </div>,
                   `Фото ${i + 1}`,
                 ),
@@ -147,6 +159,7 @@ export function ProductDetailGallery({
                         fill
                         className="object-contain object-bottom"
                         sizes="68px"
+                        {...uploadImageProps(product.image)}
                       />
                     </div>
                     <span className="absolute inset-0 flex items-center justify-center bg-black/20">
@@ -160,7 +173,14 @@ export function ProductDetailGallery({
               thumbButton(
                 i,
                 <div className="absolute inset-1.5">
-                  <Image src={src} alt="" fill className="object-contain object-bottom" sizes="68px" />
+                  <Image
+                    src={src}
+                    alt=""
+                    fill
+                    className="object-contain object-bottom"
+                    sizes="68px"
+                    {...uploadImageProps(src)}
+                  />
                 </div>,
                 `Фото ${i + 1}`,
               ),

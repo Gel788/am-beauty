@@ -1,12 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Film, Loader2, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { AdminButton } from "@/components/admin/admin-form";
 import { AdminPanel } from "@/components/admin/admin-ui";
+import { AdminUploadImage } from "@/components/admin/admin-upload-image";
 import { formatBytes, type MediaFile } from "@/lib/admin/media-types";
 import { cn } from "@/lib/utils";
 
@@ -147,7 +147,7 @@ export default function AdminMediaPage() {
                 <div key={file.path} className="group border border-black/10 bg-white">
                   <div className="relative aspect-square bg-cream">
                     {file.kind === "image" ? (
-                      <Image src={file.url} alt="" fill className="object-cover" sizes="200px" />
+                      <AdminUploadImage src={file.url} alt="" fill objectFit="cover" sizes="200px" />
                     ) : (
                       <div className="flex h-full flex-col items-center justify-center gap-2 text-grey">
                         <Film className="size-10" strokeWidth={1.25} />

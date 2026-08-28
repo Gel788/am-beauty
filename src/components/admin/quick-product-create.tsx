@@ -12,6 +12,7 @@ import {
 } from "@/components/admin/admin-form";
 import { AdminPanel } from "@/components/admin/admin-ui";
 import { MediaField } from "@/components/admin/media-field";
+import { MediaGallery } from "@/components/admin/media-gallery";
 import type { AdminCategory } from "@/lib/admin/types";
 
 type Props = {
@@ -28,6 +29,7 @@ export function QuickProductCreate({ categories, onCreated }: Props) {
     price: 5000,
     category: categories[0]?.id ?? "serums",
     image: "",
+    gallery: [] as string[],
     video: "",
   });
 
@@ -36,8 +38,8 @@ export function QuickProductCreate({ categories, onCreated }: Props) {
       toast.error("Укажите название");
       return;
     }
-    if (!form.image) {
-      toast.error("Добавьте фото");
+    if (!form.gallery.length) {
+      toast.error("Добавьте хотя бы одно фото");
       return;
     }
     setSaving(true);
@@ -49,8 +51,8 @@ export function QuickProductCreate({ categories, onCreated }: Props) {
         shortName: form.name.trim(),
         category: form.category,
         price: form.price,
-        image: form.image,
-        gallery: [form.image],
+        image: form.image || form.gallery[0],
+        gallery: form.gallery,
         video: form.video || undefined,
         published: true,
         stock: 10,
@@ -72,6 +74,7 @@ export function QuickProductCreate({ categories, onCreated }: Props) {
       price: 5000,
       category: categories[0]?.id ?? "serums",
       image: "",
+      gallery: [],
       video: "",
     });
     onCreated();
@@ -117,11 +120,18 @@ export function QuickProductCreate({ categories, onCreated }: Props) {
             </AdminSelect>
           </AdminField>
         </AdminGrid>
-        <MediaField
+        <MediaGallery
           label="Фото"
-          accept="image"
-          value={form.image}
-          onChange={(url) => setForm((f) => ({ ...f, image: url }))}
+          images={form.gallery}
+          mainImage={form.image || form.gallery[0]}
+          onChange={(gallery) =>
+            setForm((f) => ({
+              ...f,
+              gallery,
+              image: f.image && gallery.includes(f.image) ? f.image : gallery[0] ?? "",
+            }))
+          }
+          onMainChange={(url) => setForm((f) => ({ ...f, image: url }))}
         />
         <MediaField
           label="Видео (необязательно)"

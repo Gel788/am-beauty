@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import { useRef, useState } from "react";
 import { GripVertical, Loader2, Star, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { AdminButton } from "@/components/admin/admin-form";
+import { AdminUploadImage } from "@/components/admin/admin-upload-image";
 import { cn } from "@/lib/utils";
 
 type MediaGalleryProps = {
@@ -106,7 +106,7 @@ export function MediaGallery({
                 key={`${url}-${index}`}
                 className="group relative aspect-square border border-black/10 bg-white"
               >
-                <Image src={url} alt="" fill className="object-contain p-1" sizes="160px" />
+                <AdminUploadImage src={url} alt="" fill objectFit="contain" sizes="160px" className="p-1" />
                 {mainImage === url ? (
                   <span className="absolute top-1 left-1 bg-gold px-1.5 py-0.5 text-[8px] tracking-wider text-white uppercase">
                     Главное
@@ -148,7 +148,9 @@ export function MediaGallery({
             ))}
           </div>
         ) : (
-          <p className="py-4 text-center text-sm text-grey">Нет фото в галерее</p>
+          <p className="py-4 text-center text-sm text-grey">
+            Перетащите фото сюда или нажмите «Добавить фото» — можно несколько сразу
+          </p>
         )}
 
         <div className="mt-4 flex justify-center">

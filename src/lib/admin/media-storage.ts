@@ -56,8 +56,48 @@ function kindFromMime(mime: string): MediaKind | null {
   return null;
 }
 
+const IMAGE_EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif"]);
+const VIDEO_EXT = new Set([".mp4", ".webm", ".mov"]);
+const HEIC_EXT = new Set([".heic", ".heif"]);
+
+function kindFromFile(file: File): MediaKind | "heic" | null {
+  const fromMime = kindFromMime(file.type);
+  if (fromMime) return fromMime;
+
+  const ext = path.extname(file.name).toLowerCase();
+  if (HEIC_EXT.has(ext)) return "heic";
+  if (IMAGE_EXT.has(ext)) return "image";
+  if (VIDEO_EXT.has(ext)) return "video";
+  return null;
+}
+
+function mimeFromFile(file: File, kind: MediaKind) {
+  if (file.type && (IMAGE_MIME.has(file.type) || VIDEO_MIME.has(file.type))) {
+    return file.type;
+  }
+  const ext = path.extname(file.name).toLowerCase();
+  const map: Record<string, string> = {
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".webp": "image/webp",
+    ".gif": "image/gif",
+    ".avif": "image/avif",
+    ".mp4": "video/mp4",
+    ".webm": "video/webm",
+    ".mov": "video/quicktime",
+  };
+  return map[ext] ?? (kind === "image" ? "image/jpeg" : "video/mp4");
+}
+
 export function validateUpload(file: File, accept?: MediaKind) {
-  const kind = kindFromMime(file.type);
+  const kind = kindFromFile(file);
+  if (kind === "heic") {
+    return {
+      ok: false as const,
+      error: "HEIC не поддерживается — сохраните фото как JPG или PNG",
+    };
+  }
   if (!kind) {
     return { ok: false as const, error: "Неподдерживаемый формат файла" };
   }
@@ -85,7 +125,8 @@ export async function saveUpload(file: File): Promise<MediaFile> {
 
   const root = await ensureMediaDirs();
   const folder = check.kind === "image" ? "images" : "videos";
-  const ext = EXT_BY_MIME[file.type] ?? path.extname(file.name) ?? "";
+  const mime = mimeFromFile(file, check.kind);
+  const ext = EXT_BY_MIME[mime] || path.extname(file.name).toLowerCase() || "";
   const filename = safeName(file.name || `upload${ext}`);
   const relative = `${folder}/${filename}`;
   const absolute = path.join(root, relative);
