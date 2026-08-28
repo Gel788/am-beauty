@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -90,6 +90,11 @@ export function CheckoutView() {
 
   const { lines, subtotal, discount, shipping, total, promoCode } = useOrderTotals();
   const clearCart = useCartStore((s) => s.clearCart);
+  const cartItems = useCartStore((s) => s.items);
+  const itemCount = useMemo(
+    () => cartItems.reduce((sum, item) => sum + item.qty, 0),
+    [cartItems],
+  );
 
   const debouncedCity = useDebouncedValue(city, 500);
 
@@ -105,8 +110,9 @@ export function CheckoutView() {
 
   const fetchTariffs = useCallback(async () => {
     if (!debouncedCity.trim()) {
-      setTariffs([]);
-      setTariff(null);
+      const current = useCheckoutStore.getState();
+      if (current.tariffs.length > 0) setTariffs([]);
+      if (current.tariff !== null) setTariff(null);
       return;
     }
 
@@ -119,7 +125,7 @@ export function CheckoutView() {
           city: debouncedCity,
           postalCode: postalCode || undefined,
           subtotal,
-          itemCount: lines.reduce((s, l) => s + l.qty, 0),
+          itemCount,
         }),
       });
       if (!res.ok) throw new Error();
@@ -131,14 +137,17 @@ export function CheckoutView() {
         const match = data.tariffs.find(
           (t) => t.carrier === current.carrier && t.mode === current.mode,
         ) ?? data.tariffs.find((t) => t.carrier === current.carrier);
-        setTariff(match ?? null);
+        const nextTariff = match ?? null;
+        if (current.tariff?.carrier !== nextTariff?.carrier || current.tariff?.mode !== nextTariff?.mode || current.tariff?.price !== nextTariff?.price) {
+          setTariff(nextTariff);
+        }
       }
     } catch {
       toast.error("Не удалось рассчитать доставку");
     } finally {
       setTariffsLoading(false);
     }
-  }, [debouncedCity, postalCode, subtotal, lines, setTariffs, setTariff, setTariffsLoading]);
+  }, [debouncedCity, postalCode, subtotal, itemCount, setTariffs, setTariff, setTariffsLoading]);
 
   useEffect(() => {
     fetchTariffs();
