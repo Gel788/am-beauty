@@ -32,6 +32,9 @@ export function LegalDocument({ title, description, updatedAt, children }: Legal
             {company.phone}
           </a>
         </p>
+        <p className="mt-3 text-xs">
+          {company.bankName} · р/с {company.account} · БИК {company.bik}
+        </p>
       </aside>
       <p className="mt-8 text-xs text-grey">
         <Link href="/contacts" className="underline underline-offset-2">

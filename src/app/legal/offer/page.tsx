@@ -31,9 +31,19 @@ export default function OfferPage() {
         <li>Наименование: {company.legalName}</li>
         <li>ИНН: {company.inn}</li>
         <li>ОГРНИП: {company.ogrnip}</li>
+        <li>ОКВЭД: {company.okved}</li>
         <li>Юридический адрес: {company.legalAddress}</li>
+        <li>Фактический адрес: {company.postalAddress}</li>
         <li>Email: {company.email}</li>
         <li>Телефон: {company.phone}</li>
+      </ul>
+
+      <h2>2.1. Банковские реквизиты</h2>
+      <ul>
+        <li>Банк: {company.bankName}</li>
+        <li>Расчётный счёт: {company.account}</li>
+        <li>Корр. счёт: {company.corrAccount}</li>
+        <li>БИК: {company.bik}</li>
       </ul>
 
       <h2>3. Предмет договора</h2>

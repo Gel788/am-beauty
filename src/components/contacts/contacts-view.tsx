@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
-import { legalLinks } from "@/data/company";
+import { company, legalLinks } from "@/data/company";
 import { PageHeader } from "@/components/ui/page-header";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -41,22 +41,22 @@ export function ContactsView() {
             <div>
               <dt className="label-caps">Email</dt>
               <dd className="mt-2">
-                <a href="mailto:hello@ambeauty.ru" className="hover:opacity-60">
-                  hello@ambeauty.ru
+                <a href={`mailto:${company.email}`} className="hover:opacity-60">
+                  {company.email}
                 </a>
               </dd>
             </div>
             <div>
               <dt className="label-caps">Телефон</dt>
               <dd className="mt-2">
-                <a href="tel:+74951234567" className="hover:opacity-60">
-                  +7 (495) 123-45-67
+                <a href={`tel:${company.phoneHref}`} className="hover:opacity-60">
+                  {company.phone}
                 </a>
               </dd>
             </div>
             <div>
-              <dt className="label-caps">Шоурум</dt>
-              <dd className="mt-2 text-grey">Москва, Патриаршие пруды</dd>
+              <dt className="label-caps">Адрес</dt>
+              <dd className="mt-2 text-grey">{company.postalAddress}</dd>
             </div>
             <div>
               <dt className="label-caps">Часы работы</dt>
