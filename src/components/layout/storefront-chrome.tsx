@@ -16,7 +16,7 @@ export function StorefrontChrome({ children }: { children: ReactNode }) {
   return (
     <>
       <Header />
-      <main id="main" className="flex-1 overflow-x-clip pt-[3.75rem]">
+      <main id="main" className="flex-1 overflow-x-clip pt-16">
         {children}
       </main>
       <Footer />

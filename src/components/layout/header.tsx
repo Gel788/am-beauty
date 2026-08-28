@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ComponentProps } from "react";
 import { ContentImage } from "@/components/ui/content-image";
 import { Heart, Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
@@ -14,16 +14,73 @@ import { useCartTotals } from "@/store/cart-store";
 import { useWishlistStore } from "@/store/wishlist-store";
 import { cn } from "@/lib/utils";
 
-const iconClass = "size-[18px] stroke-[1]";
+const HEADER_H = "h-16";
+
+const iconClass = "size-[17px] stroke-[1.25]";
 
 function isActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+function HeaderIconButton({
+  children,
+  className,
+  ...props
+}: ComponentProps<"button"> & { children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      className={cn(
+        "flex size-10 cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-black/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+
+function HeaderIconLink({
+  children,
+  className,
+  ...props
+}: ComponentProps<typeof Link> & { children: React.ReactNode }) {
+  return (
+    <Link
+      className={cn(
+        "relative flex size-10 items-center justify-center rounded-full transition-colors hover:bg-black/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </Link>
+  );
+}
+
+function CountBadge({ count, onHero }: { count: number; onHero?: boolean }) {
+  if (count <= 0) return null;
+
+  return (
+    <motion.span
+      key={count}
+      initial={{ scale: 0.6, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      className={cn(
+        "absolute top-1.5 right-1 flex min-w-[1.125rem] items-center justify-center px-0.5 text-[8px] font-medium leading-none tabular-nums",
+        onHero ? "bg-white text-black" : "bg-gold text-black",
+      )}
+    >
+      {count > 9 ? "9+" : count}
+    </motion.span>
+  );
+}
+
 export function Header() {
   const site = useSite();
-  const navItems = site.nav;
+  const navItems = site.nav.filter((item) => item.href !== "/account");
   const router = useRouter();
   const pathname = usePathname();
   const reduce = useReducedMotion();
@@ -41,7 +98,7 @@ export function Header() {
   const suggestions = searchSuggestions(products, query);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
+    const onScroll = () => setScrolled(window.scrollY > 48);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -76,76 +133,91 @@ export function Header() {
     router.push(`/catalog?q=${encodeURIComponent(q)}`);
   };
 
-  const navLinkClass = (href: string) =>
-    cn(
-      "text-[11px] tracking-[0.2em] uppercase transition-opacity hover:opacity-50",
+  const navLinkClass = (href: string) => {
+    const active = isActive(pathname, href);
+    return cn(
+      "relative py-1 text-[10px] tracking-[0.22em] uppercase transition-colors",
       onHero
-        ? isActive(pathname, href)
-          ? "text-white"
-          : "text-white/55"
-        : isActive(pathname, href)
-          ? "text-black"
-          : "text-grey",
+        ? active
+          ? "text-white after:absolute after:inset-x-0 after:-bottom-1.5 after:h-px after:bg-white"
+          : "text-white/60 hover:text-white"
+        : active
+          ? "text-black after:absolute after:inset-x-0 after:-bottom-1.5 after:h-px after:bg-gold"
+          : "text-grey hover:text-black",
     );
+  };
 
-  const iconColor = onHero ? "text-white" : "text-black";
+  const iconTone = onHero ? "text-white hover:bg-white/10" : "text-black hover:bg-black/5";
 
   const closeMenu = () => setMenuOpen(false);
+
+  const brandLink = (
+    <Link
+      href="/"
+      onClick={closeMenu}
+      className={cn(
+        "font-display text-[1.375rem] leading-none font-light tracking-[0.08em] transition-colors sm:text-[1.5rem]",
+        onHero ? "text-white" : "text-black",
+      )}
+    >
+      {site.brand}
+    </Link>
+  );
 
   return (
     <>
       <header
         className={cn(
-          "fixed inset-x-0 top-0 z-50 border-b transition-all duration-500",
-          onHero ? "border-transparent bg-transparent" : "border-border bg-white/95 backdrop-blur-md",
+          "fixed inset-x-0 top-0 z-50 transition-all duration-500 motion-reduce:transition-none",
+          onHero
+            ? "border-b border-white/10 bg-gradient-to-b from-black/55 via-black/20 to-transparent"
+            : "border-b border-border bg-white/95 shadow-[0_1px_0_rgba(0,0,0,0.04)] backdrop-blur-md",
         )}
       >
-        {/* Mobile: 3 колонки — меню | лого | корзина */}
-        <div className="container-page relative grid h-[3.75rem] grid-cols-[3rem_1fr_3rem] items-center lg:hidden">
-          <button
-            type="button"
+        {/* Mobile */}
+        <div
+          className={cn(
+            "container-page relative grid max-w-full grid-cols-[auto_1fr_auto] items-center gap-2 lg:hidden",
+            HEADER_H,
+          )}
+        >
+          <HeaderIconButton
             aria-label={menuOpen ? "Закрыть меню" : "Открыть меню"}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((v) => !v)}
-            className={cn(
-              "flex size-12 cursor-pointer items-center justify-center transition-opacity hover:opacity-60",
-              iconColor,
-            )}
+            className={iconTone}
           >
             {menuOpen ? (
               <X className="size-5" strokeWidth={1.25} />
             ) : (
               <Menu className="size-5" strokeWidth={1.25} />
             )}
-          </button>
+          </HeaderIconButton>
 
-          <Link
-            href="/"
-            onClick={closeMenu}
-            className="justify-self-center text-center text-[11px] font-medium tracking-[0.42em] uppercase"
-            style={{ color: onHero ? "white" : "black" }}
-          >
-            {site.brand}
-          </Link>
+          <div className="justify-self-center">{brandLink}</div>
 
-          <Link
-            href="/cart"
-            aria-label={`Корзина${count > 0 ? `, ${count}` : ""}`}
-            className={cn(
-              "relative flex size-12 items-center justify-center justify-self-end",
-              iconColor,
-            )}
-          >
-            <ShoppingBag className={iconClass} />
-            {count > 0 ? (
-              <span className="absolute top-2.5 right-2 text-[9px] font-medium leading-none">{count}</span>
-            ) : null}
-          </Link>
+          <div className="flex items-center justify-end gap-0.5">
+            <HeaderIconButton
+              aria-label="Поиск"
+              onClick={() => setSearchOpen(true)}
+              className={iconTone}
+            >
+              <Search className={iconClass} />
+            </HeaderIconButton>
+            <HeaderIconLink
+              href="/cart"
+              aria-label={`Корзина${count > 0 ? `, ${count}` : ""}`}
+              className={iconTone}
+            >
+              <ShoppingBag className={iconClass} />
+              <CountBadge count={count} onHero={onHero} />
+            </HeaderIconLink>
+          </div>
         </div>
 
         {/* Desktop */}
-        <div className="container-page hidden h-[3.75rem] grid-cols-[1fr_auto_1fr] items-center lg:grid">
-          <nav className="flex items-center gap-8" aria-label="Основное меню">
+        <div className={cn("container-page hidden max-w-full items-center lg:grid lg:grid-cols-[1fr_auto_1fr]", HEADER_H)}>
+          <nav className="flex items-center gap-7 xl:gap-9" aria-label="Основное меню">
             {navItems.slice(0, 2).map((item) => (
               <Link
                 key={item.href}
@@ -158,17 +230,11 @@ export function Header() {
             ))}
           </nav>
 
-          <Link
-            href="/"
-            className="text-[11px] font-medium tracking-[0.42em] uppercase transition-colors"
-            style={{ color: onHero ? "white" : "black" }}
-          >
-            {site.brand}
-          </Link>
+          {brandLink}
 
-          <div className="flex items-center justify-end gap-0">
-            <nav className="mr-2 flex items-center gap-8">
-              {navItems.slice(2, 4).map((item) => (
+          <div className="flex items-center justify-end gap-1">
+            <nav className="mr-3 flex items-center gap-7 xl:mr-4 xl:gap-9">
+              {navItems.slice(2).map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -180,50 +246,40 @@ export function Header() {
               ))}
             </nav>
 
-            <button
-              type="button"
-              aria-label="Поиск"
-              onClick={() => setSearchOpen(true)}
-              className={cn("flex size-10 cursor-pointer items-center justify-center hover:opacity-50", iconColor)}
-            >
+            <div
+              className={cn(
+                "mr-1 hidden h-5 w-px sm:block",
+                onHero ? "bg-white/20" : "bg-border",
+              )}
+              aria-hidden
+            />
+
+            <HeaderIconButton aria-label="Поиск" onClick={() => setSearchOpen(true)} className={iconTone}>
               <Search className={iconClass} />
-            </button>
+            </HeaderIconButton>
 
-            <Link href="/account" aria-label="Аккаунт" className={cn("flex size-10 items-center justify-center hover:opacity-50", iconColor)}>
+            <HeaderIconLink href="/account" aria-label="Аккаунт" className={iconTone}>
               <User className={iconClass} />
-            </Link>
+            </HeaderIconLink>
 
-            <Link
+            <HeaderIconLink
               href="/account?tab=wishlist"
-              aria-label="Избранное"
-              className={cn("relative flex size-10 items-center justify-center hover:opacity-50", iconColor)}
+              aria-label={`Избранное${wishlistCount > 0 ? `, ${wishlistCount}` : ""}`}
+              className={iconTone}
             >
               <Heart className={iconClass} />
-              {wishlistCount > 0 ? <span className="absolute top-2 right-2 size-1.5 bg-current" /> : null}
-            </Link>
+              <CountBadge count={wishlistCount} onHero={onHero} />
+            </HeaderIconLink>
 
-            <Link
-              href="/cart"
-              aria-label="Корзина"
-              className={cn("relative flex size-10 items-center justify-center hover:opacity-50", iconColor)}
-            >
+            <HeaderIconLink href="/cart" aria-label={`Корзина${count > 0 ? `, ${count}` : ""}`} className={iconTone}>
               <ShoppingBag className={iconClass} />
-              {count > 0 ? (
-                <motion.span
-                  key={count}
-                  initial={{ scale: 0.6, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="absolute -top-0.5 -right-0.5 min-w-4 text-center text-[9px]"
-                >
-                  {count}
-                </motion.span>
-              ) : null}
-            </Link>
+              <CountBadge count={count} onHero={onHero} />
+            </HeaderIconLink>
           </div>
         </div>
       </header>
 
-      {/* Fullscreen mobile menu */}
+      {/* Mobile menu */}
       <AnimatePresence>
         {menuOpen ? (
           <motion.div
@@ -233,19 +289,24 @@ export function Header() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: reduce ? 0 : 0.35 }}
-            className="fixed inset-0 z-[70] flex flex-col bg-white lg:hidden"
+            transition={{ duration: reduce ? 0 : 0.3 }}
+            className="fixed inset-0 z-[70] flex flex-col overflow-hidden bg-cream/30 lg:hidden"
           >
-            <div className="container-page flex h-[3.75rem] items-center justify-between border-b border-border">
+            <div
+              className={cn(
+                "container-page flex max-w-full items-center justify-between border-b border-border bg-white",
+                HEADER_H,
+              )}
+            >
               <button
                 type="button"
                 aria-label="Закрыть меню"
                 onClick={closeMenu}
-                className="flex size-11 cursor-pointer items-center justify-center text-black"
+                className="flex size-10 cursor-pointer items-center justify-center text-black"
               >
                 <X className="size-5" strokeWidth={1} />
               </button>
-              <span className="text-[10px] tracking-[0.32em] text-grey uppercase">Меню</span>
+              <span className="text-[10px] tracking-[0.28em] text-grey uppercase">Меню</span>
               <button
                 type="button"
                 aria-label="Поиск"
@@ -253,33 +314,38 @@ export function Header() {
                   closeMenu();
                   setSearchOpen(true);
                 }}
-                className="flex size-11 cursor-pointer items-center justify-center text-black"
+                className="flex size-10 cursor-pointer items-center justify-center text-black"
               >
                 <Search className={iconClass} />
               </button>
             </div>
 
-            <nav className="flex-1 overflow-y-auto px-6 py-8" aria-label="Мобильное меню">
-              <ul>
+            <nav className="flex-1 overflow-y-auto overscroll-y-contain" aria-label="Мобильное меню">
+              <ul className="border-b border-border bg-white">
                 {navItems.map((item, i) => (
                   <motion.li
                     key={item.href}
-                    initial={reduce ? false : { opacity: 0, x: -24 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: reduce ? 0 : 0.05 + i * 0.06, duration: 0.45 }}
+                    initial={reduce ? false : { opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: reduce ? 0 : 0.04 + i * 0.05, duration: 0.4 }}
                   >
                     <Link
                       href={item.href}
                       onClick={closeMenu}
                       className={cn(
-                        "group flex items-baseline gap-5 border-b border-border py-5",
-                        isActive(pathname, item.href) ? "text-black" : "text-grey",
+                        "group flex items-baseline gap-4 border-b border-border px-6 py-5 last:border-b-0 sm:px-8",
+                        isActive(pathname, item.href) ? "bg-cream/40" : "bg-white",
                       )}
                     >
-                      <span className="text-[11px] tracking-[0.2em] text-grey-light">
+                      <span className="w-7 shrink-0 font-display text-lg text-gold/80 tabular-nums">
                         {String(i + 1).padStart(2, "0")}
                       </span>
-                      <span className="text-xl font-light tracking-[0.14em] uppercase transition-colors group-hover:text-black">
+                      <span
+                        className={cn(
+                          "font-display text-2xl leading-none tracking-[0.02em] transition-colors",
+                          isActive(pathname, item.href) ? "text-black" : "text-charcoal group-hover:text-black",
+                        )}
+                      >
                         {item.label}
                       </span>
                     </Link>
@@ -288,19 +354,19 @@ export function Header() {
               </ul>
 
               <motion.div
-                initial={reduce ? false : { opacity: 0, y: 16 }}
+                initial={reduce ? false : { opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: reduce ? 0 : 0.4 }}
-                className="mt-10"
+                transition={{ delay: reduce ? 0 : 0.28 }}
+                className="px-6 py-8 sm:px-8"
               >
-                <p className="label-caps">Категории</p>
-                <div className="mt-4 flex flex-wrap gap-2">
+                <p className="text-[10px] tracking-[0.28em] text-grey uppercase">Категории</p>
+                <div className="scroll-snap-x mt-4 flex gap-2 overflow-x-auto pb-1">
                   {categories.map((cat) => (
                     <Link
                       key={cat.id}
                       href={`/catalog?category=${cat.id}`}
                       onClick={closeMenu}
-                      className="border border-border px-3 py-2 text-[10px] tracking-[0.16em] uppercase transition-colors hover:border-black hover:text-black"
+                      className="shrink-0 snap-start border border-border bg-white px-3.5 py-2 text-[10px] tracking-[0.16em] text-charcoal uppercase transition-colors hover:border-gold hover:text-black"
                     >
                       {cat.title}
                     </Link>
@@ -309,12 +375,12 @@ export function Header() {
               </motion.div>
             </nav>
 
-            <div className="border-t border-border px-6 py-5">
-              <div className="flex items-center justify-between gap-4">
+            <div className="border-t border-border bg-white px-6 py-5 sm:px-8">
+              <div className="grid grid-cols-2 gap-3">
                 <Link
                   href="/account"
                   onClick={closeMenu}
-                  className="flex flex-1 items-center justify-center gap-2 border border-border py-3 text-[10px] tracking-[0.2em] uppercase"
+                  className="flex items-center justify-center gap-2 border border-border py-3.5 text-[10px] tracking-[0.18em] uppercase transition-colors hover:border-black"
                 >
                   <User className="size-4" strokeWidth={1} />
                   Аккаунт
@@ -322,11 +388,11 @@ export function Header() {
                 <Link
                   href="/account?tab=wishlist"
                   onClick={closeMenu}
-                  className="flex flex-1 items-center justify-center gap-2 border border-border py-3 text-[10px] tracking-[0.2em] uppercase"
+                  className="flex items-center justify-center gap-2 border border-border py-3.5 text-[10px] tracking-[0.18em] uppercase transition-colors hover:border-black"
                 >
                   <Heart className="size-4" strokeWidth={1} />
                   Избранное
-                  {wishlistCount > 0 ? ` (${wishlistCount})` : ""}
+                  {wishlistCount > 0 ? ` · ${wishlistCount}` : ""}
                 </Link>
               </div>
               <p className="mt-4 text-center text-[10px] tracking-[0.2em] text-grey uppercase">
@@ -337,34 +403,34 @@ export function Header() {
         ) : null}
       </AnimatePresence>
 
-      {/* Search overlay */}
+      {/* Search */}
       <AnimatePresence>
         {searchOpen ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[80] bg-white"
+            className="fixed inset-0 z-[80] overflow-y-auto bg-white"
             role="dialog"
             aria-modal="true"
             aria-label="Поиск"
           >
-            <div className="container-page pt-6">
+            <div className="container-page max-w-full pt-6 pb-10">
               <div className="flex items-center gap-4 border-b border-border pb-5">
-                <Search className="size-5 text-grey" strokeWidth={1} />
+                <Search className="size-5 shrink-0 text-grey" strokeWidth={1} />
                 <input
                   ref={inputRef}
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && query && goSearch(query)}
-                  placeholder="Поиск"
-                  className="flex-1 bg-transparent text-sm tracking-[0.12em] uppercase outline-none placeholder:text-grey-light"
+                  placeholder="Найти продукт"
+                  className="min-w-0 flex-1 bg-transparent font-display text-xl font-light tracking-[0.02em] outline-none placeholder:text-grey/60"
                 />
                 <button
                   type="button"
                   aria-label="Закрыть"
                   onClick={() => setSearchOpen(false)}
-                  className="flex size-11 cursor-pointer items-center justify-center text-grey hover:opacity-50"
+                  className="flex size-10 shrink-0 cursor-pointer items-center justify-center text-grey transition-colors hover:text-black"
                 >
                   <X className="size-5" strokeWidth={1} />
                 </button>
@@ -377,15 +443,22 @@ export function Header() {
                       <button
                         type="button"
                         onClick={() => goSearch(p.shortName)}
-                        className="flex w-full cursor-pointer items-center gap-5 py-5 text-left hover:opacity-60"
+                        className="flex w-full cursor-pointer items-center gap-4 py-4 text-left transition-colors hover:bg-cream/40 sm:gap-5 sm:py-5"
                       >
-                        <div className="relative size-16 bg-cream">
-                          <div className="absolute inset-1.5">
-                            <ContentImage src={p.image} alt="" fill objectFit="contain" sizes="64px" className="object-bottom" />
-                          </div>
+                        <div className="relative size-16 shrink-0 overflow-hidden border border-border bg-cream sm:size-[4.5rem]">
+                          <ContentImage
+                            src={p.image}
+                            alt=""
+                            fill
+                            objectFit="cover"
+                            sizes="72px"
+                            className="object-center"
+                          />
                         </div>
-                        <div className="text-left">
-                          <p className="text-[11px] tracking-[0.18em] uppercase">{p.shortName}</p>
+                        <div className="min-w-0 text-left">
+                          <p className="font-display text-lg tracking-[0.02em] text-black">
+                            {p.shortName}
+                          </p>
                           <p className="mt-1 text-xs text-grey">
                             {lineLabels[p.line]} · {formatPrice(p.price)}
                           </p>
@@ -397,7 +470,21 @@ export function Header() {
               ) : query ? (
                 <p className="mt-16 text-center text-sm text-grey">Ничего не найдено</p>
               ) : (
-                <p className="mt-16 text-center text-xs text-grey">Сыворотка · кушон · SPF</p>
+                <div className="mt-12">
+                  <p className="text-[10px] tracking-[0.28em] text-grey uppercase">Популярное</p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {["Сыворотка", "Кушон", "SPF", "Тоник"].map((term) => (
+                      <button
+                        key={term}
+                        type="button"
+                        onClick={() => goSearch(term)}
+                        className="cursor-pointer border border-border px-3.5 py-2 text-[10px] tracking-[0.16em] uppercase transition-colors hover:border-black"
+                      >
+                        {term}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
           </motion.div>

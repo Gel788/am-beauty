@@ -37,7 +37,7 @@ export function HomeHero() {
     <>
       <section
         ref={ref}
-        className="relative -mt-[3.75rem] flex min-h-[100svh] flex-col justify-end overflow-hidden bg-black"
+        className="relative -mt-16 flex min-h-[100svh] flex-col justify-end overflow-hidden bg-black"
       >
         <motion.div
           className="absolute inset-0 overflow-hidden"
