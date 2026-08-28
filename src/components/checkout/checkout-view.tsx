@@ -1,15 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { DeliveryCarrierSelect } from "@/components/checkout/delivery-carrier-select";
+import { PickupPointPicker } from "@/components/checkout/pickup-point-picker";
 import { OrderSummary } from "@/components/commerce/order-summary";
 import { ConsentFields } from "@/components/legal/consent-fields";
 import { formatPrice } from "@/data/products";
 import { createPayment } from "@/lib/payment";
-import { useCartStore, useCartTotals } from "@/store/cart-store";
+import {
+  CARRIER_LABELS,
+  MODE_LABELS,
+  type DeliveryCarrier,
+  type DeliveryMode,
+  type DeliveryTariff,
+} from "@/lib/delivery/types";
+import { useAccountStore } from "@/store/account-store";
+import { useCartStore, useOrderTotals } from "@/store/cart-store";
+import { useCheckoutStore } from "@/store/checkout-store";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
@@ -17,34 +27,165 @@ import { PageHeader } from "@/components/ui/page-header";
 
 const steps = ["Доставка", "Оплата", "Подтверждение"] as const;
 
-type DeliveryForm = {
+type ContactForm = {
   name: string;
   email: string;
   phone: string;
-  city: string;
-  address: string;
 };
 
-const emptyForm: DeliveryForm = {
-  name: "",
-  email: "",
-  phone: "",
-  city: "",
-  address: "",
-};
+function useDebouncedValue<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+  return debounced;
+}
 
 export function CheckoutView() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState<DeliveryForm>(emptyForm);
-  const [errors, setErrors] = useState<Partial<Record<keyof DeliveryForm, string>>>({});
   const [payment, setPayment] = useState<"card" | "sbp">("card");
   const [acceptOffer, setAcceptOffer] = useState(false);
   const [acceptPrivacy, setAcceptPrivacy] = useState(false);
   const [consentErrors, setConsentErrors] = useState<{ offer?: string; privacy?: string }>({});
-  const { lines, subtotal, discount, shipping, total, promoCode } = useCartTotals();
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const profile = useAccountStore((s) => s.profile);
+  const updateProfile = useAccountStore((s) => s.updateProfile);
+  const addOrder = useAccountStore((s) => s.addOrder);
+
+  const [contact, setContact] = useState<ContactForm>({
+    name: profile.name,
+    email: profile.email,
+    phone: profile.phone,
+  });
+
+  const {
+    carrier,
+    mode,
+    tariff,
+    tariffs,
+    tariffsLoading,
+    pickupPoint,
+    pickupPoints,
+    pickupPointsLoading,
+    city,
+    postalCode,
+    address,
+    setCarrier,
+    setMode,
+    setTariff,
+    setTariffs,
+    setTariffsLoading,
+    setPickupPoint,
+    setPickupPoints,
+    setPickupPointsLoading,
+    setCity,
+    setPostalCode,
+    setAddress,
+    resetDelivery,
+  } = useCheckoutStore();
+
+  const { lines, subtotal, discount, shipping, total, promoCode } = useOrderTotals();
   const clearCart = useCartStore((s) => s.clearCart);
+
+  const debouncedCity = useDebouncedValue(city, 500);
+
+  useEffect(() => {
+    if (profile.name || profile.email || profile.phone) {
+      setContact((c) => ({
+        name: c.name || profile.name,
+        email: c.email || profile.email,
+        phone: c.phone || profile.phone,
+      }));
+    }
+  }, [profile.name, profile.email, profile.phone]);
+
+  const fetchTariffs = useCallback(async () => {
+    if (!debouncedCity.trim()) {
+      setTariffs([]);
+      setTariff(null);
+      return;
+    }
+
+    setTariffsLoading(true);
+    try {
+      const res = await fetch("/api/delivery/tariffs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          city: debouncedCity,
+          postalCode: postalCode || undefined,
+          subtotal,
+          itemCount: lines.reduce((s, l) => s + l.qty, 0),
+        }),
+      });
+      if (!res.ok) throw new Error();
+      const data = (await res.json()) as { tariffs: DeliveryTariff[] };
+      setTariffs(data.tariffs);
+
+      const current = useCheckoutStore.getState();
+      if (current.carrier) {
+        const match = data.tariffs.find(
+          (t) => t.carrier === current.carrier && t.mode === current.mode,
+        ) ?? data.tariffs.find((t) => t.carrier === current.carrier);
+        setTariff(match ?? null);
+      }
+    } catch {
+      toast.error("Не удалось рассчитать доставку");
+    } finally {
+      setTariffsLoading(false);
+    }
+  }, [debouncedCity, postalCode, subtotal, lines, setTariffs, setTariff, setTariffsLoading]);
+
+  useEffect(() => {
+    fetchTariffs();
+  }, [fetchTariffs]);
+
+  const fetchPickupPoints = useCallback(async () => {
+    if (!carrier || mode !== "pickup" || !debouncedCity.trim()) {
+      setPickupPoints([]);
+      return;
+    }
+
+    setPickupPointsLoading(true);
+    try {
+      const params = new URLSearchParams({
+        carrier,
+        city: debouncedCity,
+        ...(postalCode ? { postalCode } : {}),
+      });
+      const res = await fetch(`/api/delivery/pickup-points?${params}`);
+      if (!res.ok) throw new Error();
+      const data = (await res.json()) as { points: typeof pickupPoints };
+      setPickupPoints(data.points);
+    } catch {
+      toast.error("Не удалось загрузить пункты выдачи");
+    } finally {
+      setPickupPointsLoading(false);
+    }
+  }, [carrier, mode, debouncedCity, postalCode, setPickupPoints, setPickupPointsLoading]);
+
+  useEffect(() => {
+    fetchPickupPoints();
+  }, [fetchPickupPoints]);
+
+  const handleCarrierSelect = (nextCarrier: DeliveryCarrier) => {
+    setCarrier(nextCarrier);
+    const match = tariffs.find((t) => t.carrier === nextCarrier && t.mode === mode)
+      ?? tariffs.find((t) => t.carrier === nextCarrier);
+    if (match) setTariff(match);
+  };
+
+  const handleModeSelect = (nextMode: DeliveryMode) => {
+    setMode(nextMode);
+    if (carrier) {
+      const match = tariffs.find((t) => t.carrier === carrier && t.mode === nextMode);
+      if (match) setTariff(match);
+    }
+  };
 
   if (lines.length === 0) {
     return (
@@ -60,12 +201,16 @@ export function CheckoutView() {
   }
 
   const validateDelivery = () => {
-    const next: Partial<Record<keyof DeliveryForm, string>> = {};
-    if (!form.name.trim()) next.name = "Укажите имя";
-    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) next.email = "Укажите email";
-    if (!form.phone.trim()) next.phone = "Укажите телефон";
-    if (!form.city.trim()) next.city = "Укажите город";
-    if (!form.address.trim()) next.address = "Укажите адрес";
+    const next: Record<string, string> = {};
+    if (!contact.name.trim()) next.name = "Укажите имя";
+    if (!contact.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)) {
+      next.email = "Укажите email";
+    }
+    if (!contact.phone.trim()) next.phone = "Укажите телефон";
+    if (!city.trim()) next.city = "Укажите город";
+    if (!carrier || !tariff) next.carrier = "Выберите службу доставки";
+    if (mode === "courier" && !address.trim()) next.address = "Укажите адрес";
+    if (mode === "pickup" && !pickupPoint) next.pickup = "Выберите пункт выдачи";
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -79,29 +224,73 @@ export function CheckoutView() {
 
     setLoading(true);
     const orderId = `AM-${Date.now()}`;
+
+    const deliverySelection = {
+      carrier: carrier!,
+      mode,
+      price: shipping,
+      minDays: tariff!.minDays,
+      maxDays: tariff!.maxDays,
+      city,
+      postalCode: postalCode || undefined,
+      address: mode === "courier" ? address : undefined,
+      pickupPoint: mode === "pickup" ? pickupPoint ?? undefined : undefined,
+    };
+
     const result = await createPayment({
       orderId,
       amount: total,
       description: `Заказ AM Beauty ${orderId}`,
       returnUrl: `${typeof window !== "undefined" ? window.location.origin : ""}/checkout/success`,
     });
-    setLoading(false);
+
     if (result.ok) {
+      updateProfile(contact);
+      addOrder({
+        id: orderId,
+        date: new Date().toISOString().slice(0, 10),
+        status: "processing",
+        items: lines.map((l) => ({
+          slug: l.product.slug,
+          name: l.product.shortName,
+          qty: l.qty,
+          price: l.product.price,
+          image: l.product.image,
+        })),
+        delivery: deliverySelection,
+        payment,
+        subtotal,
+        discount,
+        shipping,
+        total,
+        promoCode,
+      });
+
       clearCart();
-      router.push(result.redirectUrl);
+      resetDelivery();
+
+      const deliveryParam = encodeURIComponent(
+        `${CARRIER_LABELS[carrier!]} · ${mode === "pickup" && pickupPoint ? pickupPoint.name : address}`,
+      );
+      const redirectUrl = result.redirectUrl.includes("?")
+        ? `${result.redirectUrl}&delivery=${deliveryParam}`
+        : `${result.redirectUrl}?delivery=${deliveryParam}`;
+      router.push(redirectUrl);
     } else {
       toast.error(result.error);
     }
+
+    setLoading(false);
   };
 
-  const field = (key: keyof DeliveryForm, label: string, type = "text") => (
+  const contactField = (key: keyof ContactForm, label: string, type = "text") => (
     <div>
       <Input
         type={type}
-        value={form[key]}
+        value={contact[key]}
         onChange={(e) => {
-          setForm((f) => ({ ...f, [key]: e.target.value }));
-          if (errors[key]) setErrors((err) => ({ ...err, [key]: undefined }));
+          setContact((f) => ({ ...f, [key]: e.target.value }));
+          if (errors[key]) setErrors((err) => ({ ...err, [key]: "" }));
         }}
         placeholder={label}
         aria-label={label}
@@ -111,6 +300,16 @@ export function CheckoutView() {
       {errors[key] ? <p className="mt-1 text-xs text-destructive">{errors[key]}</p> : null}
     </div>
   );
+
+  const deliverySummary = () => {
+    if (!carrier || !tariff) return null;
+    const carrierLabel = CARRIER_LABELS[carrier];
+    const modeLabel = MODE_LABELS[mode];
+    if (mode === "pickup" && pickupPoint) {
+      return `${carrierLabel} · ${modeLabel} — ${pickupPoint.name}, ${pickupPoint.address}`;
+    }
+    return `${carrierLabel} · ${modeLabel} — ${city}, ${address}`;
+  };
 
   return (
     <div className="container-page section-pad pb-16">
@@ -133,18 +332,93 @@ export function CheckoutView() {
         <div>
           {step === 0 ? (
             <form
-              className="space-y-4"
+              className="space-y-8"
               onSubmit={(e) => {
                 e.preventDefault();
                 if (validateDelivery()) setStep(1);
               }}
             >
-              <h2 className="text-[10px] tracking-[0.22em] uppercase">Адрес доставки</h2>
-              {field("name", "Имя и фамилия")}
-              {field("email", "Email", "email")}
-              {field("phone", "Телефон", "tel")}
-              {field("city", "Город")}
-              {field("address", "Адрес доставки")}
+              <div className="space-y-4">
+                <h2 className="text-[10px] tracking-[0.22em] uppercase">Контактные данные</h2>
+                {contactField("name", "Имя и фамилия")}
+                {contactField("email", "Email", "email")}
+                {contactField("phone", "Телефон", "tel")}
+              </div>
+
+              <div className="space-y-4">
+                <h2 className="text-[10px] tracking-[0.22em] uppercase">Город доставки</h2>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <Input
+                      value={city}
+                      onChange={(e) => {
+                        setCity(e.target.value);
+                        if (errors.city) setErrors((err) => ({ ...err, city: "" }));
+                      }}
+                      placeholder="Город"
+                      aria-label="Город"
+                      aria-invalid={Boolean(errors.city)}
+                      className="h-11"
+                    />
+                    {errors.city ? <p className="mt-1 text-xs text-destructive">{errors.city}</p> : null}
+                  </div>
+                  <Input
+                    value={postalCode}
+                    onChange={(e) => setPostalCode(e.target.value)}
+                    placeholder="Индекс (необязательно)"
+                    aria-label="Почтовый индекс"
+                    className="h-11"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h2 className="text-[10px] tracking-[0.22em] uppercase">Служба доставки</h2>
+                <DeliveryCarrierSelect
+                  tariffs={tariffs}
+                  selectedCarrier={carrier}
+                  selectedMode={mode}
+                  loading={tariffsLoading}
+                  onSelectCarrier={handleCarrierSelect}
+                  onSelectMode={handleModeSelect}
+                />
+                {errors.carrier ? <p className="text-xs text-destructive">{errors.carrier}</p> : null}
+              </div>
+
+              {mode === "courier" ? (
+                <div className="space-y-4">
+                  <h2 className="text-[10px] tracking-[0.22em] uppercase">Адрес курьера</h2>
+                  <Input
+                    value={address}
+                    onChange={(e) => {
+                      setAddress(e.target.value);
+                      if (errors.address) setErrors((err) => ({ ...err, address: "" }));
+                    }}
+                    placeholder="Улица, дом, квартира"
+                    aria-label="Адрес доставки"
+                    aria-invalid={Boolean(errors.address)}
+                    className="h-11"
+                  />
+                  {errors.address ? <p className="text-xs text-destructive">{errors.address}</p> : null}
+                </div>
+              ) : null}
+
+              {mode === "pickup" && carrier ? (
+                <div className="space-y-4">
+                  <h2 className="text-[10px] tracking-[0.22em] uppercase">Пункт выдачи</h2>
+                  <PickupPointPicker
+                    points={pickupPoints}
+                    selected={pickupPoint}
+                    loading={pickupPointsLoading}
+                    onSelect={(point) => {
+                      setPickupPoint(point);
+                      if (errors.pickup) setErrors((err) => ({ ...err, pickup: "" }));
+                    }}
+                  />
+                  {errors.pickup ? <p className="text-xs text-destructive">{errors.pickup}</p> : null}
+                </div>
+              ) : null}
+
               <Button type="submit" className="mt-2 cursor-pointer">
                 Далее
               </Button>
@@ -191,11 +465,9 @@ export function CheckoutView() {
               <dl className="space-y-2 text-sm text-grey">
                 <div>
                   <dt className="text-[10px] tracking-[0.16em] uppercase">Доставка</dt>
-                  <dd className="mt-1 text-black">
-                    {form.name}, {form.city}, {form.address}
-                  </dd>
+                  <dd className="mt-1 text-black">{deliverySummary()}</dd>
                   <dd className="text-black">
-                    {form.phone} · {form.email}
+                    {contact.name} · {contact.phone} · {contact.email}
                   </dd>
                 </div>
                 <div>
