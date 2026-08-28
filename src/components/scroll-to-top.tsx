@@ -1,10 +1,11 @@
 "use client";
 
+import type { Lenis } from "lenis";
 import { useLenis } from "lenis/react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
-function resetScroll(lenis: ReturnType<typeof useLenis>) {
+function resetScroll(lenis?: Lenis | null) {
   window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   document.documentElement.scrollTop = 0;
   document.body.scrollTop = 0;
@@ -34,7 +35,7 @@ export function NativeScrollToTop() {
   useEffect(() => {
     if (prevPath.current === pathname) return;
     prevPath.current = pathname;
-    requestAnimationFrame(() => resetScroll(null));
+    requestAnimationFrame(() => resetScroll());
   }, [pathname]);
 
   return null;
