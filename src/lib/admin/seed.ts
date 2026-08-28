@@ -13,8 +13,8 @@ const MOCK_ORDERS: AdminOrder[] = [
     customerEmail: "alina@example.com",
     customerPhone: "+7 916 123-45-67",
     items: [
-      { slug: "bakuchiol-night", name: "Bakuchiol Night", qty: 1, price: 8900, image: "/images/bakuchiol-v2.jpg" },
-      { slug: "peptide-dew", name: "Peptide Dew", qty: 1, price: 8200, image: "/images/peptide-v2.jpg" },
+      { slug: "bakuchiol-night", name: "Bakuchiol Night", qty: 1, price: 8900, image: "/images/bakuchiol-v2.webp" },
+      { slug: "peptide-dew", name: "Peptide Dew", qty: 1, price: 8200, image: "/images/peptide-v2.webp" },
     ],
     delivery: {
       carrier: "cdek",
@@ -47,7 +47,7 @@ const MOCK_ORDERS: AdminOrder[] = [
     customerEmail: "maria@example.com",
     customerPhone: "+7 903 555-12-34",
     items: [
-      { slug: "cica-repair", name: "Cica Repair", qty: 2, price: 7800, image: "/images/cica-v2.jpg" },
+      { slug: "cica-repair", name: "Cica Repair", qty: 2, price: 7800, image: "/images/cica-v2.webp" },
     ],
     delivery: {
       carrier: "russian_post",
@@ -74,8 +74,8 @@ const MOCK_ORDERS: AdminOrder[] = [
     customerEmail: "elena@example.com",
     customerPhone: "+7 925 777-88-99",
     items: [
-      { slug: "hydra-cream", name: "Hydra Cream", qty: 1, price: 6900, image: "/images/hydra-v2.jpg" },
-      { slug: "micellar-water", name: "Micellar Water", qty: 1, price: 3200, image: "/images/micellar-v2.jpg" },
+      { slug: "hydra-cream", name: "Hydra Cream", qty: 1, price: 6900, image: "/images/cica-v2.webp" },
+      { slug: "micellar-water", name: "Micellar Water", qty: 1, price: 3200, image: "/images/peptide-v2.webp" },
     ],
     delivery: {
       carrier: "yandex",
@@ -100,7 +100,7 @@ const MOCK_ORDERS: AdminOrder[] = [
     customerEmail: "darya@example.com",
     customerPhone: "+7 981 222-33-44",
     items: [
-      { slug: "velvet-tint", name: "Velvet Tint", qty: 3, price: 4200, image: "/images/velvet-v2.jpg" },
+      { slug: "velvet-tint", name: "Velvet Tint", qty: 3, price: 4200, image: "/images/hero-v2.webp" },
     ],
     delivery: {
       carrier: "cdek",
@@ -131,7 +131,7 @@ const MOCK_ORDERS: AdminOrder[] = [
     customerEmail: "olga@example.com",
     customerPhone: "+7 915 444-55-66",
     items: [
-      { slug: "bakuchiol-night", name: "Bakuchiol Night", qty: 1, price: 8900, image: "/images/bakuchiol-v2.jpg" },
+      { slug: "bakuchiol-night", name: "Bakuchiol Night", qty: 1, price: 8900, image: "/images/bakuchiol-v2.webp" },
     ],
     delivery: {
       carrier: "cdek",

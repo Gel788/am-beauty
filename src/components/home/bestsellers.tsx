@@ -1,24 +1,32 @@
+"use client";
+
 import Link from "next/link";
-import { getBestsellers } from "@/data/products";
 import { ProductCard } from "@/components/catalog/product-card";
 import { Reveal, Stagger, StaggerItem } from "@/components/reveal";
+import { useCatalog } from "@/context/catalog-context";
+import { HomeSectionHeader } from "@/components/home/section-header";
 
 export function HomeBestsellers() {
-  const items = getBestsellers(4);
+  const { products } = useCatalog();
+  const featured = products.filter((p) => p.isBestseller).slice(0, 3);
+  const featuredSlugs = new Set(featured.map((p) => p.slug));
+  const items = products.filter((p) => !featuredSlugs.has(p.slug)).slice(0, 4);
+
+  if (items.length === 0) return null;
 
   return (
-    <section className="section-pad bg-white">
+    <section className="border-b border-border bg-white py-16 md:py-24">
       <div className="container-page">
-        <Reveal>
-          <div className="flex items-end justify-between gap-6 border-b border-border pb-8">
-            <h2 className="headline-lg">Хиты продаж</h2>
-            <Link href="/catalog" className="link-underline hidden sm:inline-block">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <HomeSectionHeader label="Магазин" title="Ещё из коллекции" className="sm:mb-0" />
+          <Reveal>
+            <Link href="/catalog" className="link-underline shrink-0">
               Каталог
             </Link>
-          </div>
-        </Reveal>
+          </Reveal>
+        </div>
 
-        <Stagger className="mt-12 grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-4 md:gap-x-8">
+        <Stagger className="mt-10 grid grid-cols-2 gap-x-5 gap-y-10 md:mt-12 md:grid-cols-4 md:gap-x-8 md:gap-y-12">
           {items.map((p, i) => (
             <StaggerItem key={p.slug}>
               <ProductCard product={p} priority={i < 2} />

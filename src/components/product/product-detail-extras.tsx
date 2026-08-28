@@ -34,44 +34,20 @@ export function ProductDetailFactsStrip({ product }: { product: Product }) {
   );
 }
 
+/** Краткий состав в колонке покупки — без дублирования эффектов/ритуала */
 export function ProductDetailSidebarExtras({ product }: { product: Product }) {
+  const highlights = product.ingredients.slice(0, 4);
+
+  if (highlights.length === 0) return null;
+
   return (
-    <div className="mt-8 space-y-6 border-t border-border pt-8">
-      <div>
-        <h3 className="border-l-2 border-gold py-0.5 pl-3 text-[10px] tracking-[0.22em] uppercase">
-          Ключевые эффекты
-        </h3>
-        <ul className="mt-4 space-y-3">
-          {product.benefits.map((benefit, i) => (
-            <li key={benefit} className="flex gap-3 text-sm leading-relaxed text-charcoal">
-              <span className="shrink-0 font-display text-lg leading-none text-gold/80">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <span>{benefit}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="border border-border bg-white p-5">
-        <p className="text-[10px] tracking-[0.18em] text-grey uppercase">Как применять</p>
-        <ol className="mt-3 space-y-2">
-          {product.howToUse.map((step, i) => (
-            <li key={step} className="flex gap-3 text-sm text-charcoal">
-              <span className="shrink-0 text-[10px] tracking-[0.14em] text-gold uppercase">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <span>{step}</span>
-            </li>
-          ))}
-        </ol>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        {product.ingredients.slice(0, 4).map((ingredient) => (
+    <div className="mt-8 border-t border-border pt-6">
+      <p className="text-[10px] tracking-[0.2em] text-grey uppercase">Ключевые компоненты</p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {highlights.map((ingredient) => (
           <span
             key={ingredient}
-            className="border border-border bg-cream/60 px-3 py-2 text-center text-[9px] tracking-[0.12em] text-grey uppercase"
+            className="border border-border bg-cream/50 px-2.5 py-1.5 text-[9px] leading-tight tracking-[0.1em] text-charcoal uppercase"
           >
             {ingredient}
           </span>

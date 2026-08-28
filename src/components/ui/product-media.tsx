@@ -24,11 +24,13 @@ type ProductMediaProps = {
   className?: string;
   aspect?: string;
   zoom?: boolean;
-  inset?: "sm" | "md" | "lg";
+  objectFit?: "contain" | "cover";
+  inset?: "none" | "sm" | "md" | "lg";
   children?: ReactNode;
 };
 
 const insetMap = {
+  none: "inset-0",
   sm: "inset-2 sm:inset-2.5",
   md: "inset-2.5 sm:inset-3.5 md:inset-5",
   lg: "inset-3 sm:inset-4 md:inset-6 lg:inset-8",
@@ -44,6 +46,7 @@ export function ProductMedia({
   className,
   aspect = "aspect-[3/4]",
   zoom = true,
+  objectFit = "contain",
   inset = "md",
   children,
 }: ProductMediaProps) {
@@ -87,8 +90,9 @@ export function ProductMedia({
     >
       <div
         className={cn(
-          "absolute transition-opacity duration-300 motion-reduce:transition-none",
+          "absolute",
           insetMap[inset],
+          "transition-opacity duration-300 motion-reduce:transition-none",
           showVideo ? "opacity-0" : "opacity-100",
         )}
       >
@@ -98,8 +102,8 @@ export function ProductMedia({
           fill
           priority={priority}
           sizes={sizes}
-          objectFit="contain"
-          className={cn("object-bottom", zoom && "img-zoom")}
+          objectFit={objectFit}
+          className={cn(objectFit === "cover" ? "object-center" : "object-bottom", zoom && "img-zoom")}
         />
       </div>
 

@@ -13,6 +13,7 @@
     "deploy:regru": "bash scripts/deploy-regru.sh",
     "deploy:vps": "bash scripts/deploy-vps.sh",
     "sync:videos": "bash scripts/sync-videos-vps.sh",
+    "reprocess:images": "node scripts/reprocess-upload-images.mjs",
     "lint": "eslint"
   },
   "engines": {

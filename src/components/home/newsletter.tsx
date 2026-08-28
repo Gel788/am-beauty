@@ -5,15 +5,21 @@ import { toast } from "sonner";
 import { legalLinks } from "@/data/company";
 import { Input } from "@/components/ui/input";
 import { useSite } from "@/context/catalog-context";
+import { HomeSectionHeader } from "@/components/home/section-header";
 
 export function HomeNewsletter() {
   const { home } = useSite();
+
   return (
-    <section className="section-pad-sm">
-      <div className="container-narrow">
-        <p className="label-caps">Рассылка</p>
-        <h2 className="headline-lg mt-4">{home.newsletterTitle}</h2>
-        <p className="mx-auto mt-4 max-w-sm text-sm text-grey">{home.newsletterText}</p>
+    <section className="border-t border-border bg-cream/50 py-16 md:py-24">
+      <div className="container-page mx-auto max-w-xl text-center">
+        <HomeSectionHeader
+          label="Рассылка"
+          title={home.newsletterTitle}
+          description={home.newsletterText}
+          align="center"
+          className="mx-auto"
+        />
         <form
           className="mx-auto mt-10 flex max-w-md flex-col gap-3 sm:flex-row"
           onSubmit={(e) => {
@@ -32,7 +38,7 @@ export function HomeNewsletter() {
             Подписаться
           </button>
         </form>
-        <p className="mx-auto mt-4 max-w-md text-xs text-grey">
+        <p className="mx-auto mt-4 max-w-md text-xs leading-relaxed text-grey">
           Нажимая «Подписаться», вы соглашаетесь с{" "}
           <Link href={legalLinks.privacy} className="underline underline-offset-2">
             политикой конфиденциальности

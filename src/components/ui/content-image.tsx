@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { normalizeMediaSrc } from "@/lib/admin/media-url";
+import { isOptimizableImageSrc } from "@/lib/admin/image-paths";
 
 type ContentImageProps = {
   src: string;
@@ -16,12 +17,8 @@ type ContentImageProps = {
   priority?: boolean;
 };
 
-function isUploadImagePath(src: string) {
-  return src.startsWith("/uploads/images/");
-}
-
 function isDirectMediaPath(src: string) {
-  return src.startsWith("/uploads/") || src.startsWith("/videos/");
+  return (src.startsWith("/uploads/") && !src.startsWith("/uploads/images/")) || src.startsWith("/videos/");
 }
 
 function widthFromSizes(sizes?: string, fallback = 1200) {
@@ -74,7 +71,7 @@ export function ContentImage({
     );
   }
 
-  if (isUploadImagePath(resolvedSrc)) {
+  if (isOptimizableImageSrc(resolvedSrc)) {
     const deliverySrc = optimizedUploadUrl(resolvedSrc, deliveryWidth);
     const srcSet = [
       `${optimizedUploadUrl(resolvedSrc, Math.round(deliveryWidth * 0.5))} ${Math.round(deliveryWidth * 0.5)}w`,

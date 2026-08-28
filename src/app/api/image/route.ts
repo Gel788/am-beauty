@@ -1,14 +1,13 @@
 import { readFile } from "node:fs/promises";
-import { NextResponse } from "next/server";
-import { getMediaRoot } from "@/lib/admin/media-storage";
-import { normalizeMediaSrc } from "@/lib/admin/media-url";
-import { parseRequestedWidth, resizeForDelivery } from "@/lib/admin/image-process";
-import path from "node:path";
 import { existsSync } from "node:fs";
+import { NextResponse } from "next/server";
+import path from "node:path";
+import { normalizeMediaSrc } from "@/lib/admin/media-url";
+import { isOptimizableImageSrc } from "@/lib/admin/image-paths";
+import { isSupportedImageExt, resolveOptimizableImagePath } from "@/lib/admin/image-resolve.server";
+import { parseRequestedWidth, resizeForDelivery } from "@/lib/admin/image-process";
 
 export const dynamic = "force-dynamic";
-
-const IMAGE_EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif"]);
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -16,23 +15,26 @@ export async function GET(request: Request) {
   const width = parseRequestedWidth(searchParams.get("w"), 1200);
   const quality = Math.min(Math.max(Number.parseInt(searchParams.get("q") ?? "82", 10) || 82, 40), 95);
 
-  if (!src.startsWith("/uploads/images/")) {
+  if (!isOptimizableImageSrc(src)) {
     return NextResponse.json({ error: "Invalid src" }, { status: 400 });
   }
 
-  const relative = src.replace(/^\/uploads\//, "");
-  const ext = path.extname(relative).toLowerCase();
-  if (!IMAGE_EXT.has(ext)) {
+  const resolved = resolveOptimizableImagePath(src);
+  if (!resolved) {
+    return NextResponse.json({ error: "Invalid path" }, { status: 400 });
+  }
+
+  const ext = path.extname(resolved.relative).toLowerCase();
+  if (!isSupportedImageExt(ext)) {
     return NextResponse.json({ error: "Not an image" }, { status: 400 });
   }
 
-  const absolute = path.join(getMediaRoot(), relative);
-  if (!absolute.startsWith(getMediaRoot()) || !existsSync(absolute)) {
+  if (!existsSync(resolved.absolute)) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
   try {
-    const input = await readFile(absolute);
+    const input = await readFile(resolved.absolute);
     const { buffer, mime } = await resizeForDelivery(input, width, quality);
 
     return new NextResponse(buffer, {

@@ -13,6 +13,13 @@ chmod 664 .data/admin-db.json 2>/dev/null || true
 chmod 775 .data 2>/dev/null || true
 
 npm ci
+
+# Старые фото: ресайз + webp, обновление URL в БД (идемпотентно)
+export ADMIN_DB_DIR="$APP_DIR/.data"
+export MEDIA_DIR="$APP_DIR/public/uploads"
+export APP_DIR="$APP_DIR"
+node scripts/reprocess-upload-images.mjs || echo "WARN: reprocess-upload-images failed"
+
 npm run build
 
 # Видео не в git — убеждаемся что лежат в public/videos

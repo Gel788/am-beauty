@@ -58,10 +58,10 @@ export function ProductDetailGallery({
   };
 
   return (
-    <div className="lg:sticky lg:top-20 lg:self-start">
+    <div className="min-w-0 lg:sticky lg:top-20 lg:self-start">
       <div className={cn("flex gap-3 lg:gap-5", hasThumbs && "lg:flex-row-reverse")}>
         <div className="relative min-w-0 flex-1">
-          <div className="relative overflow-hidden border border-border bg-white p-4 sm:p-5 lg:p-6">
+          <div className="relative overflow-hidden border border-border bg-cream">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={slideKey(activeSlide)}
@@ -76,10 +76,11 @@ export function ProductDetailGallery({
                   videoSrc={product.video}
                   videoMode={activeSlide === "video" ? "always" : "off"}
                   priority
-                  aspect="aspect-[4/5] lg:aspect-[4/5]"
+                  aspect="aspect-[4/5]"
                   sizes="(max-width:1024px) 100vw, 55vw"
+                  objectFit="cover"
+                  inset="none"
                   zoom={false}
-                  inset="lg"
                 />
               </motion.div>
             </AnimatePresence>

@@ -9,16 +9,11 @@ import { useProductReviews } from "@/context/catalog-context";
 import { ProductDetailBuyBox, ProductDetailHeroMeta } from "@/components/product/product-detail-buy-box";
 import { ProductDetailGallery } from "@/components/product/product-detail-gallery";
 import {
-  ProductDetailBenefits,
+  ProductDetailEditorial,
   ProductDetailMarquee,
   ProductDetailReviews,
-  ProductDetailRitual,
-  ProductDetailSpecs,
 } from "@/components/product/product-detail-sections";
-import {
-  ProductDetailFactsStrip,
-  ProductDetailSidebarExtras,
-} from "@/components/product/product-detail-extras";
+import { ProductDetailFactsStrip, ProductDetailSidebarExtras } from "@/components/product/product-detail-extras";
 
 type Slide = "video" | number;
 
@@ -55,7 +50,7 @@ export function ProductDetail({ product }: { product: Product }) {
               <span className="text-black">{product.shortName}</span>
             </nav>
 
-            <div className="mt-8 grid gap-10 lg:mt-10 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:gap-12 xl:gap-16">
+            <div className="mt-8 grid min-w-0 gap-10 lg:mt-10 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:gap-12 xl:gap-16">
             <ProductDetailGallery
               key={product.slug}
               product={product}
@@ -63,7 +58,7 @@ export function ProductDetail({ product }: { product: Product }) {
               onSlideChange={setActiveSlide}
             />
 
-              <div className="lg:sticky lg:top-20 lg:self-start">
+              <div className="min-w-0 lg:sticky lg:top-20 lg:self-start">
                 <div className="border border-border bg-white p-6 lg:p-8">
                   <ProductDetailHeroMeta product={product} />
                   <ProductDetailBuyBox product={product} qty={qty} onQtyChange={setQty} />
@@ -78,17 +73,9 @@ export function ProductDetail({ product }: { product: Product }) {
 
         <ProductDetailFactsStrip product={product} />
 
-        <div className="lg:hidden">
-          <div className="container-page py-10">
-            <ProductDetailSidebarExtras product={product} />
-          </div>
-        </div>
-
         <ProductDetailMarquee product={product} />
 
-        <ProductDetailBenefits product={product} />
-        <ProductDetailRitual product={product} />
-        <ProductDetailSpecs product={product} />
+        <ProductDetailEditorial product={product} />
         <ProductDetailReviews reviews={productReviews} />
 
         {bundle.length > 0 ? (

@@ -3,8 +3,7 @@
 import { ChevronDown } from "lucide-react";
 import type { Review } from "@/data/types";
 import type { Product } from "@/data/products";
-import { Reveal, Stagger, StaggerItem } from "@/components/reveal";
-import { cn } from "@/lib/utils";
+import { Reveal } from "@/components/reveal";
 
 export function ProductDetailMarquee({ product }: { product: Product }) {
   const items = [
@@ -33,86 +32,87 @@ export function ProductDetailMarquee({ product }: { product: Product }) {
   );
 }
 
-export function ProductDetailBenefits({ product }: { product: Product }) {
+/** Единый блок: эффекты, ритуал, состав — без трёх разрозненных секций */
+export function ProductDetailEditorial({ product }: { product: Product }) {
   return (
-    <section className="section-pad-sm border-b border-border bg-cream/60">
-      <div className="container-page">
-        <Reveal>
-          <p className="text-center text-[10px] tracking-[0.32em] text-grey uppercase">Преимущества</p>
-          <h2 className="headline-lg mt-4 text-center !normal-case !tracking-[0.02em]">
-            Почему это работает
-          </h2>
-        </Reveal>
-
-        <Stagger className="mt-14 grid gap-10 md:grid-cols-3 md:gap-8">
-          {product.benefits.map((benefit, i) => (
-            <StaggerItem
-              key={benefit}
-              className={cn(
-                "border-t border-black/10 pt-6 text-center md:border-t-0 md:border-l md:pt-0 md:pl-8 md:text-left",
-                i === 0 && "md:border-l-0 md:pl-0",
-              )}
-            >
-              <span className="font-display text-4xl leading-none text-gold/80">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <p className="mt-4 text-sm leading-relaxed text-charcoal">{benefit}</p>
-            </StaggerItem>
-          ))}
-        </Stagger>
-      </div>
-    </section>
-  );
-}
-
-export function ProductDetailRitual({ product }: { product: Product }) {
-  return (
-    <section className="container-page section-pad-sm border-b border-border">
-      <Reveal>
-        <p className="text-[10px] tracking-[0.32em] text-grey uppercase">Ритуал</p>
-        <h2 className="headline-lg mt-4 !normal-case !tracking-[0.02em]">Как применять</h2>
-      </Reveal>
-
-      <ol className="mt-12 grid gap-0 md:grid-cols-3">
-        {product.howToUse.map((step, i) => (
-          <li
-            key={step}
-            className={cn(
-              "relative border-t border-border py-8 md:border-t-0 md:border-l md:px-8 md:py-0",
-              i === 0 && "md:border-l-0 md:pl-0",
-            )}
+    <section className="border-b border-border bg-white">
+      <div className="container-page py-12 md:py-16 lg:py-20">
+        <div className="grid gap-12 lg:grid-cols-2 lg:gap-0">
+          <EditorialColumn
+            label="Преимущества"
+            title="Почему это работает"
+            className="lg:pr-12 xl:pr-16"
           >
-            <span className="text-[10px] tracking-[0.24em] text-gold uppercase">
-              Шаг {String(i + 1).padStart(2, "0")}
-            </span>
-            <p className="mt-3 text-sm leading-relaxed text-charcoal">{step}</p>
-          </li>
-        ))}
-      </ol>
-    </section>
-  );
-}
+            <ul className="divide-y divide-border">
+              {product.benefits.map((benefit, i) => (
+                <li key={benefit} className="flex gap-4 py-5 first:pt-0 last:pb-0">
+                  <span
+                    className="w-8 shrink-0 font-display text-2xl leading-none text-gold/90 tabular-nums"
+                    aria-hidden
+                  >
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <p className="pt-0.5 text-[15px] leading-relaxed text-charcoal">{benefit}</p>
+                </li>
+              ))}
+            </ul>
+          </EditorialColumn>
 
-export function ProductDetailSpecs({ product }: { product: Product }) {
-  return (
-    <section className="section-pad-sm border-b border-border bg-white">
-      <div className="container-page">
-        <Reveal>
-          <p className="text-center text-[10px] tracking-[0.32em] text-grey uppercase">Детали</p>
-          <h2 className="headline-lg mt-4 text-center !normal-case !tracking-[0.02em]">
-            Состав и характеристики
-          </h2>
-        </Reveal>
-        <div className="mx-auto mt-10 max-w-3xl">
-        <DetailAccordion title="Состав INCI" defaultOpen>
-          <p className="font-mono text-xs leading-[1.9] text-grey">{product.ingredients.join(" · ")}</p>
-        </DetailAccordion>
-        <DetailAccordion title="Тип кожи">
-          <p className="text-sm leading-relaxed text-grey">{product.skinTypeLabel}</p>
-        </DetailAccordion>
+          <EditorialColumn
+            label="Ритуал"
+            title="Как применять"
+            className="border-t border-border pt-12 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-12 xl:pl-16"
+          >
+            <ol className="divide-y divide-border">
+              {product.howToUse.map((step, i) => (
+                <li key={step} className="flex gap-4 py-5 first:pt-0 last:pb-0">
+                  <span className="w-14 shrink-0 pt-0.5 text-[10px] tracking-[0.2em] text-gold uppercase">
+                    Шаг {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <p className="text-[15px] leading-relaxed text-charcoal">{step}</p>
+                </li>
+              ))}
+            </ol>
+          </EditorialColumn>
+        </div>
+
+        <div className="mt-12 border border-border bg-cream/40 md:mt-14">
+          <DetailAccordion title="Состав INCI" defaultOpen>
+            <p className="text-sm leading-[1.85] text-charcoal/90">{product.ingredients.join(" · ")}</p>
+          </DetailAccordion>
+          <DetailAccordion title="Тип кожи">
+            <p className="text-sm leading-relaxed text-charcoal/90">{product.skinTypeLabel}</p>
+          </DetailAccordion>
+          {product.ritual ? (
+            <DetailAccordion title="Время применения">
+              <p className="text-sm leading-relaxed text-charcoal/90">{product.ritual}</p>
+            </DetailAccordion>
+          ) : null}
         </div>
       </div>
     </section>
+  );
+}
+
+function EditorialColumn({
+  label,
+  title,
+  className,
+  children,
+}: {
+  label: string;
+  title: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Reveal className={className}>
+      <p className="text-[10px] tracking-[0.28em] text-grey uppercase">{label}</p>
+      <h2 className="mt-3 font-display text-[clamp(1.5rem,3vw,2rem)] leading-tight font-light tracking-[0.02em] text-black">
+        {title}
+      </h2>
+      <div className="mt-8">{children}</div>
+    </Reveal>
   );
 }
 
@@ -161,15 +161,19 @@ function DetailAccordion({
   defaultOpen?: boolean;
 }) {
   return (
-    <details className="group border-b border-border" open={defaultOpen}>
-      <summary className="flex cursor-pointer list-none items-center justify-between py-5 text-[10px] tracking-[0.22em] uppercase transition-colors hover:text-grey [&::-webkit-details-marker]:hidden">
-        {title}
+    <details
+      className="group border-b border-border last:border-b-0 motion-safe:transition-colors open:bg-white/60"
+      open={defaultOpen}
+    >
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-[10px] tracking-[0.22em] uppercase transition-colors hover:text-grey sm:px-6 sm:py-5 [&::-webkit-details-marker]:hidden">
+        <span>{title}</span>
         <ChevronDown
-          className="size-4 transition-transform duration-300 group-open:rotate-180 motion-reduce:transition-none"
+          className="size-4 shrink-0 text-grey transition-transform duration-300 group-open:rotate-180 motion-reduce:transition-none"
           strokeWidth={1}
+          aria-hidden
         />
       </summary>
-      <div className="pb-6">{children}</div>
+      <div className="border-t border-border/60 px-5 pb-5 pt-4 sm:px-6 sm:pb-6">{children}</div>
     </details>
   );
 }

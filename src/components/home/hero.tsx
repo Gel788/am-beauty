@@ -6,15 +6,16 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { products } from "@/data/products";
 import { MarqueeStrip } from "@/components/marquee-strip";
-import { useSite } from "@/context/catalog-context";
+import { useCatalog, useSite } from "@/context/catalog-context";
 
 export function HomeHero() {
   const site = useSite();
+  const { products: catalogProducts } = useCatalog();
   const home = site.home;
   const ref = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
   const [isDesktop, setIsDesktop] = useState(false);
-  const lead = products[0];
+  const lead = catalogProducts[0] ?? products[0];
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)");
@@ -80,7 +81,7 @@ export function HomeHero() {
             initial={reduce ? false : { opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="headline-massive mt-6 max-w-[12ch] text-white"
+            className="mt-6 max-w-[14ch] font-display text-[clamp(2.5rem,7.5vw,5.25rem)] leading-[1.02] font-light tracking-[0.02em] text-white"
           >
             {home.heroTitle}
           </motion.h1>
