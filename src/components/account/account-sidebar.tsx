@@ -15,12 +15,12 @@ import { cn } from "@/lib/utils";
 
 export type AccountTabId = "overview" | "orders" | "profile" | "addresses" | "wishlist";
 
-const TABS: { id: AccountTabId; label: string; icon: typeof LayoutDashboard }[] = [
-  { id: "overview", label: "Обзор", icon: LayoutDashboard },
-  { id: "orders", label: "Заказы", icon: Package },
-  { id: "profile", label: "Профиль", icon: User },
-  { id: "addresses", label: "Адреса", icon: MapPin },
-  { id: "wishlist", label: "Избранное", icon: Heart },
+const TABS: { id: AccountTabId; label: string; shortLabel: string; icon: typeof LayoutDashboard }[] = [
+  { id: "overview", label: "Обзор", shortLabel: "Обзор", icon: LayoutDashboard },
+  { id: "orders", label: "Заказы", shortLabel: "Заказы", icon: Package },
+  { id: "profile", label: "Профиль", shortLabel: "Профиль", icon: User },
+  { id: "addresses", label: "Адреса", shortLabel: "Адреса", icon: MapPin },
+  { id: "wishlist", label: "Избранное", shortLabel: "Избр.", icon: Heart },
 ];
 
 const QUICK_LINKS = [
@@ -56,31 +56,76 @@ export function AccountNav({
   return (
     <nav
       className={cn(
-        vertical ? "flex flex-col gap-0.5" : "flex gap-1 overflow-x-auto border-b border-border pb-px",
+        vertical
+          ? "flex flex-col gap-0.5"
+          : "grid grid-cols-2 gap-2 sm:flex sm:gap-0 sm:overflow-x-auto sm:border-b sm:border-border sm:pb-px",
       )}
       aria-label="Разделы личного кабинета"
     >
-      {TABS.map(({ id, label, icon: Icon }) => (
+      {TABS.map(({ id, label, shortLabel, icon: Icon }) => (
         <button
           key={id}
           type="button"
           onClick={() => onChange(id)}
           className={cn(
-            "flex shrink-0 items-center gap-2.5 px-4 py-3 text-[10px] tracking-[0.16em] uppercase transition-colors cursor-pointer",
+            "flex min-h-11 cursor-pointer items-center justify-center gap-2 px-3 py-2.5 text-[10px] tracking-[0.14em] uppercase transition-colors sm:min-h-0 sm:shrink-0 sm:justify-start sm:px-4 sm:py-3 sm:tracking-[0.16em]",
             vertical
               ? active === id
                 ? "border-l-2 border-gold bg-cream/80 pl-[14px] text-black"
                 : "border-l-2 border-transparent text-grey hover:bg-cream/40 hover:text-black"
               : active === id
-                ? "border-b-2 border-gold text-black"
-                : "text-grey hover:text-black",
+                ? "border border-gold/60 bg-cream/80 text-black sm:border-0 sm:border-b-2 sm:border-gold sm:bg-transparent"
+                : "border border-border bg-white text-grey hover:border-black/20 hover:text-black sm:border-0 sm:bg-transparent",
+            !vertical && id === "wishlist" && "col-span-2 sm:col-span-1",
           )}
         >
-          <Icon className="size-3.5" aria-hidden />
-          {label}
+          <Icon className="size-3.5 shrink-0" aria-hidden />
+          <span className="sm:hidden">{shortLabel}</span>
+          <span className="hidden sm:inline">{label}</span>
         </button>
       ))}
     </nav>
+  );
+}
+
+export function AccountMobileSummary({
+  profile,
+  stats,
+}: {
+  profile: AccountProfile;
+  stats: { orders: number; addresses: number; wishlist: number };
+}) {
+  const name = profile.name.trim() || "Гость";
+
+  return (
+    <div className="border border-border bg-white p-4 sm:p-5">
+      <div className="flex items-center gap-3">
+        <div
+          className="flex size-12 shrink-0 items-center justify-center border border-gold/40 bg-cream font-display text-lg text-gold"
+          aria-hidden
+        >
+          {initials(name)}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-display text-lg tracking-wide">{name}</p>
+          <p className="truncate text-xs text-grey">
+            {profile.email || "Добавьте email в профиле"}
+          </p>
+        </div>
+      </div>
+      <dl className="mt-4 grid grid-cols-3 gap-2 border-t border-border pt-4 text-center">
+        {[
+          { label: "Заказы", value: stats.orders },
+          { label: "Адреса", value: stats.addresses },
+          { label: "Избранное", value: stats.wishlist },
+        ].map((s) => (
+          <div key={s.label} className="min-w-0">
+            <dd className="font-display text-xl text-gold/90 sm:text-2xl">{s.value}</dd>
+            <dt className="mt-0.5 truncate text-[9px] tracking-[0.1em] text-grey uppercase">{s.label}</dt>
+          </div>
+        ))}
+      </dl>
+    </div>
   );
 }
 
@@ -103,7 +148,7 @@ export function AccountSidebar({ active, onChange, profile, stats }: AccountSide
               {profile.email || "Добавьте email в профиле"}
             </p>
             {profile.phone ? (
-              <p className="mt-0.5 text-xs text-grey">{profile.phone}</p>
+              <p className="mt-0.5 truncate text-xs text-grey">{profile.phone}</p>
             ) : null}
           </div>
         </div>
@@ -114,9 +159,9 @@ export function AccountSidebar({ active, onChange, profile, stats }: AccountSide
             { label: "Адреса", value: stats.addresses },
             { label: "Избранное", value: stats.wishlist },
           ].map((s) => (
-            <div key={s.label}>
+            <div key={s.label} className="min-w-0">
               <dd className="font-display text-2xl text-gold/90">{s.value}</dd>
-              <dt className="mt-1 text-[9px] tracking-[0.12em] text-grey uppercase">{s.label}</dt>
+              <dt className="mt-1 truncate text-[9px] tracking-[0.12em] text-grey uppercase">{s.label}</dt>
             </div>
           ))}
         </dl>

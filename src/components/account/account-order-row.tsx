@@ -48,31 +48,45 @@ function toDetail(order: AccountOrder): OrderDetailData {
 
 export function AccountOrderRow({ order, defaultOpen }: { order: AccountOrder; defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen ?? false);
-  const previewItems = order.items.slice(0, 4);
+  const previewItems = order.items.slice(0, 3);
   const extraCount = order.items.length - previewItems.length;
 
   return (
-    <li className="border border-border bg-white transition-colors hover:border-black/20">
+    <li className="overflow-hidden border border-border bg-white transition-colors hover:border-black/20">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full flex-col gap-4 p-5 text-left cursor-pointer sm:flex-row sm:flex-wrap sm:items-center"
+        className="flex w-full flex-col gap-3 p-4 text-left cursor-pointer sm:gap-4 sm:p-5"
       >
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-3">
-            <p className="text-[11px] tracking-[0.14em] uppercase">{order.id}</p>
-            <Badge variant={statusVariant(order.status)} className={statusAccent(order.status)}>
-              {ORDER_STATUS_LABELS[order.status]}
-            </Badge>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <p className="break-all text-[10px] tracking-[0.12em] uppercase sm:text-[11px]">{order.id}</p>
+              <Badge variant={statusVariant(order.status)} className={statusAccent(order.status)}>
+                {ORDER_STATUS_LABELS[order.status]}
+              </Badge>
+            </div>
+            <p className="mt-1 text-xs text-grey">{order.date}</p>
           </div>
-          <p className="mt-1 text-xs text-grey">{order.date}</p>
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            <span className="font-display text-base tracking-wide tabular-nums sm:text-lg">
+              {formatPrice(order.total)}
+            </span>
+            <ChevronDown
+              className={cn(
+                "size-4 text-grey transition-transform motion-safe:duration-300",
+                open && "rotate-180",
+              )}
+              aria-hidden
+            />
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 sm:gap-2">
           {previewItems.map((item) => (
             <div
               key={item.slug}
-              className="relative size-11 shrink-0 border border-border bg-cream"
+              className="relative size-10 shrink-0 border border-border bg-cream sm:size-11"
               title={item.name}
             >
               <div className="absolute inset-1">
@@ -88,24 +102,13 @@ export function AccountOrderRow({ order, defaultOpen }: { order: AccountOrder; d
             </div>
           ))}
           {extraCount > 0 ? (
-            <span className="text-[10px] tracking-[0.12em] text-grey uppercase">+{extraCount}</span>
+            <span className="shrink-0 text-[10px] tracking-[0.12em] text-grey uppercase">+{extraCount}</span>
           ) : null}
-        </div>
-
-        <div className="flex items-center gap-4 sm:ml-auto">
-          <span className="font-display text-lg tracking-wide tabular-nums">{formatPrice(order.total)}</span>
-          <ChevronDown
-            className={cn(
-              "size-4 text-grey transition-transform motion-safe:duration-300",
-              open && "rotate-180",
-            )}
-            aria-hidden
-          />
         </div>
       </button>
 
       {open ? (
-        <div className="border-t border-border bg-cream/20 px-5 py-5">
+        <div className="border-t border-border bg-cream/20 px-3 py-4 sm:px-5 sm:py-5">
           <OrderDetailContent order={toDetail(order)} />
         </div>
       ) : null}

@@ -111,7 +111,7 @@ function InfoCard({
   children: ReactNode;
 }) {
   return (
-    <div className="border border-border bg-white p-4">
+    <div className="border border-border bg-white p-3 sm:p-4">
       <p className="flex items-center gap-2 text-[10px] tracking-[0.16em] uppercase text-grey">
         <Icon className="size-3.5 shrink-0" aria-hidden />
         {title}
@@ -142,14 +142,14 @@ export function OrderDetailContent({
   return (
     <div className={cn("space-y-6", isAdmin && "text-charcoal")}>
       {!hideHeader ? (
-      <header className="border border-border bg-cream/40 p-5 sm:p-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
+      <header className="border border-border bg-cream/40 p-4 sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
           <div className="min-w-0">
             <p className="text-[10px] tracking-[0.2em] uppercase text-grey">Заказ</p>
-            <p className="mt-1 font-display text-2xl tracking-wide">{order.id}</p>
+            <p className="mt-1 break-all font-display text-xl tracking-wide sm:text-2xl">{order.id}</p>
             <p className="mt-1 text-xs text-grey">{order.date}</p>
           </div>
-          <div className="text-right">
+          <div className="flex items-end justify-between gap-4 sm:block sm:text-right">
             <span
               className={cn(
                 "inline-flex px-2.5 py-1 text-[10px] tracking-[0.12em] uppercase",
@@ -158,7 +158,7 @@ export function OrderDetailContent({
             >
               {ORDER_STATUS_LABELS[order.status]}
             </span>
-            <p className="mt-3 font-display text-2xl tracking-wide tabular-nums">
+            <p className="mt-0 font-display text-xl tracking-wide tabular-nums sm:mt-3 sm:text-2xl">
               {formatPrice(order.total)}
             </p>
             <p className="text-xs text-grey">
@@ -166,7 +166,7 @@ export function OrderDetailContent({
             </p>
           </div>
         </div>
-        <div className="mt-5 max-w-md">
+        <div className="mt-4 max-w-md sm:mt-5">
           <OrderStatusTimeline status={order.status} />
         </div>
       </header>
@@ -181,11 +181,11 @@ export function OrderDetailContent({
         {order.customer ? (
           <InfoCard icon={User} title="Клиент">
             <p className="font-medium">{order.customer.name}</p>
-            <p className="flex items-center gap-2 text-grey">
-              <Mail className="size-3.5 shrink-0" aria-hidden />
+            <p className="flex items-start gap-2 break-all text-grey">
+              <Mail className="mt-0.5 size-3.5 shrink-0" aria-hidden />
               {order.customer.email}
             </p>
-            <p className="flex items-center gap-2 text-grey">
+            <p className="flex items-center gap-2 break-all text-grey">
               <Phone className="size-3.5 shrink-0" aria-hidden />
               {order.customer.phone}
             </p>
@@ -244,11 +244,11 @@ export function OrderDetailContent({
         </h3>
         <ul className="mt-4 divide-y divide-border border border-border bg-white">
           {order.items.map((item) => (
-            <li key={`${order.id}-${item.slug}`} className="flex items-center gap-4 p-4 sm:p-5">
+            <li key={`${order.id}-${item.slug}`} className="flex items-start gap-3 p-3 sm:items-center sm:gap-4 sm:p-5">
               {productLinks ? (
                 <Link
                   href={`/products/${item.slug}`}
-                  className="relative size-16 shrink-0 border border-border bg-cream sm:size-20"
+                  className="relative size-14 shrink-0 border border-border bg-cream sm:size-20"
                 >
                   <div className="absolute inset-2">
                     <ContentImage
@@ -262,7 +262,7 @@ export function OrderDetailContent({
                   </div>
                 </Link>
               ) : (
-                <div className="relative size-16 shrink-0 border border-border bg-cream sm:size-20">
+                <div className="relative size-14 shrink-0 border border-border bg-cream sm:size-20">
                   <div className="absolute inset-2">
                     <ContentImage
                       src={item.image}
@@ -279,24 +279,24 @@ export function OrderDetailContent({
                 {productLinks ? (
                   <Link
                     href={`/products/${item.slug}`}
-                    className="block truncate text-[11px] tracking-[0.12em] uppercase hover:opacity-60"
+                    className="block text-[10px] leading-snug tracking-[0.1em] uppercase hover:opacity-60 sm:text-[11px] sm:tracking-[0.12em]"
                   >
                     {item.name}
                   </Link>
                 ) : (
-                  <p className="truncate text-[11px] tracking-[0.12em] uppercase">{item.name}</p>
+                  <p className="text-[10px] leading-snug tracking-[0.1em] uppercase sm:text-[11px] sm:tracking-[0.12em]">{item.name}</p>
                 )}
                 <p className="mt-1 text-xs text-grey">
                   {formatPrice(item.price)} × {item.qty}
                 </p>
               </div>
-              <p className="shrink-0 font-medium tabular-nums">{formatPrice(item.price * item.qty)}</p>
+              <p className="shrink-0 text-sm font-medium tabular-nums">{formatPrice(item.price * item.qty)}</p>
             </li>
           ))}
         </ul>
       </section>
 
-      <aside className="border border-border bg-cream/30 p-5 sm:p-6">
+      <aside className="border border-border bg-cream/30 p-4 sm:p-6">
         <h3 className="border-l-2 border-gold py-0.5 pl-3 text-[10px] tracking-[0.2em] uppercase">
           Итого
         </h3>

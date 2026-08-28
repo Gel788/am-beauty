@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, Plus, Trash2 } from "lucide-react";
@@ -9,7 +8,7 @@ import { toast } from "sonner";
 import { ProductCard } from "@/components/catalog/product-card";
 import { CommercePageHeader } from "@/components/commerce/commerce-page-header";
 import { CommerceTrustMarquee, CommerceTrustPills } from "@/components/commerce/commerce-trust-marquee";
-import { AccountNav, AccountSidebar, type AccountTabId } from "@/components/account/account-sidebar";
+import { AccountMobileSummary, AccountNav, AccountSidebar, type AccountTabId } from "@/components/account/account-sidebar";
 import { AccountOrderRow } from "@/components/account/account-order-row";
 import { formatPrice, getBestsellers } from "@/data/products";
 import { useCatalogProducts } from "@/context/catalog-context";
@@ -200,14 +199,14 @@ function AccountContent() {
 
   return (
     <div className="bg-cream/30">
-      <div className="container-page section-pad pb-16">
+      <div className="container-page pt-8 pb-12 sm:pt-12 sm:pb-16 md:py-20 lg:py-24">
         <CommercePageHeader
           label="Аккаунт"
           title="Личный кабинет"
           description="Заказы, адреса, профиль и избранное — всё для вашего ритуала ухода."
         />
 
-        <div className="mt-10 grid gap-8 lg:grid-cols-[280px_1fr] lg:gap-10">
+        <div className="mt-6 grid gap-4 sm:mt-8 sm:gap-6 lg:grid-cols-[280px_1fr] lg:gap-10">
           <aside className="hidden lg:block">
             <AccountSidebar
               active={activeTab}
@@ -222,18 +221,28 @@ function AccountContent() {
           </aside>
 
           <div className="min-w-0">
-            <div className="border border-border bg-white p-4 lg:hidden">
-              <AccountNav active={activeTab} onChange={changeTab} />
+            <div className="space-y-3 lg:hidden">
+              <AccountMobileSummary
+                profile={profile}
+                stats={{
+                  orders: orders.length,
+                  addresses: addresses.length,
+                  wishlist: wishlistSlugs.length,
+                }}
+              />
+              <div className="border border-border bg-white p-3 sm:p-4">
+                <AccountNav active={activeTab} onChange={changeTab} />
+              </div>
             </div>
 
-            <div className="mt-4 border border-border bg-white p-6 md:p-8 lg:mt-0">
+            <div className="mt-3 border border-border bg-white p-4 sm:mt-4 sm:p-6 md:p-8 lg:mt-0">
               {activeTab === "overview" ? (
                 <div className="space-y-10">
-                  <div className="border border-border bg-cream/50 p-6 md:p-8">
+                  <div className="border border-border bg-cream/50 p-4 sm:p-6 md:p-8">
                     <p className="border-l-2 border-gold py-0.5 pl-3 text-[10px] tracking-[0.22em] uppercase text-grey">
                       Добро пожаловать
                     </p>
-                    <h2 className="mt-4 font-display text-2xl md:text-3xl">{greeting}</h2>
+                    <h2 className="mt-3 font-display text-xl sm:mt-4 sm:text-2xl md:text-3xl">{greeting}</h2>
                     <p className="mt-3 max-w-lg text-sm leading-relaxed text-grey">
                       Здесь собраны ваши заказы, сохранённые адреса и любимые продукты AM Beauty.
                     </p>
@@ -255,14 +264,14 @@ function AccountContent() {
                     </div>
                   </div>
 
-                  <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-3 sm:gap-4">
                     {[
                       { label: "Заказов", value: orders.length, hint: activeOrders ? `${activeOrders} в пути` : "История" },
                       { label: "Потрачено", value: formatPrice(totalSpent), hint: "Всего" },
                       { label: "Избранное", value: wishlistSlugs.length, hint: "Продуктов" },
                     ].map((stat) => (
-                      <div key={stat.label} className="border border-border bg-white p-5 text-center">
-                        <p className="font-display text-2xl text-gold/90 sm:text-3xl">{stat.value}</p>
+                      <div key={stat.label} className="border border-border bg-white p-4 text-center sm:p-5">
+                        <p className="font-display text-xl text-gold/90 sm:text-2xl md:text-3xl">{stat.value}</p>
                         <p className="mt-2 text-[10px] tracking-[0.16em] uppercase text-grey">{stat.label}</p>
                         <p className="mt-1 text-xs text-grey">{stat.hint}</p>
                       </div>
@@ -303,18 +312,18 @@ function AccountContent() {
                     <section className="space-y-6">
                       <div>
                         <SectionHeading>Профиль</SectionHeading>
-                        <dl className="mt-4 space-y-3 border border-border bg-cream/30 p-5 text-sm">
-                          <div className="flex justify-between gap-4">
+                        <dl className="mt-4 space-y-3 border border-border bg-cream/30 p-4 text-sm sm:p-5">
+                          <div className="flex flex-col gap-1 sm:flex-row sm:justify-between sm:gap-4">
                             <dt className="text-grey">Имя</dt>
-                            <dd className="text-right text-charcoal">{profile.name || "—"}</dd>
+                            <dd className="break-words text-charcoal sm:text-right">{profile.name || "—"}</dd>
                           </div>
-                          <div className="flex justify-between gap-4">
+                          <div className="flex flex-col gap-1 sm:flex-row sm:justify-between sm:gap-4">
                             <dt className="text-grey">Email</dt>
-                            <dd className="text-right text-charcoal">{profile.email || "—"}</dd>
+                            <dd className="break-all text-charcoal sm:text-right">{profile.email || "—"}</dd>
                           </div>
-                          <div className="flex justify-between gap-4">
+                          <div className="flex flex-col gap-1 sm:flex-row sm:justify-between sm:gap-4">
                             <dt className="text-grey">Телефон</dt>
-                            <dd className="text-right text-charcoal">{profile.phone || "—"}</dd>
+                            <dd className="break-words text-charcoal sm:text-right">{profile.phone || "—"}</dd>
                           </div>
                         </dl>
                         <Button
@@ -367,7 +376,7 @@ function AccountContent() {
                           Смотреть все
                         </Button>
                       </div>
-                      <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3">
+                      <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
                         {wishlistProducts.slice(0, 3).map((p) => (
                           <ProductCard key={p.slug} product={p} />
                         ))}
@@ -376,7 +385,7 @@ function AccountContent() {
                   ) : (
                     <section className="border border-border bg-cream/30 p-6">
                       <SectionHeading>Рекомендуем</SectionHeading>
-                      <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3">
+                      <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
                         {suggestions.map((p) => (
                           <ProductCard key={p.slug} product={p} />
                         ))}
@@ -393,7 +402,7 @@ function AccountContent() {
                   <SectionHeading>История заказов</SectionHeading>
 
                   {orders.length > 0 ? (
-                    <div className="grid gap-4 border border-border bg-cream/40 p-5 sm:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-3 border border-border bg-cream/40 p-4 sm:grid-cols-3 sm:gap-4 sm:p-5">
                       <div>
                         <p className="text-[9px] tracking-[0.16em] text-grey uppercase">Всего заказов</p>
                         <p className="mt-1 font-display text-2xl">{orders.length}</p>
@@ -434,7 +443,7 @@ function AccountContent() {
               ) : null}
 
               {activeTab === "profile" ? (
-                <section className="grid gap-8 lg:grid-cols-[1fr_280px]">
+                <section className="grid gap-6 lg:grid-cols-[1fr_280px] lg:gap-8">
                   <div>
                     <SectionHeading>Профиль</SectionHeading>
                     <p className="mt-3 text-sm text-grey">
@@ -456,7 +465,7 @@ function AccountContent() {
                       </Button>
                     </form>
                   </div>
-                  <aside className="border border-border bg-cream/40 p-5">
+                  <aside className="border border-border bg-cream/40 p-4 sm:p-5">
                     <p className="text-[9px] tracking-[0.18em] text-grey uppercase">Подсказка</p>
                     <p className="mt-3 text-sm leading-relaxed text-charcoal">
                       Укажите телефон — курьер сможет связаться при доставке. Email нужен для чека и статуса заказа.
@@ -527,8 +536,8 @@ function AccountContent() {
                               onCancel={() => setEditingAddress(null)}
                             />
                           ) : (
-                            <div className="flex flex-wrap items-start justify-between gap-4">
-                              <div>
+                            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+                              <div className="min-w-0 flex-1">
                                 <p className="text-[11px] tracking-[0.14em] uppercase">
                                   {addr.label}
                                   {addr.isDefault ? (
@@ -537,10 +546,10 @@ function AccountContent() {
                                     </Badge>
                                   ) : null}
                                 </p>
-                                <p className="mt-1 text-sm">{addr.city}, {addr.address}</p>
+                                <p className="mt-1 break-words text-sm">{addr.city}, {addr.address}</p>
                                 {addr.postalCode ? <p className="text-xs text-grey">{addr.postalCode}</p> : null}
                               </div>
-                              <div className="flex gap-2">
+                              <div className="flex flex-wrap gap-2">
                                 {!addr.isDefault ? (
                                   <Button variant="ghost" size="xs" className="cursor-pointer" onClick={() => { setDefaultAddress(addr.id); toast.success("Адрес по умолчанию обновлён"); }}>
                                     По умолчанию
@@ -570,7 +579,7 @@ function AccountContent() {
                       <p className="mt-3 text-sm text-grey">
                         {wishlistProducts.length} продуктов в вашей коллекции
                       </p>
-                      <div className="mt-8 grid grid-cols-2 gap-6 md:grid-cols-3">
+                      <div className="mt-6 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-6 md:grid-cols-3">
                         {wishlistProducts.map((p) => (
                           <ProductCard key={p.slug} product={p} />
                         ))}
@@ -586,7 +595,7 @@ function AccountContent() {
                       />
                       <div className="mt-10 border-t border-border pt-10">
                         <p className="text-center text-[10px] tracking-[0.24em] text-grey uppercase">Хиты</p>
-                        <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3">
+                        <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
                           {getBestsellers(3).map((p) => (
                             <ProductCard key={p.slug} product={p} />
                           ))}
