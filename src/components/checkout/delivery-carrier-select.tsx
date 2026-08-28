@@ -2,7 +2,7 @@
 
 import { Package, Mail, Truck } from "lucide-react";
 import { formatPrice } from "@/data/products";
-import { formatEta } from "@/lib/delivery";
+import { formatEta } from "@/lib/delivery/types";
 import type { DeliveryCarrier, DeliveryMode, DeliveryTariff } from "@/lib/delivery/types";
 import { CARRIER_LABELS, MODE_LABELS } from "@/lib/delivery/types";
 import { cn } from "@/lib/utils";

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -108,78 +108,129 @@ export function CheckoutView() {
     }
   }, [profile.name, profile.email, profile.phone]);
 
-  const fetchTariffs = useCallback(async () => {
+  useEffect(() => {
     if (!debouncedCity.trim()) {
-      const current = useCheckoutStore.getState();
-      if (current.tariffs.length > 0) setTariffs([]);
-      if (current.tariff !== null) setTariff(null);
+      setTariffs([]);
+      setTariff(null);
+      setTariffsLoading(false);
       return;
     }
 
-    setTariffsLoading(true);
-    try {
-      const res = await fetch("/api/delivery/tariffs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          city: debouncedCity,
-          postalCode: postalCode || undefined,
-          subtotal,
-          itemCount,
-        }),
-      });
-      if (!res.ok) throw new Error();
-      const data = (await res.json()) as { tariffs: DeliveryTariff[] };
-      setTariffs(data.tariffs);
+    const controller = new AbortController();
+    let cancelled = false;
 
-      const current = useCheckoutStore.getState();
-      if (current.carrier) {
-        const match = data.tariffs.find(
-          (t) => t.carrier === current.carrier && t.mode === current.mode,
-        ) ?? data.tariffs.find((t) => t.carrier === current.carrier);
-        const nextTariff = match ?? null;
-        if (current.tariff?.carrier !== nextTariff?.carrier || current.tariff?.mode !== nextTariff?.mode || current.tariff?.price !== nextTariff?.price) {
-          setTariff(nextTariff);
+    (async () => {
+      setTariffsLoading(true);
+      try {
+        const res = await fetch("/api/delivery/tariffs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: controller.signal,
+          body: JSON.stringify({
+            city: debouncedCity,
+            postalCode: postalCode || undefined,
+            subtotal,
+            itemCount,
+          }),
+        });
+        if (!res.ok) throw new Error("tariffs failed");
+        const data = (await res.json()) as { tariffs: DeliveryTariff[] };
+        if (cancelled) return;
+
+        setTariffs(data.tariffs);
+
+        const current = useCheckoutStore.getState();
+        if (data.tariffs.length === 0) {
+          setTariff(null);
+          return;
         }
+
+        if (current.carrier) {
+          const match =
+            data.tariffs.find(
+              (t) => t.carrier === current.carrier && t.mode === current.mode,
+            ) ?? data.tariffs.find((t) => t.carrier === current.carrier);
+          setTariff(match ?? null);
+          return;
+        }
+
+        const preferred =
+          data.tariffs.find((t) => t.mode === current.mode) ?? data.tariffs[0];
+        setCarrier(preferred.carrier);
+        setMode(preferred.mode);
+        setTariff(preferred);
+      } catch (error) {
+        if (cancelled || (error instanceof DOMException && error.name === "AbortError")) {
+          return;
+        }
+        toast.error("Не удалось рассчитать доставку");
+      } finally {
+        if (!cancelled) setTariffsLoading(false);
       }
-    } catch {
-      toast.error("Не удалось рассчитать доставку");
-    } finally {
-      setTariffsLoading(false);
-    }
-  }, [debouncedCity, postalCode, subtotal, itemCount, setTariffs, setTariff, setTariffsLoading]);
+    })();
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [
+    debouncedCity,
+    postalCode,
+    subtotal,
+    itemCount,
+    setTariffs,
+    setTariff,
+    setTariffsLoading,
+    setCarrier,
+    setMode,
+  ]);
 
   useEffect(() => {
-    fetchTariffs();
-  }, [fetchTariffs]);
-
-  const fetchPickupPoints = useCallback(async () => {
     if (!carrier || mode !== "pickup" || !debouncedCity.trim()) {
       setPickupPoints([]);
+      setPickupPointsLoading(false);
       return;
     }
 
-    setPickupPointsLoading(true);
-    try {
-      const params = new URLSearchParams({
-        carrier,
-        city: debouncedCity,
-        ...(postalCode ? { postalCode } : {}),
-      });
-      const res = await fetch(`/api/delivery/pickup-points?${params}`);
-      if (!res.ok) throw new Error();
-      const data = (await res.json()) as { points: typeof pickupPoints };
-      setPickupPoints(data.points);
-    } catch {
-      toast.error("Не удалось загрузить пункты выдачи");
-    } finally {
-      setPickupPointsLoading(false);
-    }
-  }, [carrier, mode, debouncedCity, postalCode, setPickupPoints, setPickupPointsLoading]);
+    const controller = new AbortController();
+    let cancelled = false;
 
-  useEffect(() => {
-    fetchPickupPoints();
-  }, [fetchPickupPoints]);
+    (async () => {
+      setPickupPointsLoading(true);
+      try {
+        const params = new URLSearchParams({
+          carrier,
+          city: debouncedCity,
+          ...(postalCode ? { postalCode } : {}),
+        });
+        const res = await fetch(`/api/delivery/pickup-points?${params}`, {
+          signal: controller.signal,
+        });
+        if (!res.ok) throw new Error("pickup points failed");
+        const data = (await res.json()) as { points: typeof pickupPoints };
+        if (!cancelled) setPickupPoints(data.points);
+      } catch (error) {
+        if (cancelled || (error instanceof DOMException && error.name === "AbortError")) {
+          return;
+        }
+        toast.error("Не удалось загрузить пункты выдачи");
+      } finally {
+        if (!cancelled) setPickupPointsLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [
+    carrier,
+    mode,
+    debouncedCity,
+    postalCode,
+    setPickupPoints,
+    setPickupPointsLoading,
+  ]);
 
   const handleCarrierSelect = (nextCarrier: DeliveryCarrier) => {
     setCarrier(nextCarrier);
@@ -387,7 +438,7 @@ export function CheckoutView() {
                   tariffs={tariffs}
                   selectedCarrier={carrier}
                   selectedMode={mode}
-                  loading={tariffsLoading}
+                  loading={tariffsLoading && tariffs.length === 0}
                   onSelectCarrier={handleCarrierSelect}
                   onSelectMode={handleModeSelect}
                 />

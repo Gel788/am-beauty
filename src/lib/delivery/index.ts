@@ -35,10 +35,7 @@ export function getCarrierTariffs(
   return tariffs.filter((t) => t.carrier === carrier);
 }
 
-export function formatEta(minDays: number, maxDays: number): string {
-  if (minDays === maxDays) return `${minDays} дн.`;
-  return `${minDays}–${maxDays} дн.`;
-}
+export { formatEta } from "./types";
 
 export const DEFAULT_ITEM_WEIGHT_GRAMS = 350;
 

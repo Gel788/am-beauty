@@ -60,3 +60,8 @@ export const MODE_LABELS: Record<DeliveryMode, string> = {
   courier: "Курьер",
   pickup: "ПВЗ / отделение",
 };
+
+export function formatEta(minDays: number, maxDays: number): string {
+  if (minDays === maxDays) return `${minDays} дн.`;
+  return `${minDays}–${maxDays} дн.`;
+}
