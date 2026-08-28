@@ -64,6 +64,7 @@
   --color-gold: var(--gold);
   --font-sans: var(--font-sans);
   --font-display: var(--font-display);
+  --font-family-display: var(--font-display), ui-serif, Georgia, serif;
 }
 
 @layer base {
@@ -271,6 +272,9 @@
   .hero-kenburns {
     animation: none;
   }
+  .splash-screen {
+    display: none !important;
+  }
 }
 
 .skip-link {
@@ -350,4 +354,135 @@
   display: none !important;
   opacity: 0 !important;
   pointer-events: none !important;
+}
+
+body.splash-active {
+  overflow: hidden;
+}
+
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cream);
+  pointer-events: auto;
+}
+
+.splash-screen--exit {
+  animation: splash-out 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.splash-screen__watermark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display), serif;
+  font-size: clamp(7rem, 34vw, 18rem);
+  font-weight: 300;
+  letter-spacing: 0.18em;
+  color: var(--black);
+  opacity: 0.035;
+  user-select: none;
+  pointer-events: none;
+}
+
+.splash-screen__inner {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding-inline: 1.5rem;
+  animation: splash-in 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.splash-screen__logo {
+  font-family: var(--font-display), serif;
+  font-size: clamp(1.75rem, 5.5vw, 2.75rem);
+  font-weight: 300;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--black);
+}
+
+.splash-screen__line {
+  height: 1px;
+  width: min(140px, 42vw);
+  margin: 1.25rem auto 0;
+  background: linear-gradient(90deg, transparent, var(--gold) 20%, var(--gold) 80%, transparent);
+  transform-origin: center;
+  animation: splash-line 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
+}
+
+.splash-screen__tagline {
+  margin-top: 1rem;
+  font-size: 0.625rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--grey);
+  animation: splash-tagline 0.55s ease 0.65s both;
+}
+
+.brand-loader__mark {
+  animation: brand-loader-pulse 1.8s ease-in-out infinite;
+}
+
+.brand-loader__line {
+  width: 3rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  animation: splash-line 1.2s cubic-bezier(0.22, 1, 0.36, 1) infinite alternate;
+}
+
+@keyframes splash-line {
+  from {
+    transform: scaleX(0.35);
+    opacity: 0.45;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+@keyframes splash-tagline {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes splash-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes splash-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes brand-loader-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
 }

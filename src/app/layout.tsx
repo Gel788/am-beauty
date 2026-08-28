@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Cormorant_Garamond, Geist } from "next/font/google";
 import { StorefrontChrome } from "@/components/layout/storefront-chrome";
 import { Providers } from "@/components/providers";
 import { CatalogProvider } from "@/context/catalog-context";
@@ -18,6 +18,12 @@ const sans = Geist({
   weight: ["300", "400", "500"],
 });
 
+const display = Cormorant_Garamond({
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-display",
+  weight: ["300", "400", "500"],
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
@@ -26,6 +32,7 @@ export const metadata: Metadata = {
   },
   description:
     "Интернет-магазин AM Beauty: уход за кожей и декоративная косметика. Натуральный состав, доставка по России.",
+  themeColor: "#f9f9f7",
   openGraph: {
     title: "AM Beauty",
     description: "Премиальная косметика для ухода и макияжа",
@@ -39,7 +46,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   hydrateCatalog(catalog.products);
 
   return (
-    <html lang="ru" className={cn("h-full", sans.variable)}>
+    <html lang="ru" className={cn("h-full", sans.variable, display.variable)}>
       <body className="flex min-h-full flex-col font-sans">
         <a href="#main" className="skip-link">
           Перейти к содержимому

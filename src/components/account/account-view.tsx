@@ -19,6 +19,7 @@ import {
 } from "@/store/account-store";
 import { adminOrderToAccount } from "@/lib/orders/account-orders";
 import { useWishlistStore } from "@/store/wishlist-store";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -616,7 +617,7 @@ function AccountContent() {
 
 export function AccountView() {
   return (
-    <Suspense fallback={<div className="container-page section-pad text-grey">Загрузка…</div>}>
+    <Suspense fallback={<BrandLoader className="container-page min-h-[50vh]" />}>
       <AccountContent />
     </Suspense>
   );

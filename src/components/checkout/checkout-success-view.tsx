@@ -8,6 +8,7 @@ import { Check } from "lucide-react";
 import { CommerceTrustMarquee } from "@/components/commerce/commerce-trust-marquee";
 import { formatPrice } from "@/data/products";
 import { useAccountStore } from "@/store/account-store";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import { Button } from "@/components/ui/button";
 
 function CheckoutSuccessContent() {
@@ -122,9 +123,7 @@ function CheckoutSuccessContent() {
 export function CheckoutSuccessView() {
   return (
     <Suspense
-      fallback={
-        <div className="container-page section-pad text-center text-grey">Загрузка…</div>
-      }
+      fallback={<BrandLoader className="container-page min-h-[50vh]" label="Оформление заказа" />}
     >
       <CheckoutSuccessContent />
     </Suspense>
