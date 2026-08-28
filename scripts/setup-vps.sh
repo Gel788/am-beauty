@@ -39,13 +39,17 @@ export NEXT_PUBLIC_SITE_URL="https://${DOMAIN}"
 npm ci
 npm run build
 
-# PM2
+# Standalone требует public и .next/static рядом с server.js
+cp -r public .next/standalone/
+mkdir -p .next/standalone/.next
+cp -r .next/static .next/standalone/.next/static
+
+# PM2 — запуск из каталога standalone
 pm2 delete am-beauty 2>/dev/null || true
-cd "$APP_DIR"
+cd "$APP_DIR/.next/standalone"
 PORT=3000 HOSTNAME=127.0.0.1 NEXT_PUBLIC_SITE_URL="https://${DOMAIN}" \
-  pm2 start .next/standalone/server.js --name am-beauty
-pm2 save
-pm2 startup systemd -u root --hp /root 2>/dev/null | tail -1 | bash || true
+  pm2 start server.js --name am-beauty
+cd "$APP_DIR"
 
 # Nginx
 cat > /etc/nginx/sites-available/am-beauty <<NGINX

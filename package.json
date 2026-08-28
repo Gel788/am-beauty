@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "bash scripts/sync-standalone.sh",
     "start": "next start",
     "start:standalone": "node .next/standalone/server.js",
     "build:static": "NEXT_STATIC_EXPORT=true next build",
