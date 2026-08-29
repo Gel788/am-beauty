@@ -1,11 +1,10 @@
 "use client";
 
-import type { Lenis } from "lenis";
 import { useLenis } from "lenis/react";
 import { usePathname } from "next/navigation";
 import { useLayoutEffect, useRef } from "react";
 
-function resetScroll(lenis?: Lenis | null) {
+function resetScroll(lenis?: ReturnType<typeof useLenis>) {
   lenis?.scrollTo(0, { immediate: true, force: true });
   window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   document.documentElement.scrollTop = 0;

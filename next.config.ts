@@ -4,7 +4,7 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 const isStaticExport = process.env.NEXT_STATIC_EXPORT === "true";
 
 const nextConfig: NextConfig = {
-  ...(isStaticExport ? { output: "export" as const, trailingSlash: true } : { output: "standalone" as const }),
+  ...(isStaticExport ? { output: "export" as const, trailingSlash: true } : {}),
   poweredByHeader: false,
   compress: !isStaticExport,
   images: {
