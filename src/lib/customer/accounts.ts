@@ -126,7 +126,6 @@ export async function updateCustomerProfile(
   const now = new Date().toISOString();
   let savedCustomer: CustomerAccount | null = null;
   const emailChanged = Boolean(nextEmail && nextEmail !== normalizedCurrent);
-  const targetEmail = nextEmail ?? normalizedCurrent;
 
   try {
     await updateDb((db) => {
@@ -170,14 +169,11 @@ export async function updateCustomerProfile(
     return { ok: false, error: "Аккаунт не найден" };
   }
 
+  const account: CustomerAccount = savedCustomer;
+
   return {
     ok: true,
-    customer: toPublic({
-      ...savedCustomer,
-      email: targetEmail,
-      name: name ?? savedCustomer.name,
-      phone: phone ?? savedCustomer.phone,
-    }),
+    customer: toPublic(account),
     emailChanged,
   };
 }
