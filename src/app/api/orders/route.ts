@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { readDb, updateDb } from "@/lib/admin/db";
 import { createPayment } from "@/lib/payment";
+import { computeOrderTotals } from "@/lib/orders/compute-order";
 import {
   sortOrdersNewestFirst,
   toAdminOrder,
   validateCreateOrderInput,
 } from "@/lib/orders/create-order";
+import { normalizePhone } from "@/lib/phone";
 
 export async function POST(request: Request) {
   try {
@@ -15,7 +17,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: parsed.error }, { status: 400 });
     }
 
-    const input = parsed.data;
+    const computed = await computeOrderTotals(parsed.data);
+    if (!computed.ok) {
+      return NextResponse.json({ error: computed.error }, { status: 400 });
+    }
+
+    const input = computed.data;
     const existing = (await readDb()).orders.find((o) => o.id === input.id);
     if (existing) {
       const payment = await createPayment({
@@ -72,13 +79,17 @@ function inputReturnUrl(request: Request, orderId: string) {
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const id = searchParams.get("id");
-  if (!id) {
-    return NextResponse.json({ error: "id required" }, { status: 400 });
+  const id = searchParams.get("id")?.trim();
+  const email = searchParams.get("email")?.trim().toLowerCase();
+
+  if (!id || !email) {
+    return NextResponse.json({ error: "id and email required" }, { status: 400 });
   }
 
   const db = await readDb();
-  const order = db.orders.find((o) => o.id === id);
+  const order = db.orders.find(
+    (o) => o.id === id && o.customerEmail.toLowerCase() === email,
+  );
   if (!order) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }

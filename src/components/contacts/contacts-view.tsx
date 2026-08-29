@@ -9,11 +9,13 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useSite } from "@/context/catalog-context";
+import { submitInquiry } from "@/lib/inquiries/submit-inquiry";
 
 export function ContactsView() {
   const site = useSite();
   const faq = site.contacts.faq;
   const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [sending, setSending] = useState(false);
 
   return (
     <div className="container-page section-pad">
@@ -55,10 +57,24 @@ export function ContactsView() {
 
           <form
             className="mt-12 space-y-3 border-t border-border pt-12"
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
-              toast.success("Сообщение отправлено. Ответим в течение 24 часов.");
-              setForm({ name: "", email: "", message: "" });
+              if (sending) return;
+              setSending(true);
+              try {
+                await submitInquiry({
+                  type: "contact",
+                  name: form.name.trim(),
+                  email: form.email.trim(),
+                  message: form.message.trim(),
+                });
+                toast.success("Сообщение отправлено. Ответим в течение 24 часов.");
+                setForm({ name: "", email: "", message: "" });
+              } catch {
+                toast.error("Не удалось отправить сообщение");
+              } finally {
+                setSending(false);
+              }
             }}
           >
             <h2 className="text-[10px] tracking-[0.22em] uppercase">Написать нам</h2>
@@ -88,8 +104,8 @@ export function ContactsView() {
               aria-label="Сообщение"
               className="w-full border border-border bg-white px-4 py-3 text-sm outline-none focus:border-black"
             />
-            <Button type="submit" className="cursor-pointer">
-              Отправить
+            <Button type="submit" disabled={sending} className="cursor-pointer">
+              {sending ? "Отправка..." : "Отправить"}
             </Button>
             <p className="text-xs text-grey">
               Отправляя форму, вы соглашаетесь с{" "}

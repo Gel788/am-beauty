@@ -18,12 +18,13 @@ function resolveLines(items: CartItem[]) {
 export function useOrderTotals() {
   const items = useCartStore((s) => s.items);
   const promoCode = useCartStore((s) => s.promoCode);
+  const promoDiscountPercent = useCartStore((s) => s.promoDiscountPercent);
   const deliveryTariff = useCheckoutStore((s) => s.tariff);
 
   const lines = resolveLines(items);
   const count = lines.reduce((s, l) => s + l.qty, 0);
   const subtotal = lines.reduce((s, l) => s + l.product.price * l.qty, 0);
-  const discount = getCartDiscount(subtotal, promoCode);
+  const discount = getCartDiscount(subtotal, promoCode, promoDiscountPercent);
   const shipping =
     deliveryTariff != null ? deliveryTariff.price : getDefaultShipping(subtotal);
   const total = Math.max(0, subtotal - discount + shipping);

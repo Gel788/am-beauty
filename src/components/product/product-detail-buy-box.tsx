@@ -3,7 +3,7 @@
 import { Heart, Minus, Plus, Star } from "lucide-react";
 import { toast } from "sonner";
 import { formatPrice, type Product } from "@/data/products";
-import { useCartStore } from "@/store/cart-store";
+import { useCartStore, isInStock } from "@/store/cart-store";
 import { useWishlistStore } from "@/store/wishlist-store";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -30,6 +30,9 @@ export function ProductDetailBuyBox({
   const addItem = useCartStore((s) => s.addItem);
   const toggleWishlist = useWishlistStore((s) => s.toggle);
   const inWishlist = useWishlistStore((s) => s.has(product.slug));
+  const available = isInStock(product);
+  const stockLimit = product.stock ?? Number.POSITIVE_INFINITY;
+  const atMaxStock = product.stock != null && qty >= product.stock;
 
   const savings =
     product.compareAt && product.compareAt > product.price
@@ -37,6 +40,7 @@ export function ProductDetailBuyBox({
       : null;
 
   const handleAdd = () => {
+    if (!available) return;
     addItem(product.slug, qty);
     toast.success(`${product.shortName} × ${qty} в корзине`);
   };
@@ -78,14 +82,19 @@ export function ProductDetailBuyBox({
           <button
             type="button"
             aria-label="Увеличить"
-            onClick={() => onQtyChange(qty + 1)}
-            className="flex size-10 cursor-pointer items-center justify-center transition-colors hover:bg-cream sm:size-11"
+            disabled={!available || atMaxStock}
+            onClick={() => onQtyChange(Math.min(stockLimit, qty + 1))}
+            className="flex size-10 cursor-pointer items-center justify-center transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:opacity-40 sm:size-11"
           >
             <Plus className="size-4" strokeWidth={1} />
           </button>
         </div>
-        <Button className="h-10 min-w-0 flex-1 cursor-pointer px-3 text-[9px] tracking-[0.18em] uppercase sm:h-11 sm:px-4 sm:text-[10px] sm:tracking-[0.2em]" onClick={handleAdd}>
-          В корзину
+        <Button
+          className="h-10 min-w-0 flex-1 cursor-pointer px-3 text-[9px] tracking-[0.18em] uppercase sm:h-11 sm:px-4 sm:text-[10px] sm:tracking-[0.2em]"
+          onClick={handleAdd}
+          disabled={!available}
+        >
+          {available ? "В корзину" : "Нет в наличии"}
         </Button>
         {variant === "inline" ? (
           <Button

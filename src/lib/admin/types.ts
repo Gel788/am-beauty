@@ -138,6 +138,15 @@ export type AdminPromo = {
   uses: number;
 };
 
+export type AdminInquiry = {
+  id: string;
+  type: "contact" | "newsletter";
+  name?: string;
+  email: string;
+  message?: string;
+  createdAt: string;
+};
+
 export type AdminReview = Review & {
   published: boolean;
 };
@@ -162,6 +171,7 @@ export type AdminDatabase = {
   orders: AdminOrder[];
   reviews: AdminReview[];
   promos: AdminPromo[];
+  inquiries: AdminInquiry[];
 };
 
 export type DashboardStats = {

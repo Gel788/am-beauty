@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Heart, Star } from "lucide-react";
 import { toast } from "sonner";
 import { formatPrice, type Product } from "@/data/products";
-import { useCartStore } from "@/store/cart-store";
+import { useCartStore, isInStock } from "@/store/cart-store";
 import { useWishlistStore } from "@/store/wishlist-store";
 import { cn } from "@/lib/utils";
 import { ProductMedia } from "@/components/ui/product-media";
@@ -19,10 +19,12 @@ export function ProductCard({ product, className, priority }: ProductCardProps) 
   const addItem = useCartStore((s) => s.addItem);
   const toggleWishlist = useWishlistStore((s) => s.toggle);
   const inWishlist = useWishlistStore((s) => s.has(product.slug));
+  const available = isInStock(product);
 
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!available) return;
     addItem(product.slug);
     toast.success(`${product.shortName} в корзине`);
   };
@@ -75,9 +77,10 @@ export function ProductCard({ product, className, priority }: ProductCardProps) 
       <button
         type="button"
         onClick={handleAdd}
-        className="mt-3 w-full cursor-pointer border border-border py-2.5 text-[10px] tracking-[0.2em] uppercase transition-colors hover:border-black hover:bg-black hover:text-white"
+        disabled={!available}
+        className="mt-3 w-full cursor-pointer border border-border py-2.5 text-[10px] tracking-[0.2em] uppercase transition-colors hover:border-black hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:border-border disabled:bg-cream disabled:text-grey disabled:hover:bg-cream disabled:hover:text-grey"
       >
-        В корзину
+        {available ? "В корзину" : "Нет в наличии"}
       </button>
     </article>
   );

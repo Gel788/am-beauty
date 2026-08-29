@@ -12,7 +12,7 @@ export const DB_PATH = path.join(DB_DIR, "admin-db.json");
 function normalizeDb(partial: Partial<AdminDatabase>): AdminDatabase {
   const seed = seedDatabase();
   return {
-    version: 3,
+    version: 4,
     updatedAt: partial.updatedAt ?? seed.updatedAt,
     products: partial.products?.length ? partial.products : seed.products,
     categories: partial.categories?.length ? partial.categories : seed.categories,
@@ -21,6 +21,7 @@ function normalizeDb(partial: Partial<AdminDatabase>): AdminDatabase {
     orders: partial.orders ?? seed.orders,
     reviews: partial.reviews ?? seed.reviews,
     promos: partial.promos ?? seed.promos,
+    inquiries: partial.inquiries ?? seed.inquiries,
   };
 }
 

@@ -119,13 +119,14 @@ function AccountContent() {
 
   const refreshOrders = useCallback(async () => {
     const email = profile.email.trim();
+    const phone = profile.phone.trim();
     const localOrders = useAccountStore.getState().orders;
     const remote: AccountOrder[] = [];
 
     try {
-      if (email) {
+      if (email && phone) {
         const res = await fetch(
-          `/api/account/orders?email=${encodeURIComponent(email)}`,
+          `/api/account/orders?email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}`,
           { cache: "no-store" },
         );
         if (res.ok) {
@@ -136,12 +137,13 @@ function AccountContent() {
 
       const knownIds = new Set(remote.map((o) => o.id));
       const missing = localOrders.filter((o) => !knownIds.has(o.id));
-      if (missing.length > 0) {
+      if (missing.length > 0 && email) {
         const byId = await Promise.all(
           missing.map(async (local) => {
-            const res = await fetch(`/api/orders?id=${encodeURIComponent(local.id)}`, {
-              cache: "no-store",
-            });
+            const res = await fetch(
+              `/api/orders?id=${encodeURIComponent(local.id)}&email=${encodeURIComponent(email)}`,
+              { cache: "no-store" },
+            );
             if (!res.ok) return null;
             const data = (await res.json()) as { order: Parameters<typeof adminOrderToAccount>[0] };
             return adminOrderToAccount(data.order);
@@ -154,7 +156,7 @@ function AccountContent() {
     } catch {
       /* ignore network errors */
     }
-  }, [profile.email, syncOrders]);
+  }, [profile.email, profile.phone, syncOrders]);
 
   useEffect(() => {
     void refreshOrders();

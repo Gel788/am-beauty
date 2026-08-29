@@ -13,7 +13,7 @@ import { HomeSectionHeader } from "@/components/home/section-header";
 import { Reveal } from "@/components/reveal";
 import { formatPrice, getBestsellers } from "@/data/products";
 import type { Product } from "@/data/products";
-import { useCartStore, useCartTotals } from "@/store/cart-store";
+import { useCartStore, useCartTotals, validatePromoCode } from "@/store/cart-store";
 import { useWishlistStore } from "@/store/wishlist-store";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -241,7 +241,6 @@ function CartCheckoutAside({
   shipping,
   total,
   promoCode,
-  applyPromo,
   clearPromo,
 }: {
   lines: CartLine[];
@@ -250,9 +249,10 @@ function CartCheckoutAside({
   shipping: number;
   total: number;
   promoCode?: string | null;
-  applyPromo: (code: string) => boolean;
   clearPromo: () => void;
 }) {
+  const setPromo = useCartStore((s) => s.setPromo);
+
   return (
     <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start">
       <OrderSummary
@@ -269,13 +269,18 @@ function CartCheckoutAside({
 
       <form
         className="mt-4 flex min-w-0 gap-2"
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
           const fd = new FormData(e.currentTarget);
           const code = String(fd.get("promo") ?? "");
           if (!code.trim()) return;
-          if (applyPromo(code)) toast.success("Промокод применён");
-          else toast.error("Неверный промокод");
+          const result = await validatePromoCode(code);
+          if (result.ok) {
+            setPromo(result.code, result.discountPercent);
+            toast.success("Промокод применён");
+          } else {
+            toast.error(result.error);
+          }
         }}
       >
         <Input
@@ -346,7 +351,6 @@ export function CartView() {
   const { lines, subtotal, discount, shipping, total, promoCode } = useCartTotals();
   const setQty = useCartStore((s) => s.setQty);
   const removeItem = useCartStore((s) => s.removeItem);
-  const applyPromo = useCartStore((s) => s.applyPromo);
   const clearPromo = useCartStore((s) => s.clearPromo);
   const toggleWishlist = useWishlistStore((s) => s.toggle);
   const hasInWishlist = useWishlistStore((s) => s.has);
@@ -446,7 +450,6 @@ export function CartView() {
               shipping={shipping}
               total={total}
               promoCode={promoCode}
-              applyPromo={applyPromo}
               clearPromo={clearPromo}
             />
           </div>

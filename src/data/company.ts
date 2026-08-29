@@ -13,7 +13,7 @@ export const company = {
     "Московская обл., г. Химки, ул. Зеленая, д. 6, корп. 1, кв. 184",
   postalAddress:
     "Московская обл., г. Химки, ул. Зеленая, д. 6, корп. 1, кв. 184",
-  email: "info@mebelit-prof.ru",
+  email: "info@ambeauty-cosmetica.ru",
   phone: "+7 (926) 235-51-41",
   phoneHref: "+79262355141",
   siteUrl: "https://ambeauty-cosmetica.ru",

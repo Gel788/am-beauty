@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { legalLinks } from "@/data/company";
 import { useSite } from "@/context/catalog-context";
+import { submitInquiry } from "@/lib/inquiries/submit-inquiry";
 
 const shop = [
   { href: "/catalog", label: "Каталог" },
@@ -30,6 +33,8 @@ const legal = [
 export function Footer() {
   const site = useSite();
   const company = site.company;
+  const [email, setEmail] = useState("");
+  const [sending, setSending] = useState(false);
 
   return (
     <footer className="section-invert">
@@ -102,18 +107,38 @@ export function Footer() {
         </div>
         <div className="md:col-span-2">
           <p className="label-caps">Рассылка</p>
-          <form className="mt-5 flex flex-col gap-3" action="#">
+          <form
+            className="mt-5 flex flex-col gap-3"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              if (!email.trim() || sending) return;
+              setSending(true);
+              try {
+                await submitInquiry({ type: "newsletter", email: email.trim() });
+                toast.success("Подписка оформлена. Промокод WELCOME15 действует в корзине.");
+                setEmail("");
+              } catch {
+                toast.error("Не удалось оформить подписку");
+              } finally {
+                setSending(false);
+              }
+            }}
+          >
             <Input
               type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
               aria-label="Email"
               className="h-11 border-white/20 bg-transparent text-white placeholder:text-white/40"
             />
             <button
               type="submit"
-              className="btn-chanel-outline shrink-0 cursor-pointer !border-white !text-white hover:!bg-white hover:!text-black"
+              disabled={sending}
+              className="btn-chanel-outline shrink-0 cursor-pointer !border-white !text-white hover:!bg-white hover:!text-black disabled:opacity-50"
             >
-              OK
+              {sending ? "..." : "OK"}
             </button>
             <p className="text-[10px] leading-relaxed text-white/40">
               Нажимая OK, вы соглашаетесь с{" "}

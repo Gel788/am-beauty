@@ -33,6 +33,8 @@ export type Product = {
   isBestseller?: boolean;
   relatedSlugs: string[];
   bundleSlugs: string[];
+  /** Остаток на складе (из admin DB) */
+  stock?: number;
 };
 
 export type Review = {

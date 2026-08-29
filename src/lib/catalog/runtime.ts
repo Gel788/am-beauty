@@ -5,8 +5,8 @@ import type { AdminCategory, AdminSiteSettings, PublicCatalog } from "@/lib/admi
 
 export function stripAdminProduct<T extends { stock?: number; published?: boolean }>(
   product: T,
-): Omit<T, "stock" | "published"> {
-  const { stock: _s, published: _p, ...rest } = product;
+): Omit<T, "published"> {
+  const { published: _p, ...rest } = product;
   return rest;
 }
 

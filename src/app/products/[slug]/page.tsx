@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductDetail } from "@/components/product/product-detail";
+import { ProductJsonLd } from "@/components/seo/product-json-ld";
 import { hydrateCatalog } from "@/data/products";
 import { getPublicCatalog, getRuntimeProduct } from "@/lib/catalog/runtime";
 
@@ -31,5 +32,10 @@ export default async function ProductPage({ params }: PageProps) {
   const product = await getRuntimeProduct(slug);
   if (!product) notFound();
 
-  return <ProductDetail product={product} />;
+  return (
+    <>
+      <ProductJsonLd product={product} />
+      <ProductDetail product={product} />
+    </>
+  );
 }

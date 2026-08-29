@@ -173,5 +173,6 @@ export function seedDatabase(): AdminDatabase {
       { code: "WELCOME15", discountPercent: 0.15, active: true, uses: 18 },
       { code: "GLOW20", discountPercent: 0.2, active: false, uses: 0 },
     ],
+    inquiries: [],
   };
 }
