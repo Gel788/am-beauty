@@ -156,8 +156,10 @@ export function Header() {
       href="/"
       onClick={closeMenu}
       className={cn(
-        "block whitespace-nowrap text-center font-display text-[1.25rem] leading-none font-light tracking-[0.04em] transition-colors sm:text-[1.375rem]",
-        onHero ? "text-white" : "text-black",
+        "block max-w-full truncate whitespace-nowrap text-center font-display text-[1.125rem] leading-none font-normal tracking-[0.04em] transition-colors sm:text-[1.25rem] md:text-[1.375rem]",
+        onHero
+          ? "text-white drop-shadow-[0_1px_10px_rgba(0,0,0,0.55)]"
+          : "text-black",
       )}
     >
       {site.brand}
@@ -165,12 +167,12 @@ export function Header() {
   );
 
   const desktopNav = (
-    <nav className="hidden min-w-0 items-center gap-5 xl:gap-7 lg:flex" aria-label="Основное меню">
+    <nav className="hidden min-w-0 items-center gap-3 md:flex md:gap-4 xl:gap-7" aria-label="Основное меню">
       {navItems.map((item) => (
         <Link
           key={item.href}
           href={item.href}
-          className={cn(navLinkClass(item.href), "whitespace-nowrap")}
+          className={cn(navLinkClass(item.href), "whitespace-nowrap md:text-[9px] lg:text-[10px]")}
           aria-current={isActive(pathname, item.href) ? "page" : undefined}
         >
           {item.label}
@@ -211,18 +213,18 @@ export function Header() {
         className={cn(
           "fixed inset-x-0 top-0 z-50 transition-all duration-500 motion-reduce:transition-none",
           onHero
-            ? "border-b border-white/10 bg-gradient-to-b from-black/55 via-black/20 to-transparent"
+            ? "border-b border-white/10 bg-gradient-to-b from-black/70 via-black/35 to-transparent max-md:from-black/85 max-md:via-black/55"
             : "border-b border-border bg-white/95 shadow-[0_1px_0_rgba(0,0,0,0.04)] backdrop-blur-md",
         )}
       >
         {/* Mobile */}
-        <div className={cn("container-page relative max-w-full lg:hidden", HEADER_H)}>
-          <div className="flex h-full items-center justify-between">
+        <div className={cn("container-page max-w-full md:hidden", HEADER_H)}>
+          <div className="grid h-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2">
             <HeaderIconButton
               aria-label={menuOpen ? "Закрыть меню" : "Открыть меню"}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((v) => !v)}
-              className={iconTone}
+              className={cn("relative z-10", iconTone)}
             >
               {menuOpen ? (
                 <X className="size-5" strokeWidth={1.25} />
@@ -231,11 +233,9 @@ export function Header() {
               )}
             </HeaderIconButton>
 
-            <div className="pointer-events-none absolute inset-x-0 flex justify-center px-20">
-              <div className="pointer-events-auto">{brandLink}</div>
-            </div>
+            <div className="min-w-0 justify-self-center px-1">{brandLink}</div>
 
-            <div className="relative z-10 flex items-center gap-0.5">
+            <div className="relative z-10 flex items-center justify-self-end gap-0.5">
               <HeaderIconButton
                 aria-label="Поиск"
                 onClick={() => setSearchOpen(true)}
@@ -255,8 +255,8 @@ export function Header() {
           </div>
         </div>
 
-        {/* Desktop */}
-        <div className={cn("container-page hidden max-w-full lg:block", HEADER_H)}>
+        {/* Desktop / tablet */}
+        <div className={cn("container-page hidden max-w-full md:block", HEADER_H)}>
           <div className="grid h-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4">
             <div className="min-w-0 justify-self-start">{desktopNav}</div>
 
@@ -278,7 +278,7 @@ export function Header() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: reduce ? 0 : 0.3 }}
-            className="fixed inset-0 z-[70] flex flex-col overflow-hidden bg-cream/30 lg:hidden"
+            className="fixed inset-0 z-[70] flex flex-col overflow-hidden bg-cream/30 md:hidden"
           >
             <div
               className={cn(
@@ -286,7 +286,7 @@ export function Header() {
                 HEADER_H,
               )}
             >
-              <div className="flex h-full items-center justify-between">
+              <div className="grid h-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2">
                 <button
                   type="button"
                   aria-label="Закрыть меню"
@@ -296,8 +296,8 @@ export function Header() {
                   <X className="size-5" strokeWidth={1} />
                 </button>
 
-                <div className="pointer-events-none absolute inset-x-0 flex justify-center px-16">
-                  <span className="pointer-events-none font-display text-[1.25rem] leading-none font-light tracking-[0.04em] text-black">
+                <div className="min-w-0 flex-1 text-center px-2">
+                  <span className="block truncate font-display text-[1.125rem] leading-none font-normal tracking-[0.04em] text-black sm:text-[1.25rem]">
                     {site.brand}
                   </span>
                 </div>
@@ -338,7 +338,7 @@ export function Header() {
                       </span>
                       <span
                         className={cn(
-                          "font-display text-2xl leading-tight tracking-[0.02em] transition-colors",
+                          "font-display text-xl leading-tight tracking-[0.02em] transition-colors sm:text-2xl",
                           isActive(pathname, item.href) ? "text-black" : "text-charcoal group-hover:text-black",
                         )}
                       >

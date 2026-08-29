@@ -63,8 +63,7 @@
   --color-grey-light: var(--grey-light);
   --color-gold: var(--gold);
   --font-sans: var(--font-sans);
-  --font-display: var(--font-display);
-  --font-family-display: var(--font-display), ui-serif, Georgia, serif;
+  --font-family-display: var(--font-display), ui-serif, Georgia, "Times New Roman", serif;
 }
 
 @layer base {
@@ -91,6 +90,10 @@
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--grey);
+}
+
+.font-display {
+  font-family: var(--font-display), ui-serif, Georgia, "Times New Roman", serif;
 }
 
 .headline-xl {
