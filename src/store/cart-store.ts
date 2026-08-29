@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 import { getProduct, type Product } from "@/data/products";
 import { FREE_SHIPPING_THRESHOLD, SHIPPING_COST } from "@/lib/commerce";
 
@@ -92,7 +92,11 @@ export const useCartStore = create<CartState>()(
           items: state.items.filter((i) => Boolean(getProduct(i.slug))),
         })),
     }),
-    { name: "am-beauty-cart" },
+    {
+      name: "am-beauty-cart",
+      storage: createJSONStorage(() => localStorage),
+      skipHydration: true,
+    },
   ),
 );
 

@@ -75,7 +75,7 @@ export function ProductCard({ product, className, priority }: ProductCardProps) 
       <button
         type="button"
         onClick={handleAdd}
-        className="mt-3 w-full cursor-pointer border border-border py-2.5 text-[10px] tracking-[0.2em] uppercase transition-colors hover:border-black hover:bg-black hover:text-white sm:opacity-0 sm:transition-all sm:group-hover:opacity-100"
+        className="mt-3 w-full cursor-pointer border border-border py-2.5 text-[10px] tracking-[0.2em] uppercase transition-colors hover:border-black hover:bg-black hover:text-white"
       >
         В корзину
       </button>

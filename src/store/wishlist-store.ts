@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 type WishlistState = {
   slugs: string[];
@@ -21,6 +21,10 @@ export const useWishlistStore = create<WishlistState>()(
       has: (slug) => get().slugs.includes(slug),
       clear: () => set({ slugs: [] }),
     }),
-    { name: "am-beauty-wishlist" },
+    {
+      name: "am-beauty-wishlist",
+      storage: createJSONStorage(() => localStorage),
+      skipHydration: true,
+    },
   ),
 );

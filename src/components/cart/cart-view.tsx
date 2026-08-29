@@ -15,7 +15,7 @@ import { formatPrice, getBestsellers } from "@/data/products";
 import type { Product } from "@/data/products";
 import { useCartStore, useCartTotals } from "@/store/cart-store";
 import { useWishlistStore } from "@/store/wishlist-store";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -307,13 +307,14 @@ function CartCheckoutAside({
         </button>
       ) : null}
 
-      <Button
-        nativeButton={false}
-        className="mt-6 h-12 w-full cursor-pointer text-[10px] tracking-[0.2em] uppercase"
-        render={<Link href="/checkout" />}
+      <Link
+        href="/checkout"
+        className={buttonVariants({
+          className: "mt-6 h-12 w-full cursor-pointer text-[10px] tracking-[0.2em] uppercase",
+        })}
       >
         Оформить заказ
-      </Button>
+      </Link>
 
       <p className="mt-4 text-center text-xs text-grey">Безопасная оплата · Возврат 14 дней</p>
 
@@ -462,13 +463,15 @@ export function CartView() {
             <p className="text-[10px] tracking-[0.18em] text-grey uppercase">К оплате</p>
             <p className="font-display text-xl tracking-wide tabular-nums">{formatPrice(total)}</p>
           </div>
-          <Button
-            nativeButton={false}
-            className="h-11 min-w-0 flex-1 cursor-pointer px-4 text-[10px] tracking-[0.2em] uppercase sm:max-w-[220px]"
-            render={<Link href="/checkout" />}
+          <Link
+            href="/checkout"
+            className={buttonVariants({
+              className:
+                "h-11 min-w-0 flex-1 cursor-pointer px-4 text-center text-[10px] tracking-[0.2em] uppercase sm:max-w-[220px]",
+            })}
           >
             Оформить
-          </Button>
+          </Link>
         </div>
       </div>
     </>

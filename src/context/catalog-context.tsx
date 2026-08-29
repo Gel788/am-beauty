@@ -2,7 +2,6 @@
 
 import {
   createContext,
-  useCallback,
   useContext,
   useEffect,
   useState,
@@ -41,34 +40,37 @@ export function CatalogProvider({
   children: ReactNode;
 }) {
   const [catalog, setCatalog] = useState(data);
-  const pruneInvalidItems = useCartStore((s) => s.pruneInvalidItems);
-
-  const refresh = useCallback(async () => {
-    const next = await fetchCatalog();
-    if (!next) return;
-    setCatalog(next);
-    hydrateCatalog(next.products);
-    pruneInvalidItems();
-  }, [pruneInvalidItems]);
 
   useEffect(() => {
     hydrateCatalog(data.products);
-  }, [data.products]);
 
-  useEffect(() => {
-    void refresh();
+    const refreshCatalog = async () => {
+      const next = await fetchCatalog();
+      if (!next) return;
+      setCatalog(next);
+      hydrateCatalog(next.products);
+      if (useCartStore.persist.hasHydrated()) {
+        useCartStore.getState().pruneInvalidItems();
+      }
+    };
+
+    void refreshCatalog();
 
     const onVisible = () => {
-      if (document.visibilityState === "visible") void refresh();
+      if (document.visibilityState === "visible") void refreshCatalog();
     };
 
-    window.addEventListener("focus", refresh);
+    const onFocus = () => {
+      void refreshCatalog();
+    };
+
+    window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onVisible);
     return () => {
-      window.removeEventListener("focus", refresh);
+      window.removeEventListener("focus", onFocus);
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [refresh]);
+  }, [data.products]);
 
   return <CatalogContext.Provider value={catalog}>{children}</CatalogContext.Provider>;
 }
