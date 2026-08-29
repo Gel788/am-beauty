@@ -101,7 +101,10 @@ export function AccountMobileSummary({
   isAuthenticated?: boolean;
   onLogout?: () => void | Promise<void>;
 }) {
-  const name = profile.name.trim() || "Гость";
+  const name = isAuthenticated ? profile.name.trim() || "Гость" : "Войдите в кабинет";
+  const emailHint = isAuthenticated
+    ? profile.email || "Добавьте email в профиле"
+    : "Вход по email и паролю";
 
   return (
     <div className="border border-border bg-white p-4 sm:p-5">
@@ -114,9 +117,7 @@ export function AccountMobileSummary({
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate font-display text-lg tracking-wide">{name}</p>
-          <p className="truncate text-xs text-grey">
-            {profile.email || "Добавьте email в профиле"}
-          </p>
+          <p className="truncate text-xs text-grey">{emailHint}</p>
         </div>
       </div>
       {isAuthenticated && onLogout ? (
@@ -152,7 +153,10 @@ export function AccountSidebar({
   isAuthenticated,
   onLogout,
 }: AccountSidebarProps) {
-  const name = profile.name.trim() || "Гость";
+  const name = isAuthenticated ? profile.name.trim() || "Гость" : "Войдите в кабинет";
+  const emailHint = isAuthenticated
+    ? profile.email || "Добавьте email в профиле"
+    : "Вход по email и паролю";
 
   return (
     <div className="space-y-4">
@@ -166,9 +170,7 @@ export function AccountSidebar({
           </div>
           <div className="min-w-0">
             <p className="truncate font-display text-lg tracking-wide">{name}</p>
-            <p className="mt-0.5 truncate text-xs text-grey">
-              {profile.email || "Добавьте email в профиле"}
-            </p>
+            <p className="mt-0.5 truncate text-xs text-grey">{emailHint}</p>
             {profile.phone ? (
               <p className="mt-0.5 truncate text-xs text-grey">{profile.phone}</p>
             ) : null}

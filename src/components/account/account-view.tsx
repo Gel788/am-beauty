@@ -10,6 +10,7 @@ import { CommercePageHeader } from "@/components/commerce/commerce-page-header";
 import { CommerceTrustMarquee, CommerceTrustPills } from "@/components/commerce/commerce-trust-marquee";
 import { AccountMobileSummary, AccountNav, AccountSidebar, type AccountTabId } from "@/components/account/account-sidebar";
 import { AccountLoginForm } from "@/components/account/account-login-form";
+import { AccountLoginGate } from "@/components/account/account-login-gate";
 import { AccountOrderRow } from "@/components/account/account-order-row";
 import { formatPrice, getBestsellers } from "@/data/products";
 import { useCatalogProducts } from "@/context/catalog-context";
@@ -99,7 +100,8 @@ function AccountContent() {
   const removeAddress = useAccountStore((s) => s.removeAddress);
   const setDefaultAddress = useAccountStore((s) => s.setDefaultAddress);
   const syncOrders = useAccountStore((s) => s.syncOrders);
-  const { customer, isAuthenticated, logout, refresh: refreshSession } = useCustomerSession();
+  const { customer, isAuthenticated, logout, refresh: refreshSession, loading: sessionLoading } =
+    useCustomerSession();
 
   const catalogProducts = useCatalogProducts();
   const wishlistSlugs = useWishlistStore((s) => s.slugs);
@@ -121,26 +123,26 @@ function AccountContent() {
   }, [profile.name, profile.email, profile.phone]);
 
   const refreshOrders = useCallback(async () => {
-    const email = (customer?.email ?? profile.email).trim();
-    const phone = (customer?.phone ?? profile.phone).trim();
+    if (!customer?.email || !customer.phone) return;
+
+    const email = customer.email.trim();
+    const phone = customer.phone.trim();
     const localOrders = useAccountStore.getState().orders;
     const remote: AccountOrder[] = [];
 
     try {
-      if (email && phone) {
-        const res = await fetch(
-          `/api/account/orders?email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}`,
-          { cache: "no-store" },
-        );
-        if (res.ok) {
-          const data = (await res.json()) as { orders: AccountOrder[] };
-          remote.push(...data.orders);
-        }
+      const res = await fetch(
+        `/api/account/orders?email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}`,
+        { cache: "no-store" },
+      );
+      if (res.ok) {
+        const data = (await res.json()) as { orders: AccountOrder[] };
+        remote.push(...data.orders);
       }
 
       const knownIds = new Set(remote.map((o) => o.id));
       const missing = localOrders.filter((o) => !knownIds.has(o.id));
-      if (missing.length > 0 && email) {
+      if (missing.length > 0) {
         const byId = await Promise.all(
           missing.map(async (local) => {
             const res = await fetch(
@@ -159,7 +161,7 @@ function AccountContent() {
     } catch {
       /* ignore network errors */
     }
-  }, [customer?.email, customer?.phone, profile.email, profile.phone, syncOrders]);
+  }, [customer?.email, customer?.phone, syncOrders]);
 
   useEffect(() => {
     if (customer) {
@@ -172,6 +174,7 @@ function AccountContent() {
   }, [customer, updateProfile]);
 
   useEffect(() => {
+    if (!isAuthenticated) return;
     void refreshOrders();
     const onVisible = () => {
       if (document.visibilityState === "visible") void refreshOrders();
@@ -182,11 +185,11 @@ function AccountContent() {
       window.removeEventListener("focus", refreshOrders);
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [refreshOrders]);
+  }, [isAuthenticated, refreshOrders]);
 
   useEffect(() => {
-    if (activeTab === "orders" || activeTab === "overview") void refreshOrders();
-  }, [activeTab, refreshOrders]);
+    if (isAuthenticated && (activeTab === "orders" || activeTab === "overview")) void refreshOrders();
+  }, [activeTab, isAuthenticated, refreshOrders]);
 
   const changeTab = useCallback(
     (tab: AccountTabId) => {
@@ -208,15 +211,34 @@ function AccountContent() {
     }
   }, [changeTab]);
 
-  const greeting = (customer?.name ?? profile.name).trim() || "Гость";
-  const recentOrder = orders[0];
-  const defaultAddress = addresses.find((a) => a.isDefault) ?? addresses[0];
-  const suggestions = getBestsellers(3);
+  const handleLoginSuccess = useCallback(
+    (c: { email: string; name: string; phone: string }) => {
+      updateProfile(c);
+      void refreshSession();
+      void refreshOrders();
+    },
+    [refreshOrders, refreshSession, updateProfile],
+  );
 
   const handleLogout = useCallback(async () => {
     await logout();
     toast.success("Вы вышли из аккаунта");
-  }, [logout]);
+    changeTab("overview");
+  }, [changeTab, logout]);
+
+  const displayProfile = isAuthenticated
+    ? { name: customer?.name ?? profile.name, email: customer?.email ?? profile.email, phone: customer?.phone ?? profile.phone }
+    : { name: "", email: "", phone: "" };
+
+  const cabinetStats = isAuthenticated
+    ? { orders: orders.length, addresses: addresses.length, wishlist: wishlistSlugs.length }
+    : { orders: 0, addresses: 0, wishlist: wishlistSlugs.length };
+
+  const greeting = isAuthenticated ? (customer?.name ?? profile.name).trim() || "Гость" : "Войдите в кабинет";
+  const showLoginGate = !sessionLoading && !isAuthenticated && activeTab !== "wishlist";
+  const recentOrder = isAuthenticated ? orders[0] : undefined;
+  const defaultAddress = isAuthenticated ? addresses.find((a) => a.isDefault) ?? addresses[0] : undefined;
+  const suggestions = getBestsellers(3);
 
   return (
     <div className="bg-cream/30">
@@ -232,12 +254,8 @@ function AccountContent() {
             <AccountSidebar
               active={activeTab}
               onChange={changeTab}
-              profile={profile}
-              stats={{
-                orders: orders.length,
-                addresses: addresses.length,
-                wishlist: wishlistSlugs.length,
-              }}
+              profile={displayProfile}
+              stats={cabinetStats}
               isAuthenticated={isAuthenticated}
               onLogout={handleLogout}
             />
@@ -246,12 +264,8 @@ function AccountContent() {
           <div className="min-w-0">
             <div className="space-y-3 lg:hidden">
               <AccountMobileSummary
-                profile={profile}
-                stats={{
-                  orders: orders.length,
-                  addresses: addresses.length,
-                  wishlist: wishlistSlugs.length,
-                }}
+                profile={displayProfile}
+                stats={cabinetStats}
                 isAuthenticated={isAuthenticated}
                 onLogout={handleLogout}
               />
@@ -261,7 +275,18 @@ function AccountContent() {
             </div>
 
             <div className="mt-3 border border-border bg-white p-4 sm:mt-4 sm:p-6 md:p-8 lg:mt-0">
-              {activeTab === "overview" ? (
+              {sessionLoading ? (
+                <div className="flex justify-center py-16">
+                  <BrandLoader />
+                </div>
+              ) : showLoginGate ? (
+                <AccountLoginGate
+                  onSuccess={handleLoginSuccess}
+                  onOpenWishlist={() => changeTab("wishlist")}
+                />
+              ) : null}
+
+              {!sessionLoading && !showLoginGate && activeTab === "overview" ? (
                 <div className="space-y-10">
                   <div className="border border-border bg-cream/50 p-4 sm:p-6 md:p-8">
                     <p className="border-l-2 border-gold py-0.5 pl-3 text-[10px] tracking-[0.22em] uppercase text-grey">
@@ -425,7 +450,7 @@ function AccountContent() {
                 </div>
               ) : null}
 
-              {activeTab === "orders" ? (
+              {!sessionLoading && !showLoginGate && activeTab === "orders" ? (
                 <section className="space-y-6">
                   <SectionHeading>История заказов</SectionHeading>
 
@@ -470,7 +495,7 @@ function AccountContent() {
                 </section>
               ) : null}
 
-              {activeTab === "profile" ? (
+              {!sessionLoading && !showLoginGate && activeTab === "profile" ? (
                 <section className="grid gap-6 lg:grid-cols-[1fr_280px] lg:gap-8">
                   <div>
                     <div className="flex flex-wrap items-start justify-between gap-3">
@@ -552,7 +577,7 @@ function AccountContent() {
                 </section>
               ) : null}
 
-              {activeTab === "addresses" ? (
+              {!sessionLoading && !showLoginGate && activeTab === "addresses" ? (
                 <section>
                   <div className="flex flex-wrap items-center justify-between gap-4">
                     <SectionHeading>Адреса доставки</SectionHeading>
@@ -646,7 +671,7 @@ function AccountContent() {
                 </section>
               ) : null}
 
-              {activeTab === "wishlist" ? (
+              {!sessionLoading && activeTab === "wishlist" ? (
                 <section id="wishlist">
                   <SectionHeading>Избранное</SectionHeading>
                   {wishlistProducts.length > 0 ? (
