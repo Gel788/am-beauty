@@ -149,6 +149,10 @@ export function Header() {
 
   const iconTone = onHero ? "text-white hover:bg-white/10" : "text-black hover:bg-black/5";
 
+  const mobileMenuButtonTone = onHero
+    ? "bg-black/55 text-white shadow-[0_2px_12px_rgba(0,0,0,0.35)] backdrop-blur-sm hover:bg-black/70"
+    : "bg-cream text-black hover:bg-black/5";
+
   const closeMenu = () => setMenuOpen(false);
 
   const brandLink = (
@@ -224,12 +228,12 @@ export function Header() {
               aria-label={menuOpen ? "Закрыть меню" : "Открыть меню"}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((v) => !v)}
-              className={cn("relative z-10", iconTone)}
+              className={cn("relative z-10", mobileMenuButtonTone)}
             >
               {menuOpen ? (
-                <X className="size-5" strokeWidth={1.25} />
+                <X className="size-5" strokeWidth={1.75} />
               ) : (
-                <Menu className="size-5" strokeWidth={1.25} />
+                <Menu className="size-5" strokeWidth={1.75} />
               )}
             </HeaderIconButton>
 
@@ -278,11 +282,11 @@ export function Header() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: reduce ? 0 : 0.3 }}
-            className="fixed inset-0 z-[70] flex flex-col overflow-hidden bg-cream/30 md:hidden"
+            className="fixed inset-0 z-[70] flex flex-col overflow-hidden bg-white md:hidden"
           >
             <div
               className={cn(
-                "container-page relative max-w-full border-b border-border bg-white",
+                "container-page relative max-w-full border-b border-border bg-white shadow-[0_1px_0_rgba(0,0,0,0.06)]",
                 HEADER_H,
               )}
             >
@@ -316,7 +320,7 @@ export function Header() {
               </div>
             </div>
 
-            <nav className="flex-1 overflow-y-auto overscroll-y-contain" aria-label="Мобильное меню">
+            <nav className="flex-1 overflow-y-auto overscroll-y-contain bg-white" aria-label="Мобильное меню">
               <ul className="border-b border-border bg-white">
                 {navItems.map((item, i) => (
                   <motion.li
@@ -329,17 +333,17 @@ export function Header() {
                       href={item.href}
                       onClick={closeMenu}
                       className={cn(
-                        "group flex items-center gap-4 border-b border-border px-6 py-5 last:border-b-0 sm:px-8",
-                        isActive(pathname, item.href) ? "bg-cream/40" : "bg-white",
+                        "group flex min-h-14 items-center gap-4 border-b border-border px-6 py-5 last:border-b-0 active:bg-cream sm:px-8",
+                        isActive(pathname, item.href) ? "bg-cream" : "bg-white",
                       )}
                     >
-                      <span className="w-7 shrink-0 font-display text-lg text-gold/80 tabular-nums">
+                      <span className="w-7 shrink-0 font-display text-lg text-gold tabular-nums">
                         {String(i + 1).padStart(2, "0")}
                       </span>
                       <span
                         className={cn(
                           "font-display text-xl leading-tight tracking-[0.02em] transition-colors sm:text-2xl",
-                          isActive(pathname, item.href) ? "text-black" : "text-charcoal group-hover:text-black",
+                          isActive(pathname, item.href) ? "text-black" : "text-black/85 group-hover:text-black",
                         )}
                       >
                         {item.label}
@@ -353,16 +357,16 @@ export function Header() {
                 initial={reduce ? false : { opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: reduce ? 0 : 0.28 }}
-                className="px-6 py-8 sm:px-8"
+                className="border-b border-border bg-cream px-6 py-8 sm:px-8"
               >
-                <p className="text-[10px] tracking-[0.28em] text-grey uppercase">Категории</p>
+                <p className="text-[10px] font-medium tracking-[0.28em] text-charcoal uppercase">Категории</p>
                 <div className="scroll-snap-x mt-4 flex gap-2 overflow-x-auto pb-1">
                   {categories.map((cat) => (
                     <Link
                       key={cat.id}
                       href={`/catalog?category=${cat.id}`}
                       onClick={closeMenu}
-                      className="shrink-0 snap-start border border-border bg-white px-3.5 py-2 text-[10px] tracking-[0.16em] text-charcoal uppercase transition-colors hover:border-gold hover:text-black"
+                      className="shrink-0 snap-start border border-border bg-white px-3.5 py-2.5 text-[10px] font-medium tracking-[0.16em] text-black uppercase transition-colors hover:border-gold"
                     >
                       {cat.title}
                     </Link>
