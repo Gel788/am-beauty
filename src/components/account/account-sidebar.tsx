@@ -42,6 +42,8 @@ type AccountSidebarProps = {
   profile: AccountProfile;
   stats: { orders: number; addresses: number; wishlist: number };
   vertical?: boolean;
+  isAuthenticated?: boolean;
+  onLogout?: () => void | Promise<void>;
 };
 
 export function AccountNav({
@@ -91,9 +93,13 @@ export function AccountNav({
 export function AccountMobileSummary({
   profile,
   stats,
+  isAuthenticated,
+  onLogout,
 }: {
   profile: AccountProfile;
   stats: { orders: number; addresses: number; wishlist: number };
+  isAuthenticated?: boolean;
+  onLogout?: () => void | Promise<void>;
 }) {
   const name = profile.name.trim() || "Гость";
 
@@ -113,6 +119,15 @@ export function AccountMobileSummary({
           </p>
         </div>
       </div>
+      {isAuthenticated && onLogout ? (
+        <button
+          type="button"
+          onClick={() => void onLogout()}
+          className="mt-3 cursor-pointer text-[10px] tracking-[0.16em] text-grey uppercase underline underline-offset-2 transition-colors hover:text-black"
+        >
+          Выйти из аккаунта
+        </button>
+      ) : null}
       <dl className="mt-4 grid grid-cols-3 gap-2 border-t border-border pt-4 text-center">
         {[
           { label: "Заказы", value: stats.orders },
@@ -129,7 +144,14 @@ export function AccountMobileSummary({
   );
 }
 
-export function AccountSidebar({ active, onChange, profile, stats }: AccountSidebarProps) {
+export function AccountSidebar({
+  active,
+  onChange,
+  profile,
+  stats,
+  isAuthenticated,
+  onLogout,
+}: AccountSidebarProps) {
   const name = profile.name.trim() || "Гость";
 
   return (
@@ -165,6 +187,15 @@ export function AccountSidebar({ active, onChange, profile, stats }: AccountSide
             </div>
           ))}
         </dl>
+        {isAuthenticated && onLogout ? (
+          <button
+            type="button"
+            onClick={() => void onLogout()}
+            className="mt-5 w-full cursor-pointer border border-border py-2.5 text-[10px] tracking-[0.16em] uppercase transition-colors hover:border-black hover:bg-cream"
+          >
+            Выйти
+          </button>
+        ) : null}
       </div>
 
       <div className="border border-border bg-white">

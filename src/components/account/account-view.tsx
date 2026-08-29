@@ -213,6 +213,11 @@ function AccountContent() {
   const defaultAddress = addresses.find((a) => a.isDefault) ?? addresses[0];
   const suggestions = getBestsellers(3);
 
+  const handleLogout = useCallback(async () => {
+    await logout();
+    toast.success("Вы вышли из аккаунта");
+  }, [logout]);
+
   return (
     <div className="bg-cream/30">
       <div className="container-page pt-8 pb-12 sm:pt-12 sm:pb-16 md:py-20 lg:py-24">
@@ -233,6 +238,8 @@ function AccountContent() {
                 addresses: addresses.length,
                 wishlist: wishlistSlugs.length,
               }}
+              isAuthenticated={isAuthenticated}
+              onLogout={handleLogout}
             />
           </aside>
 
@@ -245,6 +252,8 @@ function AccountContent() {
                   addresses: addresses.length,
                   wishlist: wishlistSlugs.length,
                 }}
+                isAuthenticated={isAuthenticated}
+                onLogout={handleLogout}
               />
               <div className="border border-border bg-white p-3 sm:p-4">
                 <AccountNav active={activeTab} onChange={changeTab} />
@@ -464,7 +473,25 @@ function AccountContent() {
               {activeTab === "profile" ? (
                 <section className="grid gap-6 lg:grid-cols-[1fr_280px] lg:gap-8">
                   <div>
-                    <SectionHeading>Профиль</SectionHeading>
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <SectionHeading>Профиль</SectionHeading>
+                      {isAuthenticated ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="cursor-pointer text-[10px] tracking-[0.14em] uppercase"
+                          onClick={() => void handleLogout()}
+                        >
+                          Выйти
+                        </Button>
+                      ) : null}
+                    </div>
+                    {isAuthenticated ? (
+                      <p className="mt-2 text-xs text-grey">
+                        Вход выполнен: <span className="text-charcoal">{customer?.email}</span>
+                      </p>
+                    ) : null}
                     <p className="mt-3 text-sm text-grey">
                       Данные подставляются при оформлении заказа.
                     </p>
@@ -495,13 +522,10 @@ function AccountContent() {
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="mt-4 cursor-pointer"
-                          onClick={async () => {
-                            await logout();
-                            toast.success("Вы вышли из аккаунта");
-                          }}
+                          className="mt-4 w-full cursor-pointer sm:w-auto"
+                          onClick={() => void handleLogout()}
                         >
-                          Выйти
+                          Выйти из аккаунта
                         </Button>
                         <Link
                           href="/account/forgot-password"
