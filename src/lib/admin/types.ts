@@ -147,6 +147,18 @@ export type AdminInquiry = {
   createdAt: string;
 };
 
+export type CustomerAccount = {
+  id: string;
+  email: string;
+  phone: string;
+  name: string;
+  passwordHash: string;
+  createdAt: string;
+  updatedAt: string;
+  resetTokenHash?: string;
+  resetExpiresAt?: string;
+};
+
 export type AdminReview = Review & {
   published: boolean;
 };
@@ -172,6 +184,7 @@ export type AdminDatabase = {
   reviews: AdminReview[];
   promos: AdminPromo[];
   inquiries: AdminInquiry[];
+  customers: CustomerAccount[];
 };
 
 export type DashboardStats = {

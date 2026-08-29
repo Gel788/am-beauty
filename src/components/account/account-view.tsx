@@ -9,6 +9,7 @@ import { ProductCard } from "@/components/catalog/product-card";
 import { CommercePageHeader } from "@/components/commerce/commerce-page-header";
 import { CommerceTrustMarquee, CommerceTrustPills } from "@/components/commerce/commerce-trust-marquee";
 import { AccountMobileSummary, AccountNav, AccountSidebar, type AccountTabId } from "@/components/account/account-sidebar";
+import { AccountLoginForm } from "@/components/account/account-login-form";
 import { AccountOrderRow } from "@/components/account/account-order-row";
 import { formatPrice, getBestsellers } from "@/data/products";
 import { useCatalogProducts } from "@/context/catalog-context";
@@ -18,6 +19,7 @@ import {
   type AccountOrder,
 } from "@/store/account-store";
 import { adminOrderToAccount } from "@/lib/orders/account-orders";
+import { useCustomerSession } from "@/hooks/use-customer-session";
 import { useWishlistStore } from "@/store/wishlist-store";
 import { BrandLoader } from "@/components/ui/brand-loader";
 import { Badge } from "@/components/ui/badge";
@@ -97,6 +99,7 @@ function AccountContent() {
   const removeAddress = useAccountStore((s) => s.removeAddress);
   const setDefaultAddress = useAccountStore((s) => s.setDefaultAddress);
   const syncOrders = useAccountStore((s) => s.syncOrders);
+  const { customer, isAuthenticated, logout, refresh: refreshSession } = useCustomerSession();
 
   const catalogProducts = useCatalogProducts();
   const wishlistSlugs = useWishlistStore((s) => s.slugs);
@@ -118,8 +121,8 @@ function AccountContent() {
   }, [profile.name, profile.email, profile.phone]);
 
   const refreshOrders = useCallback(async () => {
-    const email = profile.email.trim();
-    const phone = profile.phone.trim();
+    const email = (customer?.email ?? profile.email).trim();
+    const phone = (customer?.phone ?? profile.phone).trim();
     const localOrders = useAccountStore.getState().orders;
     const remote: AccountOrder[] = [];
 
@@ -156,7 +159,17 @@ function AccountContent() {
     } catch {
       /* ignore network errors */
     }
-  }, [profile.email, profile.phone, syncOrders]);
+  }, [customer?.email, customer?.phone, profile.email, profile.phone, syncOrders]);
+
+  useEffect(() => {
+    if (customer) {
+      updateProfile({
+        name: customer.name,
+        email: customer.email,
+        phone: customer.phone,
+      });
+    }
+  }, [customer, updateProfile]);
 
   useEffect(() => {
     void refreshOrders();
@@ -195,7 +208,7 @@ function AccountContent() {
     }
   }, [changeTab]);
 
-  const greeting = profile.name.trim() || "Гость";
+  const greeting = (customer?.name ?? profile.name).trim() || "Гость";
   const recentOrder = orders[0];
   const defaultAddress = addresses.find((a) => a.isDefault) ?? addresses[0];
   const suggestions = getBestsellers(3);
@@ -248,6 +261,9 @@ function AccountContent() {
                     <h2 className="mt-3 font-display text-xl sm:mt-4 sm:text-2xl md:text-3xl">{greeting}</h2>
                     <p className="mt-3 max-w-lg text-sm leading-relaxed text-grey">
                       Здесь собраны ваши заказы, сохранённые адреса и любимые продукты AM Beauty.
+                      {!isAuthenticated ? (
+                        <> Оформите заказ — аккаунт создастся автоматически, пароль придёт на email.</>
+                      ) : null}
                     </p>
                     <div className="mt-6 flex flex-wrap gap-3">
                       <Button
@@ -469,13 +485,45 @@ function AccountContent() {
                     </form>
                   </div>
                   <aside className="border border-border bg-cream/40 p-4 sm:p-5">
-                    <p className="text-[9px] tracking-[0.18em] text-grey uppercase">Подсказка</p>
-                    <p className="mt-3 text-sm leading-relaxed text-charcoal">
-                      Укажите телефон — курьер сможет связаться при доставке. Email нужен для чека и статуса заказа.
-                    </p>
-                    <Link href="/legal/privacy" className="mt-4 inline-block text-[10px] tracking-[0.14em] text-grey uppercase underline">
-                      Политика конфиденциальности
-                    </Link>
+                    {isAuthenticated ? (
+                      <>
+                        <p className="text-[9px] tracking-[0.18em] text-grey uppercase">Вход</p>
+                        <p className="mt-3 text-sm text-charcoal">
+                          Вы вошли как <span className="font-medium">{customer?.email}</span>
+                        </p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="mt-4 cursor-pointer"
+                          onClick={async () => {
+                            await logout();
+                            toast.success("Вы вышли из аккаунта");
+                          }}
+                        >
+                          Выйти
+                        </Button>
+                        <Link
+                          href="/account/forgot-password"
+                          className="mt-4 block text-[10px] tracking-[0.14em] text-grey uppercase underline"
+                        >
+                          Сменить пароль
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-[9px] tracking-[0.18em] text-grey uppercase">Вход в кабинет</p>
+                        <div className="mt-4">
+                          <AccountLoginForm
+                            onSuccess={(c) => {
+                              updateProfile(c);
+                              void refreshSession();
+                              void refreshOrders();
+                            }}
+                          />
+                        </div>
+                      </>
+                    )}
                   </aside>
                 </section>
               ) : null}

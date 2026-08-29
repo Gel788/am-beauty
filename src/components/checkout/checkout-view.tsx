@@ -238,7 +238,11 @@ export function CheckoutView() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(orderPayload),
     });
-    const data = await res.json().catch(() => ({}));
+    const data = (await res.json().catch(() => ({}))) as {
+      redirectUrl?: string;
+      customerCreated?: boolean;
+      error?: string;
+    };
 
     if (!res.ok) {
       toast.error(data.error ?? "Не удалось оформить заказ");
@@ -267,9 +271,12 @@ export function CheckoutView() {
     const deliveryParam = encodeURIComponent(
       `${CARRIER_LABELS[carrier!]} · ${mode === "pickup" && pickupPoint ? pickupPoint.name : address}`,
     );
-    const redirectUrl = String(data.redirectUrl).includes("?")
+    let redirectUrl = String(data.redirectUrl).includes("?")
       ? `${data.redirectUrl}&delivery=${deliveryParam}`
       : `${data.redirectUrl}?delivery=${deliveryParam}`;
+    if (data.customerCreated) {
+      redirectUrl += "&welcome=1";
+    }
     router.push(redirectUrl);
 
     setLoading(false);

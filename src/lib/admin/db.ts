@@ -22,6 +22,7 @@ function normalizeDb(partial: Partial<AdminDatabase>): AdminDatabase {
     reviews: partial.reviews ?? seed.reviews,
     promos: partial.promos ?? seed.promos,
     inquiries: partial.inquiries ?? seed.inquiries,
+    customers: partial.customers ?? seed.customers,
   };
 }
 

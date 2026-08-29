@@ -15,6 +15,7 @@ function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const order = searchParams.get("order");
   const demo = searchParams.get("demo");
+  const welcome = searchParams.get("welcome");
   const deliveryParam = searchParams.get("delivery");
   const lastOrder = useAccountStore((s) => s.orders[0]);
 
@@ -50,6 +51,13 @@ function CheckoutSuccessContent() {
           {deliveryInfo ? (
             <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-grey">
               Доставка: <span className="text-charcoal">{deliveryInfo}</span>
+            </p>
+          ) : null}
+
+          {welcome === "1" ? (
+            <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-charcoal">
+              Личный кабинет создан. Пароль для входа отправлен на ваш email — проверьте почту
+              (и папку «Спам»). Повторные заказы можно оформлять без входа.
             </p>
           ) : null}
 

@@ -174,5 +174,6 @@ export function seedDatabase(): AdminDatabase {
       { code: "GLOW20", discountPercent: 0.2, active: false, uses: 0 },
     ],
     inquiries: [],
+    customers: [],
   };
 }

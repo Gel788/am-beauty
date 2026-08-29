@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { readDb, updateDb } from "@/lib/admin/db";
+import { ensureCustomerFromOrder } from "@/lib/customer/accounts";
 import { createPayment } from "@/lib/payment";
 import { computeOrderTotals } from "@/lib/orders/compute-order";
 import {
@@ -55,6 +56,12 @@ export async function POST(request: Request) {
       }
     });
 
+    const { isNew: customerCreated } = await ensureCustomerFromOrder({
+      name: order.customerName,
+      email: order.customerEmail,
+      phone: order.customerPhone,
+    });
+
     const payment = await createPayment({
       orderId: order.id,
       amount: order.total,
@@ -66,7 +73,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: payment.error }, { status: 502 });
     }
 
-    return NextResponse.json({ order, redirectUrl: payment.redirectUrl }, { status: 201 });
+    return NextResponse.json(
+      { order, redirectUrl: payment.redirectUrl, customerCreated },
+      { status: 201 },
+    );
   } catch {
     return NextResponse.json({ error: "Не удалось создать заказ" }, { status: 500 });
   }
