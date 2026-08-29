@@ -94,12 +94,14 @@ export async function ensureCustomerFromOrder(input: {
   return { customer: toPublic(customer), isNew };
 }
 
+export type UpdateCustomerProfileResult =
+  | { ok: true; customer: CustomerPublic; emailChanged: boolean }
+  | { ok: false; error: string };
+
 export async function updateCustomerProfile(
   currentEmail: string,
   input: { name?: string; phone?: string; email?: string },
-):
-  | { ok: true; customer: CustomerPublic; emailChanged: boolean }
-  | { ok: false; error: string } {
+): Promise<UpdateCustomerProfileResult> {
   const normalizedCurrent = currentEmail.trim().toLowerCase();
   const name = input.name?.trim();
   const phone = input.phone ? normalizePhone(input.phone) : undefined;
@@ -122,7 +124,7 @@ export async function updateCustomerProfile(
   }
 
   const now = new Date().toISOString();
-  let customer: CustomerAccount | null = null;
+  let savedCustomer: CustomerAccount | null = null;
   const emailChanged = Boolean(nextEmail && nextEmail !== normalizedCurrent);
   const targetEmail = nextEmail ?? normalizedCurrent;
 
@@ -158,24 +160,26 @@ export async function updateCustomerProfile(
         if (emailChanged && nextEmail) order.customerEmail = nextEmail;
       }
 
-      customer = account;
+      savedCustomer = account;
     });
   } catch {
     return { ok: false, error: "Не удалось сохранить профиль" };
   }
 
-  if (!customer) {
+  if (!savedCustomer) {
     return { ok: false, error: "Аккаунт не найден" };
   }
 
-  const publicCustomer = toPublic({
-    ...customer,
-    email: targetEmail,
-    name: name ?? customer.name,
-    phone: phone ?? customer.phone,
-  });
-
-  return { ok: true, customer: publicCustomer, emailChanged };
+  return {
+    ok: true,
+    customer: toPublic({
+      ...savedCustomer,
+      email: targetEmail,
+      name: name ?? savedCustomer.name,
+      phone: phone ?? savedCustomer.phone,
+    }),
+    emailChanged,
+  };
 }
 
 export async function requestPasswordReset(email: string) {
