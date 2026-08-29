@@ -26,6 +26,7 @@ function FeaturedCard({
       <ProductMedia
         src={product.image}
         alt={product.name}
+        videoSrc={product.video}
         priority={priority}
         sizes="(max-width:768px) 85vw, 33vw"
         aspect="aspect-[4/5]"

@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { ContentImage } from "@/components/ui/content-image";
 import { Heart, Star } from "lucide-react";
 import { toast } from "sonner";
 import { formatPrice, type Product } from "@/data/products";
 import { useCartStore } from "@/store/cart-store";
 import { useWishlistStore } from "@/store/wishlist-store";
 import { cn } from "@/lib/utils";
+import { ProductMedia } from "@/components/ui/product-media";
 
 type CatalogFeaturedCardProps = {
   product: Product;
@@ -25,15 +25,18 @@ export function CatalogFeaturedCard({ product }: CatalogFeaturedCardProps) {
           href={`/products/${product.slug}`}
           className="relative block min-h-[220px] overflow-hidden bg-cream sm:min-h-[280px] md:min-h-[420px]"
         >
-          <ContentImage
+          <ProductMedia
             src={product.image}
             alt={product.name}
-            fill
+            videoSrc={product.video}
+            videoMode={product.video ? "always" : "off"}
             priority
-            objectFit="contain"
-            className="img-zoom object-bottom p-6 md:p-10"
             sizes="(max-width:768px) 100vw, 50vw"
-          />
+            aspect="aspect-auto min-h-[220px] sm:min-h-[280px] md:min-h-[420px]"
+            objectFit="contain"
+            inset="md"
+            className="size-full"
+          >
           {product.badge ? (
             <span className="absolute top-0 left-0 z-10 bg-gold px-3 py-1.5 text-[9px] tracking-[0.2em] text-white uppercase">
               {product.badge}
@@ -43,6 +46,7 @@ export function CatalogFeaturedCard({ product }: CatalogFeaturedCardProps) {
               Выбор редакции
             </span>
           )}
+          </ProductMedia>
         </Link>
 
         <div className="flex flex-col justify-center p-6 sm:p-8 md:p-10 lg:p-12">

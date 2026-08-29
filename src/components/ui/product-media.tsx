@@ -2,17 +2,10 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ContentImage } from "@/components/ui/content-image";
+import { productVideoSources } from "@/lib/product-video";
 import { cn } from "@/lib/utils";
 
 type VideoMode = "hover" | "always" | "off";
-
-function videoMimeType(src: string) {
-  const lower = src.toLowerCase();
-  if (lower.endsWith(".mp4")) return "video/mp4";
-  if (lower.endsWith(".webm")) return "video/webm";
-  if (lower.endsWith(".mov")) return "video/quicktime";
-  return undefined;
-}
 
 type ProductMediaProps = {
   src: string;
@@ -51,26 +44,54 @@ export function ProductMedia({
   children,
 }: ProductMediaProps) {
   const [hovering, setHovering] = useState(false);
+  const [inView, setInView] = useState(false);
+  const [coarsePointer, setCoarsePointer] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
   const [videoFailed, setVideoFailed] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
 
   const mode: VideoMode = videoMode ?? (videoSrc ? "hover" : "off");
-  const showVideo =
-    !videoFailed &&
-    (mode === "always" ? videoReady : mode === "hover" && hovering && videoReady);
+  const wantsVideo =
+    mode === "always" || (mode === "hover" && (coarsePointer ? inView : hovering));
+  const showVideo = Boolean(videoSrc && !videoFailed && wantsVideo && (videoReady || isPlaying));
 
   useEffect(() => {
     setVideoReady(false);
     setVideoFailed(false);
+    setIsPlaying(false);
   }, [videoSrc]);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(hover: none), (pointer: coarse)");
+    const update = () => setCoarsePointer(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    if (!videoSrc || mode !== "hover" || !coarsePointer) return;
+
+    const node = rootRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting && entry.intersectionRatio >= 0.45),
+      { threshold: [0, 0.45, 0.6] },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [coarsePointer, mode, videoSrc]);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !videoSrc || mode === "off" || videoFailed) return;
 
-    if (mode === "always" || hovering) {
+    if (wantsVideo) {
       void video.play().catch(() => {
+        // На части браузеров MOV не декодируется — остаётся постер.
         setVideoFailed(true);
       });
       return;
@@ -78,15 +99,15 @@ export function ProductMedia({
 
     video.pause();
     video.currentTime = 0;
-  }, [hovering, videoSrc, mode, videoFailed]);
+    setIsPlaying(false);
+  }, [wantsVideo, videoSrc, mode, videoFailed]);
 
   return (
     <div
+      ref={rootRef}
       className={cn("relative overflow-hidden bg-cream", aspect, className)}
-      onMouseEnter={() => mode === "hover" && setHovering(true)}
-      onMouseLeave={() => mode === "hover" && setHovering(false)}
-      onFocus={() => mode === "hover" && setHovering(true)}
-      onBlur={() => mode === "hover" && setHovering(false)}
+      onPointerEnter={() => mode === "hover" && !coarsePointer && setHovering(true)}
+      onPointerLeave={() => mode === "hover" && !coarsePointer && setHovering(false)}
     >
       <div
         className={cn(
@@ -111,30 +132,32 @@ export function ProductMedia({
         <video
           key={videoSrc}
           ref={videoRef}
-          src={videoSrc}
           muted
           loop
           playsInline
           autoPlay={mode === "always"}
           disablePictureInPicture
           controlsList="nodownload noplaybackrate noremoteplayback"
-          preload="auto"
+          preload={wantsVideo ? "auto" : "metadata"}
           poster={src}
           aria-hidden
           onCanPlay={() => setVideoReady(true)}
           onLoadedData={() => setVideoReady(true)}
+          onPlaying={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
           onError={() => {
             setVideoFailed(true);
             setVideoReady(false);
+            setIsPlaying(false);
           }}
           className={cn(
             "product-media-video pointer-events-none absolute inset-0 size-full border-0 object-contain object-bottom outline-none transition-opacity duration-300 motion-reduce:transition-none",
             showVideo ? "opacity-100" : "opacity-0",
           )}
         >
-          {videoMimeType(videoSrc) ? (
-            <source src={videoSrc} type={videoMimeType(videoSrc)} />
-          ) : null}
+          {productVideoSources(videoSrc).map((source) => (
+            <source key={source.src} src={source.src} type={source.type} />
+          ))}
         </video>
       ) : null}
 
