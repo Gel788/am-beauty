@@ -108,6 +108,7 @@ function AccountContent() {
   const wishlistProducts = catalogProducts.filter((p) => wishlistSlugs.includes(p.slug));
 
   const [form, setForm] = useState(profile);
+  const [savingProfile, setSavingProfile] = useState(false);
 
   const totalSpent = useMemo(
     () => orders.reduce((sum, o) => sum + o.total, 0),
@@ -225,6 +226,48 @@ function AccountContent() {
     toast.success("Вы вышли из аккаунта");
     changeTab("overview");
   }, [changeTab, logout]);
+
+  const handleProfileSave = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+
+      if (isAuthenticated) {
+        setSavingProfile(true);
+        try {
+          const res = await fetch("/api/account/profile", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: form.name,
+              phone: form.phone,
+              email: form.email,
+            }),
+          });
+          const data = (await res.json()) as {
+            customer?: { email: string; name: string; phone: string };
+            error?: string;
+          };
+          if (!res.ok || !data.customer) {
+            toast.error(data.error ?? "Не удалось сохранить профиль");
+            return;
+          }
+          updateProfile(data.customer);
+          await refreshSession();
+          void refreshOrders();
+          toast.success("Изменения сохранены");
+        } catch {
+          toast.error("Не удалось сохранить профиль");
+        } finally {
+          setSavingProfile(false);
+        }
+        return;
+      }
+
+      updateProfile(form);
+      toast.success("Сохранено локально — войдите, чтобы синхронизировать с аккаунтом");
+    },
+    [form, isAuthenticated, refreshOrders, refreshSession, updateProfile],
+  );
 
   const displayProfile = isAuthenticated
     ? { name: customer?.name ?? profile.name, email: customer?.email ?? profile.email, phone: customer?.phone ?? profile.phone }
@@ -518,21 +561,20 @@ function AccountContent() {
                       </p>
                     ) : null}
                     <p className="mt-3 text-sm text-grey">
-                      Данные подставляются при оформлении заказа.
+                      {isAuthenticated
+                        ? "Данные сохраняются в аккаунте и отображаются в админке."
+                        : "Данные подставляются при оформлении заказа. Войдите, чтобы сохранить на сервере."}
                     </p>
-                    <form
-                      className="mt-6 grid gap-3"
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        updateProfile(form);
-                        toast.success("Изменения сохранены");
-                      }}
-                    >
+                    <form className="mt-6 grid gap-3" onSubmit={(e) => void handleProfileSave(e)}>
                       <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="Имя" aria-label="Имя" className="h-11" />
                       <Input value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} placeholder="Email" type="email" aria-label="Email" className="h-11" />
                       <Input value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} placeholder="Телефон" type="tel" aria-label="Телефон" className="h-11" />
-                      <Button type="submit" className="mt-2 w-fit cursor-pointer text-[10px] tracking-[0.18em] uppercase">
-                        Сохранить
+                      <Button
+                        type="submit"
+                        disabled={savingProfile}
+                        className="mt-2 w-fit cursor-pointer text-[10px] tracking-[0.18em] uppercase"
+                      >
+                        {savingProfile ? "Сохранение…" : "Сохранить"}
                       </Button>
                     </form>
                   </div>

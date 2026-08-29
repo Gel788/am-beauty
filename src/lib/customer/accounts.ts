@@ -94,6 +94,90 @@ export async function ensureCustomerFromOrder(input: {
   return { customer: toPublic(customer), isNew };
 }
 
+export async function updateCustomerProfile(
+  currentEmail: string,
+  input: { name?: string; phone?: string; email?: string },
+):
+  | { ok: true; customer: CustomerPublic; emailChanged: boolean }
+  | { ok: false; error: string } {
+  const normalizedCurrent = currentEmail.trim().toLowerCase();
+  const name = input.name?.trim();
+  const phone = input.phone ? normalizePhone(input.phone) : undefined;
+  const nextEmail = input.email?.trim().toLowerCase();
+
+  if (name !== undefined && !name) {
+    return { ok: false, error: "Укажите имя" };
+  }
+  if (phone !== undefined && phone.length < 10) {
+    return { ok: false, error: "Укажите корректный телефон" };
+  }
+  if (nextEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(nextEmail)) {
+    return { ok: false, error: "Укажите корректный email" };
+  }
+  if (nextEmail && nextEmail !== normalizedCurrent) {
+    const taken = await findCustomerByEmail(nextEmail);
+    if (taken) {
+      return { ok: false, error: "Этот email уже используется" };
+    }
+  }
+
+  const now = new Date().toISOString();
+  let customer: CustomerAccount | null = null;
+  const emailChanged = Boolean(nextEmail && nextEmail !== normalizedCurrent);
+  const targetEmail = nextEmail ?? normalizedCurrent;
+
+  try {
+    await updateDb((db) => {
+      if (!Array.isArray(db.customers)) {
+        db.customers = [];
+      }
+
+      let account = db.customers.find((c) => c.email === normalizedCurrent);
+      if (!account) {
+        account = {
+          id: `cust-${Date.now().toString(36)}`,
+          email: normalizedCurrent,
+          phone: phone ?? "",
+          name: name ?? "",
+          passwordHash: "",
+          createdAt: now,
+          updatedAt: now,
+        };
+        db.customers.push(account);
+      }
+
+      if (name) account.name = name;
+      if (phone) account.phone = phone;
+      if (emailChanged && nextEmail) account.email = nextEmail;
+      account.updatedAt = now;
+
+      for (const order of db.orders) {
+        if (order.customerEmail.toLowerCase() !== normalizedCurrent) continue;
+        if (name) order.customerName = name;
+        if (phone) order.customerPhone = input.phone?.trim() ?? order.customerPhone;
+        if (emailChanged && nextEmail) order.customerEmail = nextEmail;
+      }
+
+      customer = account;
+    });
+  } catch {
+    return { ok: false, error: "Не удалось сохранить профиль" };
+  }
+
+  if (!customer) {
+    return { ok: false, error: "Аккаунт не найден" };
+  }
+
+  const publicCustomer = toPublic({
+    ...customer,
+    email: targetEmail,
+    name: name ?? customer.name,
+    phone: phone ?? customer.phone,
+  });
+
+  return { ok: true, customer: publicCustomer, emailChanged };
+}
+
 export async function requestPasswordReset(email: string) {
   const normalized = email.trim().toLowerCase();
   const token = randomUUID().replace(/-/g, "") + randomUUID().replace(/-/g, "");

@@ -44,6 +44,9 @@ export async function readDb(): Promise<AdminDatabase> {
 export async function writeDb(db: AdminDatabase) {
   await ensureDir();
   db.updatedAt = new Date().toISOString();
+  if (!Array.isArray(db.customers)) {
+    db.customers = [];
+  }
   const json = JSON.stringify(db, null, 2);
   const tmp = `${DB_PATH}.${process.pid}.tmp`;
   await writeFile(tmp, json, "utf-8");
@@ -83,6 +86,39 @@ export function deriveCustomers(orders: AdminDatabase["orders"]): AdminCustomer[
   }
 
   return [...map.values()].sort((a, b) => b.totalSpent - a.totalSpent);
+}
+
+/** Клиенты для админки: заказы + аккаунты ЛК (актуальные имя/телефон из customers). */
+export function listAdminCustomers(db: AdminDatabase): AdminCustomer[] {
+  const map = new Map<string, AdminCustomer>();
+
+  for (const customer of deriveCustomers(db.orders)) {
+    map.set(customer.email.toLowerCase(), customer);
+  }
+
+  for (const account of db.customers ?? []) {
+    const key = account.email.toLowerCase();
+    const existing = map.get(key);
+    if (existing) {
+      existing.id = account.id;
+      existing.name = account.name || existing.name;
+      existing.phone = account.phone || existing.phone;
+    } else {
+      map.set(key, {
+        id: account.id,
+        name: account.name,
+        email: account.email,
+        phone: account.phone,
+        ordersCount: 0,
+        totalSpent: 0,
+        lastOrderDate: account.updatedAt.slice(0, 10),
+      });
+    }
+  }
+
+  return [...map.values()].sort(
+    (a, b) => b.totalSpent - a.totalSpent || b.lastOrderDate.localeCompare(a.lastOrderDate),
+  );
 }
 
 export function computeDashboardStats(db: AdminDatabase): DashboardStats {
@@ -137,7 +173,7 @@ export function computeDashboardStats(db: AdminDatabase): DashboardStats {
     productsTotal: db.products.length,
     categoriesTotal: db.categories.length,
     lowStock,
-    customersTotal: deriveCustomers(db.orders).length,
+    customersTotal: listAdminCustomers(db).length,
     reviewsPending,
     revenueByDay,
     topProducts,
